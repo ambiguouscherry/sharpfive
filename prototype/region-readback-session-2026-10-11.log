@@ -1,0 +1,125 @@
+# Region readback spike — session log, 2026-10-11 (ticket #30)
+# Logic Pro 11.2, project "sharpfive-prototype" (unsaved), tracks Inst 1 (ES1 + Compressor, 5 MIDI regions
+# bars 1–12 from #8/#26) and Inst 2 (empty). Spike: prototype/region-readback-spike.swift, built with
+# `swiftc -O -o /tmp/rb prototype/region-readback-spike.swift`, run from the agent sandbox (AX-trusted host).
+
+## 1. Export menu as selection readback (nothing selected)
+$ /tmp/rb exportmenu
+  ✗ 'Region/Cell to Loop Library…'
+  ✗ 'Regions as Audio Files…'
+  ✗ 'Audio Files As…'
+  ✗ 'Selection as Audio File…'
+  ✗ 'Selection as MIDI File…'          <- ⌘E, needs a selection
+  ✓ '1 Track as Audio File…'
+  ✓ 'All Tracks as Audio Files…'
+  ✓ 'All MIDI Tracks as MIDI File…'    <- enabled with NO selection: whole-project MIDI snapshot
+  ✓ 'Project as AAF File…'
+  ✓ 'Project to Final Cut Pro XML…'
+  ✗ 'Project as ADM BWF…'
+  ✗ 'Selection as ADM BWF…'
+  ✗ 'Score as MusicXML…'
+
+## 2. First export (panel driver not yet working): AXPress of the menu item opened the save panel; the
+##    panel saved with its defaults (Where = last folder "Logic", name = project name):
+##    ~/Music/Logic/sharpfive-prototype.mid, 660 bytes. Parsed:
+SMF format 1, 6 tracks, 480 ppq, 660 bytes
+tempo map: 120.00 bpm @tick 0
+time sig: 4/4 @tick 0
+track 1..5: "Inst 1"   (one SMF track per REGION; track 0 is the tempo/meta track)
+other events: ["meta 04": 5, "meta 54": 1, "meta 20": 5, "meta 59": 1]   (instrument name, SMPTE offset, channel prefix, key sig)
+42 notes (pitch shown scientific: 48 = C3, 60 = C4; Logic's display shows them as C2/C3):
+  trk ch pitch      vel  on (bar.beat.div.tick)  len(ticks@480)  len(beats)
+    1  1 C3 ( 48) 100  1.1.1.37    196  0.408     <- region 1, bars 1–3: C3 on the beats (live-sent, ~19 ms late)
+    1  1 C4 ( 60) 100  1.1.3.171    144  0.300     <-   + C4 off-beats merged in by the #26 overdub test
+    1  1 C3 ( 48) 100  1.2.1.47    197  0.410
+    1  1 C4 ( 60) 100  1.2.3.171    144  0.300
+    1  1 C3 ( 48) 100  1.3.1.47    196  0.408
+    1  1 C4 ( 60) 100  1.3.3.171    144  0.300
+    1  1 C3 ( 48) 100  1.4.1.47    196  0.408
+    1  1 C4 ( 60) 100  1.4.3.171    144  0.300
+    1  1 C3 ( 48) 100  2.1.1.47    196  0.408
+    1  1 C3 ( 48) 100  2.2.1.47    196  0.408
+    1  1 C3 ( 48) 100  2.3.1.47    196  0.408
+    1  1 C3 ( 48) 100  2.4.1.47    197  0.410
+    2  1 C4 ( 60) 100  3.1.3.171    144  0.300     <- region 2, bars 3–4.5: the REPLACE result from #26 (C4 off-beats only)
+    2  1 C4 ( 60) 100  3.2.3.171    144  0.300
+    2  1 C4 ( 60) 100  3.3.3.171    144  0.300
+    2  1 C4 ( 60) 100  3.4.3.171    144  0.300
+    3  1 C3 ( 48) 100  4.3.1.141    192  0.400     <- region 3, ~4.5–5: remainder of the split region
+    3  1 C3 ( 48) 100  4.4.1.141    192  0.400
+    4  1 C3 ( 48) 100  5.1.1.53    197  0.410     <- region 4, bars 5–7
+    4  1 C3 ( 48) 100  5.2.1.63    196  0.408
+    4  1 C3 ( 48) 100  5.3.1.63    197  0.410
+    4  1 C3 ( 48) 100  5.4.1.63    197  0.410
+    4  1 C3 ( 48) 100  6.1.1.63    197  0.410
+    4  1 C3 ( 48) 100  6.2.1.63    196  0.408
+    4  1 C3 ( 48) 100  6.3.1.63    197  0.410
+    4  1 C3 ( 48) 100  6.4.1.63    196  0.408
+    5  1 C3 ( 48) 100  8.1.1.167    192  0.400     <- region 5, bars 8–12 (host-time-stamped pattern from #8)
+    5  1 C3 ( 48) 100  8.2.1.167    192  0.400
+    ... (16 quarter notes, 8.1 .. 11.4, all +167 ticks, all 192 ticks long)
+    5  1 C3 ( 48) 100  11.4.1.167    192  0.400
+# Positions are absolute project ticks (not region-relative) and UNquantised (the recording latency offsets
+# +37/+47/+63/+141/+167 ticks survive). Durations 192–197 ticks @480 = the spikes' 200 ms note length.
+# Velocity 100 = what the spikes sent. Channel 1 throughout.
+
+## 3. Driving the save panel (the expensive part)
+# - The panel is NOT in Logic's process: it is "Open and Save Panel Service (Logic Pro)"
+#   (com.apple.appkit.xpc.openAndSavePanelService). Logic's AX tree proxies it (reads + AXPress work),
+#   but CGEvents posted to Logic's pid never reach it; HID-tap events go to whatever is frontmost
+#   (one attempt typed a path + Return into the terminal). Post events to the panel service's pid.
+# - Go To Folder: ⌘⇧G (to the panel pid) opens an AXSheet with one AXTextField; AXValue write + ⏎ navigates.
+# - Save As field: an AXValue write shows in the field but the panel keeps its old name. Click the field
+#   (CGEvent to the panel pid), set AXSelectedTextRange to everything, type the name as unicode key events.
+#   The panel has a second AXTextField (search, with search/cancel children): pick the one with no children.
+# - Save: AXPress works most runs; in some runs AXEnabled read false while the button was visibly active
+#   (Margot clicked it by hand once; a HID click with a Logic-frontmost guard is the coded fallback).
+$ /tmp/rb export all .../out/clean1.mid
+   133 ms press File > Export > All MIDI Tracks as MIDI File…  (enabled=true)
+   133 ms AXPress -> ok
+  1530 ms posting events to panel service pid 13991
+  1710 ms click AXTextField at 798,157
+  2050 ms keystroke 'g' cmd=true opt=false shift=true ctrl=false
+  2558 ms Go To sheet open
+  2732 ms field set via AXValue
+  2887 ms keystroke '⏎'
+  3234 ms Go To sheet closed; where = out
+  3656 ms click AXTextField at 798,157
+  4351 ms field typed; reads 'clean1.mid'
+  4738 ms press Save (AX) -> 0
+  4956 ms file written: .../out/clean1.mid
+export round trip 4846 ms            (second clean run: 4521 ms; selection run: 4424 ms)
+
+## 4. Region identity
+# Margot renamed Track 1 to "hello :P" (the rename hit the track): every exported track became "hello :P".
+# Margot then renamed region 2 (bars 3–4.5) to "second":
+track 1: name "hello :P"  instrument "hello :P"
+track 2: name "second"    instrument "hello :P"    <- SMF track name (meta 03) = REGION name
+track 3: name "hello :P"  instrument "hello :P"    <- meta 04 (instrument name) = Logic TRACK name
+track 4: name "hello :P"  instrument "hello :P"
+track 5: name "hello :P"  instrument "hello :P"
+# A region with the default name exports under the track name, so unnamed regions are told apart by
+# start tick + order only. Naming a region before the round trip gives a stable handle.
+
+## 5. Selection export
+$ /tmp/rb selectall           (⌘A to Logic, then the export menu)
+  ✓ 'Selection as MIDI File…'
+  ✓ 'All MIDI Tracks as MIDI File…'
+$ /tmp/rb export sel .../out/sel1.mid
+export round trip 4424 ms
+42 notes
+selection export == all-tracks export (byte-identical)
+
+## 6. Single-region selection export (Margot clicked region "second"; Save needed her click this run)
+$ /tmp/rb export sel .../out/one-region.mid
+SMF format 0, 1 tracks, 480 ppq, 125 bytes
+tempo map: 120.00 bpm @tick 3840         <- meta events sit at the REGION START (bar 3 = 2 bars x 1920 ticks)
+time sig: 4/4 @tick 3840
+track 0: name "second"  instrument "hello :P"
+4 notes:
+    0  1 C4 ( 60) 100  3.1.3.171    144  0.300   <- absolute positions kept, not region-relative
+    0  1 C4 ( 60) 100  3.2.3.171    144  0.300
+    0  1 C4 ( 60) 100  3.3.3.171    144  0.300
+    0  1 C4 ( 60) 100  3.4.3.171    144  0.300
+# Region START is readable (first meta tick); region END/length is not in the file.
+# Save-button flakiness: 2 of 7 runs needed a human click; AXEnabled read false while the button was active.
