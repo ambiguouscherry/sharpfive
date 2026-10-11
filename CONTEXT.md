@@ -35,3 +35,27 @@ Verifying an action landed rather than firing blind — via control-surface feed
 ### Round-trip
 
 The pattern for editing notes in an existing region despite no protocol existing for it: export the region as MIDI, edit the sequence outside Logic, replace the region. Converts an impossible operation into two solved ones.
+
+### Strip
+
+One of the eight track positions a control surface shows at one time. A strip has a fader, a knob, and a short name cell. Strip 1 is the left-most position, not a fixed track.
+
+### Bank
+
+The eight tracks the strips show right now. Moving the bank swaps which tracks the strips address.
+
+### Assignment mode
+
+What the surface's knobs control right now: track, pan, send, plug-in list, plug-in edit, instrument list. The surface announces it; the agent reads it rather than assuming it.
+
+### Slot
+
+One plug-in position on a track: the instrument slot or insert 1, 2, 3 and so on. Instruments and effects are inserted by the same mechanic into different slots.
+
+### Parameter page
+
+One screen of up to eight parameters in plug-in edit view. A plug-in spans one or more pages; the agent pages to reach a parameter.
+
+### Transient
+
+A short-lived overlay the surface shows for about two seconds after a touch or a page change, carrying extra facts (full parameter name, unit, page count) that the steady display abbreviates. A source of facts, not noise.
