@@ -1,0 +1,1707 @@
+── MCU v-pot spike up. Virtual CoreMIDI port "MCU Spike" (source + destination).
+Logic: Control Surfaces → Setup → Mackie Control with both ports = "MCU Spike".
+
+COMMANDS
+  select <1-8>              select a strip (note 18+n)
+  vpot <1-8> <±n>           one relative-CC message, magnitude n (1-63), sign = direction
+  ticks <1-8> <±n> [ms]     n separate single-tick messages, [ms] apart (default 20)
+  press <1-8>               v-pot push (note 20+n)
+  plugin|track|send|pan|eq|inst|flip|namevalue|nv|up|down|left|right|enter|cancel
+  bankl|bankr|chl|chr|play|stop|rec
+  btn <hexnote>             press+release any note
+  fader <1-9> <0-16383>     move a fader (touch-bracketed)
+  lcd                       print the 2x56 framebuffer
+  cells                     print the 8 per-strip 7-char cells (top=name row, bottom=value row)
+  assign | tc               assignment display / timecode display
+  rings                     last ring value per strip, decoded
+  watch on|off              print framebuffer after each LCD burst (default on)
+  quiet on|off              hide per-message chatter (LED/fader/ring/sysex lines)
+  find <text> [maxpages]    page RIGHT until a cell contains <text>; reports strip+page
+  sleep <ms>
+  raw <hex bytes>           send raw MIDI
+  quit
+┌────────────────────────────────────────────────────────┐
+│                                                        │
+│                                                        │
+└────────────────────────────────────────────────────────┘
+ASSIGN: "  "
+ring 1: 00 (dot 0/11)
+ring 2: 00 (dot 0/11)
+ring 3: 00 (dot 0/11)
+ring 4: 00 (dot 0/11)
+ring 5: 00 (dot 0/11)
+ring 6: 00 (dot 0/11)
+ring 7: 00 (dot 0/11)
+ring 8: 00 (dot 0/11)
+  8.065 ▶ 90 18 7F
+  8.065 ▶ 90 18 00
+  9.077 ▶ 90 5D 7F
+  9.077 ▶ 90 5D 00
+┌────────────────────────────────────────────────────────┐
+│                                                        │
+│                                                        │
+└────────────────────────────────────────────────────────┘
+ 35.419 ◀ HANDSHAKE: Device Query — replying
+ 35.419 ▶ F0 00 00 66 14 01 53 50 49 4B 45 30 31 01 02 03 04 F7
+ 35.420 ◀ SYSEX cmd 21: 01
+ 35.420 ◀ SYSEX cmd 20: 00 07
+ 35.421 ◀ SYSEX cmd 20: 01 07
+ 35.421 ◀ SYSEX cmd 20: 02 07
+ 35.424 ◀ SYSEX cmd 20: 03 07
+ 35.424 ◀ SYSEX cmd 20: 04 07
+ 35.425 ◀ SYSEX cmd 20: 05 07
+ 35.425 ◀ SYSEX cmd 20: 06 07
+ 35.426 ◀ SYSEX cmd 20: 07 07
+ 35.426 ◀ SYSEX cmd 0A: 01
+ 35.426 ◀ SYSEX cmd 0C: 00
+ 35.427 ◀ SYSEX cmd 0B: 0F
+ 35.427 ◀ LCD @  0 "Inst 1 Inst 2 St Out Master                             0      0      0                                        "
+ 35.430 ◀ ASSIGN display = "P "
+ 35.431 ◀ ASSIGN display = "PN"
+ 35.431 ◀ LED REC-ARM ch1 OFF
+ 35.431 ◀ LED REC-ARM ch2 ON
+ 35.432 ◀ LED REC-ARM ch3 OFF
+ 35.432 ◀ LED REC-ARM ch4 OFF
+ 35.432 ◀ LED REC-ARM ch5 OFF
+ 35.433 ◀ LED REC-ARM ch6 OFF
+ 35.433 ◀ LED REC-ARM ch7 OFF
+ 35.433 ◀ LED REC-ARM ch8 OFF
+ 35.433 ◀ LED SOLO ch1 OFF
+ 35.434 ◀ LED SOLO ch2 OFF
+ 35.434 ◀ LED SOLO ch3 OFF
+ 35.434 ◀ LED SOLO ch4 OFF
+ 35.434 ◀ LED SOLO ch5 OFF
+ 35.435 ◀ LED SOLO ch6 OFF
+ 35.435 ◀ LED SOLO ch7 OFF
+ 35.435 ◀ LED SOLO ch8 OFF
+ 35.436 ◀ LED MUTE ch1 OFF
+ 35.436 ◀ LED MUTE ch2 OFF
+ 35.436 ◀ LED MUTE ch3 OFF
+ 35.437 ◀ LED MUTE ch4 OFF
+ 35.437 ◀ LED MUTE ch5 OFF
+ 35.437 ◀ LED MUTE ch6 OFF
+ 35.437 ◀ LED MUTE ch7 OFF
+ 35.438 ◀ LED MUTE ch8 OFF
+ 35.438 ◀ LED SELECT ch1 OFF
+ 35.438 ◀ LED SELECT ch2 ON
+ 35.439 ◀ LED SELECT ch3 OFF
+ 35.439 ◀ LED SELECT ch4 OFF
+ 35.439 ◀ LED SELECT ch5 OFF
+ 35.440 ◀ LED SELECT ch6 OFF
+ 35.440 ◀ LED SELECT ch7 OFF
+ 35.440 ◀ LED SELECT ch8 OFF
+ 35.441 ◀ LED VPOT PRESS ch1 OFF
+ 35.441 ◀ LED VPOT PRESS ch2 OFF
+ 35.441 ◀ LED VPOT PRESS ch3 OFF
+ 35.441 ◀ LED VPOT PRESS ch4 OFF
+ 35.442 ◀ LED VPOT PRESS ch5 OFF
+ 35.442 ◀ LED VPOT PRESS ch6 OFF
+ 35.442 ◀ LED VPOT PRESS ch7 OFF
+ 35.443 ◀ LED VPOT PRESS ch8 OFF
+ 35.443 ◀ LED TRACK OFF
+ 35.443 ◀ LED SEND OFF
+ 35.444 ◀ LED PAN ON
+ 35.444 ◀ LED PLUG-IN OFF
+ 35.444 ◀ LED EQ OFF
+ 35.444 ◀ LED INSTRUMENT OFF
+ 35.445 ◀ LED FLIP OFF
+ 35.445 ◀ LED GLOBAL VIEW OFF
+ 35.445 ◀ LED READ/OFF ON
+ 35.446 ◀ LED WRITE OFF
+ 35.446 ◀ LED TRIM OFF
+ 35.446 ◀ LED TOUCH OFF
+ 35.446 ◀ LED LATCH OFF
+ 35.446 ◀ LED GROUP OFF
+ 35.447 ◀ LED note 50 ON
+ 35.447 ◀ LED note 51 ON
+ 35.447 ◀ LED note 54 OFF
+ 35.447 ◀ LED note 55 OFF
+ 35.448 ◀ LED note 56 OFF
+ 35.448 ◀ LED note 57 OFF
+ 35.448 ◀ LED note 58 OFF
+ 35.449 ◀ LED note 59 OFF
+ 35.449 ◀ LED note 5A OFF
+ 35.449 ◀ LED REWIND OFF
+ 35.450 ◀ LED FFWD OFF
+ 35.450 ◀ LED STOP ON
+ 35.450 ◀ LED PLAY OFF
+ 35.450 ◀ LED RECORD OFF
+ 35.451 ◀ LED ZOOM OFF
+ 35.451 ◀ LED SCRUB OFF
+ 35.451 ◀ LED LED SMPTE OFF
+ 35.452 ◀ LED LED BEATS ON
+ 35.452 ◀ LED RUDE SOLO OFF
+ 35.452 ◀ SYSEX cmd 72: 02 02 05 04 07 07 07 07
+ 35.453 ◀ FADER ECHO strip 1 = 12443/16383
+ 35.453 ◀ FADER ECHO strip 2 = 12443/16383
+ 35.453 ◀ FADER ECHO strip 3 = 12443/16383
+ 35.453 ◀ FADER ECHO strip 4 = 12443/16383
+ 35.454 ◀ FADER ECHO strip 5 = 0/16383
+ 35.454 ◀ FADER ECHO strip 6 = 0/16383
+ 35.454 ◀ FADER ECHO strip 7 = 0/16383
+ 35.454 ◀ FADER ECHO strip 8 = 0/16383
+ 35.455 ◀ FADER ECHO strip 9 = 12443/16383
+ 35.455 ◀ FADER ECHO strip 10 = 0/16383
+ 35.455 ◀ RING 1 = 56 (boost/cut 6/11 +center)
+ 35.456 ◀ RING 2 = 56 (boost/cut 6/11 +center)
+ 35.456 ◀ RING 3 = 56 (boost/cut 6/11 +center)
+ 35.456 ◀ RING 4 = 00 (dot 0/11)
+ 35.457 ◀ RING 5 = 00 (dot 0/11)
+ 35.457 ◀ RING 6 = 00 (dot 0/11)
+ 35.457 ◀ RING 7 = 00 (dot 0/11)
+ 35.457 ◀ RING 8 = 00 (dot 0/11)
+ 35.458 ◀ HANDSHAKE: Device Query — replying
+ 35.458 ▶ F0 00 00 66 14 01 53 50 49 4B 45 30 31 01 02 03 04 F7
+ 35.459 ◀ HANDSHAKE: Device Query — replying
+ 35.459 ▶ F0 00 00 66 14 01 53 50 49 4B 45 30 31 01 02 03 04 F7
+ 35.459 ◀ HANDSHAKE: Device Query — replying
+ 35.459 ▶ F0 00 00 66 14 01 53 50 49 4B 45 30 31 01 02 03 04 F7
+ 35.459 ▶ F0 00 00 66 14 14 56 31 2E 30 F7
+ 35.459 ◀ HANDSHAKE: Device Query — replying
+ 35.459 ▶ F0 00 00 66 14 01 53 50 49 4B 45 30 31 01 02 03 04 F7
+ 35.459 ▶ F0 00 00 66 14 14 56 31 2E 30 F7
+ 35.459 ◀ HANDSHAKE: Device Query — replying
+ 35.459 ▶ F0 00 00 66 14 01 53 50 49 4B 45 30 31 01 02 03 04 F7
+ 35.460 ▶ F0 00 00 66 14 14 56 31 2E 30 F7
+ 35.460 ◀ HANDSHAKE: Device Query — replying
+ 35.460 ▶ F0 00 00 66 14 01 53 50 49 4B 45 30 31 01 02 03 04 F7
+ 35.460 ▶ F0 00 00 66 14 14 56 31 2E 30 F7
+ 35.462 ◀ HANDSHAKE: Device Query — replying
+ 35.462 ▶ F0 00 00 66 14 01 53 50 49 4B 45 30 31 01 02 03 04 F7
+ 35.462 ▶ F0 00 00 66 14 14 56 31 2E 30 F7
+ 35.462 ◀ HANDSHAKE: Device Query — replying
+ 35.462 ▶ F0 00 00 66 14 01 53 50 49 4B 45 30 31 01 02 03 04 F7
+ 35.462 ▶ F0 00 00 66 14 14 56 31 2E 30 F7
+ 35.463 ◀ HANDSHAKE: Device Query — replying
+ 35.463 ▶ F0 00 00 66 14 01 53 50 49 4B 45 30 31 01 02 03 04 F7
+ 35.463 ▶ F0 00 00 66 14 14 56 31 2E 30 F7
+ 35.558 LCD settled, assign="PN"
+   1       2       3       4       5       6       7       8       
+T: Inst 1Inst 2St OutMaster
+B: 000
+ 35.609 ▶ F0 00 00 66 14 14 56 31 2E 30 F7
+ 35.610 ▶ F0 00 00 66 14 14 56 31 2E 30 F7
+ 35.610 ▶ F0 00 00 66 14 14 56 31 2E 30 F7
+ 35.610 ▶ F0 00 00 66 14 14 56 31 2E 30 F7
+ 35.611 ◀ SYSEX cmd 0A: 01
+ 35.611 ◀ SYSEX cmd 0C: 00
+ 35.611 ◀ SYSEX cmd 0B: 0F
+ 35.611 ◀ SYSEX cmd 0A: 01
+ 35.612 ◀ SYSEX cmd 0C: 00
+ 35.612 ◀ SYSEX cmd 0B: 0F
+ 35.612 ◀ SYSEX cmd 0A: 01
+ 35.612 ◀ SYSEX cmd 0C: 00
+ 35.613 ◀ SYSEX cmd 0B: 0F
+ 35.613 ◀ SYSEX cmd 0A: 01
+ 35.613 ◀ SYSEX cmd 0C: 00
+ 35.614 ◀ SYSEX cmd 0B: 0F
+ 35.614 ◀ SYSEX cmd 0A: 01
+ 35.614 ◀ SYSEX cmd 0C: 00
+ 35.615 ◀ SYSEX cmd 0B: 0F
+ 35.615 ◀ SYSEX cmd 0A: 01
+ 35.615 ◀ SYSEX cmd 0C: 00
+ 35.616 ◀ SYSEX cmd 0B: 0F
+ 35.616 ◀ SYSEX cmd 0A: 01
+ 35.616 ◀ SYSEX cmd 0C: 00
+ 35.617 ◀ SYSEX cmd 0B: 0F
+ 35.617 ◀ SYSEX cmd 0A: 01
+ 35.617 ◀ SYSEX cmd 0C: 00
+ 35.618 ◀ SYSEX cmd 0B: 0F
+ 35.618 ◀ SYSEX cmd 0A: 01
+ 35.618 ◀ SYSEX cmd 0C: 00
+ 35.619 ◀ SYSEX cmd 0B: 0F
+ 35.619 ◀ LCD @  0 "Inst 1 Inst 2 St Out Master                             0      0      0                                        "
+ 35.622 ◀ ASSIGN display = "PN"
+ 35.622 ◀ ASSIGN display = "PN"
+ 35.622 ◀ LED REC-ARM ch1 OFF
+ 35.622 ◀ LED REC-ARM ch2 ON
+ 35.623 ◀ LED REC-ARM ch3 OFF
+ 35.623 ◀ LED REC-ARM ch4 OFF
+ 35.623 ◀ LED REC-ARM ch5 OFF
+ 35.624 ◀ LED REC-ARM ch6 OFF
+ 35.624 ◀ LED REC-ARM ch7 OFF
+ 35.624 ◀ LED REC-ARM ch8 OFF
+ 35.624 ◀ LED SOLO ch1 OFF
+ 35.625 ◀ LED SOLO ch2 OFF
+ 35.625 ◀ LED SOLO ch3 OFF
+ 35.625 ◀ LED SOLO ch4 OFF
+ 35.626 ◀ LED SOLO ch5 OFF
+ 35.626 ◀ LED SOLO ch6 OFF
+ 35.626 ◀ LED SOLO ch7 OFF
+ 35.626 ◀ LED SOLO ch8 OFF
+ 35.627 ◀ LED MUTE ch1 OFF
+ 35.627 ◀ LED MUTE ch2 OFF
+ 35.627 ◀ LED MUTE ch3 OFF
+ 35.627 ◀ LED MUTE ch4 OFF
+ 35.628 ◀ LED MUTE ch5 OFF
+ 35.628 ◀ LED MUTE ch6 OFF
+ 35.628 ◀ LED MUTE ch7 OFF
+ 35.629 ◀ LED MUTE ch8 OFF
+ 35.629 ◀ LED SELECT ch1 OFF
+ 35.629 ◀ LED SELECT ch2 ON
+ 35.629 ◀ LED SELECT ch3 OFF
+ 35.630 ◀ LED SELECT ch4 OFF
+ 35.630 ◀ LED SELECT ch5 OFF
+ 35.630 ◀ LED SELECT ch6 OFF
+ 35.631 ◀ LED SELECT ch7 OFF
+ 35.631 ◀ LED SELECT ch8 OFF
+ 35.631 ◀ LED VPOT PRESS ch1 OFF
+ 35.631 ◀ LED VPOT PRESS ch2 OFF
+ 35.632 ◀ LED VPOT PRESS ch3 OFF
+ 35.632 ◀ LED VPOT PRESS ch4 OFF
+ 35.632 ◀ LED VPOT PRESS ch5 OFF
+ 35.633 ◀ LED VPOT PRESS ch6 OFF
+ 35.633 ◀ LED VPOT PRESS ch7 OFF
+ 35.633 ◀ LED VPOT PRESS ch8 OFF
+ 35.634 ◀ LED TRACK OFF
+ 35.634 ◀ LED SEND OFF
+ 35.634 ◀ LED PAN ON
+ 35.634 ◀ LED PLUG-IN OFF
+ 35.635 ◀ LED EQ OFF
+ 35.635 ◀ LED INSTRUMENT OFF
+ 35.635 ◀ LED FLIP OFF
+ 35.636 ◀ LED GLOBAL VIEW OFF
+ 35.636 ◀ LED READ/OFF ON
+ 35.636 ◀ LED WRITE OFF
+ 35.637 ◀ LED TRIM OFF
+ 35.637 ◀ LED TOUCH OFF
+ 35.637 ◀ LED LATCH OFF
+ 35.638 ◀ LED GROUP OFF
+ 35.638 ◀ LED note 50 ON
+ 35.638 ◀ LED note 51 ON
+ 35.638 ◀ LED note 54 OFF
+ 35.639 ◀ LED note 55 OFF
+ 35.639 ◀ LED note 56 OFF
+ 35.640 ◀ LED note 57 OFF
+ 35.641 ◀ LED note 58 OFF
+ 35.641 ◀ LED note 59 OFF
+ 35.642 ◀ LED note 5A OFF
+ 35.642 ◀ LED REWIND OFF
+ 35.642 ◀ LED FFWD OFF
+ 35.642 ◀ LED STOP ON
+ 35.643 ◀ LED PLAY OFF
+ 35.643 ◀ LED RECORD OFF
+ 35.643 ◀ LED ZOOM OFF
+ 35.644 ◀ LED SCRUB OFF
+ 35.644 ◀ LED LED SMPTE OFF
+ 35.644 ◀ LED LED BEATS ON
+ 35.645 ◀ LED RUDE SOLO OFF
+ 35.645 ◀ SYSEX cmd 72: 02 02 05 04 07 07 07 07
+ 35.645 ◀ FADER ECHO strip 1 = 12443/16383
+ 35.645 ◀ FADER ECHO strip 2 = 12443/16383
+ 35.646 ◀ FADER ECHO strip 3 = 12443/16383
+ 35.646 ◀ FADER ECHO strip 4 = 12443/16383
+ 35.646 ◀ FADER ECHO strip 5 = 0/16383
+ 35.647 ◀ FADER ECHO strip 6 = 0/16383
+ 35.647 ◀ FADER ECHO strip 7 = 0/16383
+ 35.647 ◀ FADER ECHO strip 8 = 0/16383
+ 35.648 ◀ FADER ECHO strip 9 = 12443/16383
+ 35.648 ◀ FADER ECHO strip 10 = 0/16383
+ 35.648 ◀ RING 1 = 56 (boost/cut 6/11 +center)
+ 35.649 ◀ RING 2 = 56 (boost/cut 6/11 +center)
+ 35.649 ◀ RING 3 = 56 (boost/cut 6/11 +center)
+ 35.649 ◀ RING 4 = 00 (dot 0/11)
+ 35.649 ◀ RING 5 = 00 (dot 0/11)
+ 35.650 ◀ RING 6 = 00 (dot 0/11)
+ 35.650 ◀ RING 7 = 00 (dot 0/11)
+ 35.650 ◀ RING 8 = 00 (dot 0/11)
+ 35.651 ◀ SYSEX cmd 21: 01
+ 35.651 ◀ SYSEX cmd 20: 00 07
+ 35.652 ◀ SYSEX cmd 20: 01 07
+ 35.652 ◀ SYSEX cmd 20: 02 07
+ 35.653 ◀ SYSEX cmd 20: 03 07
+ 35.653 ◀ SYSEX cmd 20: 04 07
+ 35.654 ◀ SYSEX cmd 20: 05 07
+ 35.655 ◀ SYSEX cmd 20: 06 07
+ 35.655 ◀ SYSEX cmd 20: 07 07
+ 35.656 ◀ SYSEX cmd 0A: 01
+ 35.656 ◀ SYSEX cmd 0C: 00
+ 35.656 ◀ SYSEX cmd 0B: 0F
+ 35.754 LCD settled, assign="PN"
+   1       2       3       4       5       6       7       8       
+T: Inst 1Inst 2St OutMaster
+B: 000
+ 36.660 ◀ SYSEX cmd 0E: 00 03
+ 36.661 ◀ SYSEX cmd 0E: 01 03
+ 36.661 ◀ SYSEX cmd 0E: 02 03
+ 36.661 ◀ SYSEX cmd 0E: 03 03
+ 36.662 ◀ SYSEX cmd 0E: 04 03
+ 36.662 ◀ SYSEX cmd 0E: 05 03
+ 36.662 ◀ SYSEX cmd 0E: 06 03
+ 36.662 ◀ SYSEX cmd 0E: 07 03
+ 36.662 ◀ SYSEX cmd 0E: 08 03
+ 85.329 ◀ LCD @  0 "Inst 1 Inst 2 St Out Master                             0      0      0                                        "
+ 85.333 ◀ ASSIGN display = "PN"
+ 85.333 ◀ ASSIGN display = "PN"
+ 85.334 ◀ LED REC-ARM ch1 OFF
+ 85.334 ◀ LED REC-ARM ch2 ON
+ 85.334 ◀ LED REC-ARM ch3 OFF
+ 85.334 ◀ LED REC-ARM ch4 OFF
+ 85.334 ◀ LED REC-ARM ch5 OFF
+ 85.335 ◀ LED REC-ARM ch6 OFF
+ 85.335 ◀ LED REC-ARM ch7 OFF
+ 85.335 ◀ LED REC-ARM ch8 OFF
+ 85.335 ◀ LED SOLO ch1 OFF
+ 85.336 ◀ LED SOLO ch2 OFF
+ 85.337 ◀ LED SOLO ch3 OFF
+ 85.337 ◀ LED SOLO ch4 OFF
+ 85.338 ◀ LED SOLO ch5 OFF
+ 85.338 ◀ LED SOLO ch6 OFF
+ 85.338 ◀ LED SOLO ch7 OFF
+ 85.338 ◀ LED SOLO ch8 OFF
+ 85.339 ◀ LED MUTE ch1 OFF
+ 85.339 ◀ LED MUTE ch2 OFF
+ 85.339 ◀ LED MUTE ch3 OFF
+ 85.340 ◀ LED MUTE ch4 OFF
+ 85.340 ◀ LED MUTE ch5 OFF
+ 85.340 ◀ LED MUTE ch6 OFF
+ 85.341 ◀ LED MUTE ch7 OFF
+ 85.341 ◀ LED MUTE ch8 OFF
+ 85.341 ◀ LED SELECT ch1 OFF
+ 85.341 ◀ LED SELECT ch2 ON
+ 85.342 ◀ LED SELECT ch3 OFF
+ 85.342 ◀ LED SELECT ch4 OFF
+ 85.343 ◀ LED SELECT ch5 OFF
+ 85.343 ◀ LED SELECT ch6 OFF
+ 85.343 ◀ LED SELECT ch7 OFF
+ 85.343 ◀ LED SELECT ch8 OFF
+ 85.344 ◀ LED VPOT PRESS ch1 OFF
+ 85.344 ◀ LED VPOT PRESS ch2 OFF
+ 85.344 ◀ LED VPOT PRESS ch3 OFF
+ 85.345 ◀ LED VPOT PRESS ch4 OFF
+ 85.345 ◀ LED VPOT PRESS ch5 OFF
+ 85.346 ◀ LED VPOT PRESS ch6 OFF
+ 85.346 ◀ LED VPOT PRESS ch7 OFF
+ 85.346 ◀ LED VPOT PRESS ch8 OFF
+ 85.347 ◀ LED TRACK OFF
+ 85.347 ◀ LED SEND OFF
+ 85.347 ◀ LED PAN ON
+ 85.348 ◀ LED PLUG-IN OFF
+ 85.348 ◀ LED EQ OFF
+ 85.348 ◀ LED INSTRUMENT OFF
+ 85.349 ◀ LED FLIP OFF
+ 85.349 ◀ LED GLOBAL VIEW OFF
+ 85.349 ◀ LED READ/OFF ON
+ 85.349 ◀ LED WRITE OFF
+ 85.350 ◀ LED TRIM OFF
+ 85.350 ◀ LED TOUCH OFF
+ 85.350 ◀ LED LATCH OFF
+ 85.350 ◀ LED GROUP OFF
+ 85.351 ◀ LED note 50 ON
+ 85.351 ◀ LED note 51 ON
+ 85.351 ◀ LED note 54 OFF
+ 85.352 ◀ LED note 55 OFF
+ 85.352 ◀ LED note 56 OFF
+ 85.352 ◀ LED note 57 OFF
+ 85.353 ◀ LED note 58 OFF
+ 85.353 ◀ LED note 59 OFF
+ 85.353 ◀ LED note 5A OFF
+ 85.353 ◀ LED REWIND OFF
+ 85.354 ◀ LED FFWD OFF
+ 85.355 ◀ LED STOP ON
+ 85.355 ◀ LED PLAY OFF
+ 85.356 ◀ LED RECORD OFF
+ 85.356 ◀ LED ZOOM OFF
+ 85.356 ◀ LED SCRUB OFF
+ 85.356 ◀ LED LED SMPTE OFF
+ 85.357 ◀ LED LED BEATS ON
+ 85.357 ◀ LED RUDE SOLO OFF
+ 85.358 ◀ SYSEX cmd 72: 02 02 05 04 07 07 07 07
+ 85.358 ◀ FADER ECHO strip 1 = 12443/16383
+ 85.358 ◀ FADER ECHO strip 2 = 12443/16383
+ 85.358 ◀ FADER ECHO strip 3 = 12443/16383
+ 85.358 ◀ FADER ECHO strip 4 = 12443/16383
+ 85.359 ◀ FADER ECHO strip 5 = 0/16383
+ 85.359 ◀ FADER ECHO strip 6 = 0/16383
+ 85.359 ◀ FADER ECHO strip 7 = 0/16383
+ 85.359 ◀ FADER ECHO strip 8 = 0/16383
+ 85.360 ◀ FADER ECHO strip 9 = 12443/16383
+ 85.360 ◀ FADER ECHO strip 10 = 0/16383
+ 85.360 ◀ RING 1 = 56 (boost/cut 6/11 +center)
+ 85.361 ◀ RING 2 = 56 (boost/cut 6/11 +center)
+ 85.361 ◀ RING 3 = 56 (boost/cut 6/11 +center)
+ 85.361 ◀ RING 4 = 00 (dot 0/11)
+ 85.362 ◀ RING 5 = 00 (dot 0/11)
+ 85.362 ◀ RING 6 = 00 (dot 0/11)
+ 85.362 ◀ RING 7 = 00 (dot 0/11)
+ 85.363 ◀ RING 8 = 00 (dot 0/11)
+ 85.363 ◀ SYSEX cmd 21: 01
+ 85.364 ◀ SYSEX cmd 20: 00 07
+ 85.364 ◀ SYSEX cmd 20: 01 07
+ 85.365 ◀ SYSEX cmd 20: 02 07
+ 85.366 ◀ SYSEX cmd 20: 03 07
+ 85.367 ◀ SYSEX cmd 20: 04 07
+ 85.367 ◀ SYSEX cmd 20: 05 07
+ 85.368 ◀ SYSEX cmd 20: 06 07
+ 85.369 ◀ SYSEX cmd 20: 07 07
+ 85.369 ◀ SYSEX cmd 0A: 01
+ 85.369 ◀ SYSEX cmd 0C: 00
+ 85.370 ◀ SYSEX cmd 0B: 0F
+ 85.461 LCD settled, assign="PN"
+   1       2       3       4       5       6       7       8       
+T: Inst 1Inst 2St OutMaster
+B: 000
+ 86.392 ◀ SYSEX cmd 0E: 00 03
+ 86.392 ◀ SYSEX cmd 0E: 01 03
+ 86.392 ◀ SYSEX cmd 0E: 02 03
+ 86.393 ◀ SYSEX cmd 0E: 03 03
+ 86.393 ◀ SYSEX cmd 0E: 04 03
+ 86.394 ◀ SYSEX cmd 0E: 05 03
+ 86.394 ◀ SYSEX cmd 0E: 06 03
+ 86.394 ◀ SYSEX cmd 0E: 07 03
+ 86.395 ◀ SYSEX cmd 0E: 08 03
+115.157 ◀ LCD @  0 "Inst 1 Inst 2 St Out Master                             0      0      0                                        "
+115.160 ◀ ASSIGN display = "PN"
+115.161 ◀ ASSIGN display = "PN"
+115.161 ◀ LED REC-ARM ch1 OFF
+115.161 ◀ LED REC-ARM ch2 ON
+115.162 ◀ LED REC-ARM ch3 OFF
+115.162 ◀ LED REC-ARM ch4 OFF
+115.162 ◀ LED REC-ARM ch5 OFF
+115.162 ◀ LED REC-ARM ch6 OFF
+115.163 ◀ LED REC-ARM ch7 OFF
+115.163 ◀ LED REC-ARM ch8 OFF
+115.164 ◀ LED SOLO ch1 OFF
+115.164 ◀ LED SOLO ch2 OFF
+115.164 ◀ LED SOLO ch3 OFF
+115.165 ◀ LED SOLO ch4 OFF
+115.165 ◀ LED SOLO ch5 OFF
+115.165 ◀ LED SOLO ch6 OFF
+115.166 ◀ LED SOLO ch7 OFF
+115.166 ◀ LED SOLO ch8 OFF
+115.166 ◀ LED MUTE ch1 OFF
+115.167 ◀ LED MUTE ch2 OFF
+115.167 ◀ LED MUTE ch3 OFF
+115.167 ◀ LED MUTE ch4 OFF
+115.168 ◀ LED MUTE ch5 OFF
+115.168 ◀ LED MUTE ch6 OFF
+115.168 ◀ LED MUTE ch7 OFF
+115.168 ◀ LED MUTE ch8 OFF
+115.169 ◀ LED SELECT ch1 OFF
+115.169 ◀ LED SELECT ch2 ON
+115.169 ◀ LED SELECT ch3 OFF
+115.170 ◀ LED SELECT ch4 OFF
+115.170 ◀ LED SELECT ch5 OFF
+115.170 ◀ LED SELECT ch6 OFF
+115.171 ◀ LED SELECT ch7 OFF
+115.171 ◀ LED SELECT ch8 OFF
+115.172 ◀ LED VPOT PRESS ch1 OFF
+115.172 ◀ LED VPOT PRESS ch2 OFF
+115.172 ◀ LED VPOT PRESS ch3 OFF
+115.172 ◀ LED VPOT PRESS ch4 OFF
+115.172 ◀ LED VPOT PRESS ch5 OFF
+115.172 ◀ LED VPOT PRESS ch6 OFF
+115.173 ◀ LED VPOT PRESS ch7 OFF
+115.173 ◀ LED VPOT PRESS ch8 OFF
+115.174 ◀ LED TRACK OFF
+115.174 ◀ LED SEND OFF
+115.175 ◀ LED PAN ON
+115.175 ◀ LED PLUG-IN OFF
+115.175 ◀ LED EQ OFF
+115.176 ◀ LED INSTRUMENT OFF
+115.176 ◀ LED FLIP OFF
+115.176 ◀ LED GLOBAL VIEW OFF
+115.177 ◀ LED READ/OFF ON
+115.177 ◀ LED WRITE OFF
+115.178 ◀ LED TRIM OFF
+115.179 ◀ LED TOUCH OFF
+115.179 ◀ LED LATCH OFF
+115.179 ◀ LED GROUP OFF
+115.180 ◀ LED note 50 ON
+115.180 ◀ LED note 51 ON
+115.180 ◀ LED note 54 OFF
+115.180 ◀ LED note 55 OFF
+115.181 ◀ LED note 56 OFF
+115.182 ◀ LED note 57 OFF
+115.182 ◀ LED note 58 OFF
+115.182 ◀ LED note 59 OFF
+115.183 ◀ LED note 5A OFF
+115.183 ◀ LED REWIND OFF
+115.183 ◀ LED FFWD OFF
+115.183 ◀ LED STOP ON
+115.183 ◀ LED PLAY OFF
+115.184 ◀ LED RECORD OFF
+115.184 ◀ LED ZOOM OFF
+115.184 ◀ LED SCRUB OFF
+115.185 ◀ LED LED SMPTE OFF
+115.185 ◀ LED LED BEATS ON
+115.185 ◀ LED RUDE SOLO OFF
+115.186 ◀ SYSEX cmd 72: 02 02 05 04 07 07 07 07
+115.186 ◀ FADER ECHO strip 1 = 12443/16383
+115.186 ◀ FADER ECHO strip 2 = 12443/16383
+115.187 ◀ FADER ECHO strip 3 = 12443/16383
+115.187 ◀ FADER ECHO strip 4 = 12443/16383
+115.188 ◀ FADER ECHO strip 5 = 0/16383
+115.188 ◀ FADER ECHO strip 6 = 0/16383
+115.188 ◀ FADER ECHO strip 7 = 0/16383
+115.189 ◀ FADER ECHO strip 8 = 0/16383
+115.189 ◀ FADER ECHO strip 9 = 12443/16383
+115.189 ◀ FADER ECHO strip 10 = 0/16383
+115.189 ◀ RING 1 = 56 (boost/cut 6/11 +center)
+115.190 ◀ RING 2 = 56 (boost/cut 6/11 +center)
+115.190 ◀ RING 3 = 56 (boost/cut 6/11 +center)
+115.190 ◀ RING 4 = 00 (dot 0/11)
+115.192 ◀ RING 5 = 00 (dot 0/11)
+115.192 ◀ RING 6 = 00 (dot 0/11)
+115.193 ◀ RING 7 = 00 (dot 0/11)
+115.193 ◀ RING 8 = 00 (dot 0/11)
+115.194 ◀ SYSEX cmd 21: 01
+115.194 ◀ SYSEX cmd 20: 00 07
+115.194 ◀ SYSEX cmd 20: 01 07
+115.195 ◀ SYSEX cmd 20: 02 07
+115.196 ◀ SYSEX cmd 20: 03 07
+115.196 ◀ SYSEX cmd 20: 04 07
+115.197 ◀ SYSEX cmd 20: 05 07
+115.198 ◀ SYSEX cmd 20: 06 07
+115.198 ◀ SYSEX cmd 20: 07 07
+115.199 ◀ SYSEX cmd 0A: 01
+115.199 ◀ SYSEX cmd 0C: 00
+115.199 ◀ SYSEX cmd 0B: 0F
+115.287 LCD settled, assign="PN"
+   1       2       3       4       5       6       7       8       
+T: Inst 1Inst 2St OutMaster
+B: 000
+116.190 ◀ SYSEX cmd 0E: 00 03
+116.190 ◀ SYSEX cmd 0E: 01 03
+116.190 ◀ SYSEX cmd 0E: 02 03
+116.191 ◀ SYSEX cmd 0E: 03 03
+116.191 ◀ SYSEX cmd 0E: 04 03
+116.191 ◀ SYSEX cmd 0E: 05 03
+116.192 ◀ SYSEX cmd 0E: 06 03
+116.192 ◀ SYSEX cmd 0E: 07 03
+116.192 ◀ SYSEX cmd 0E: 08 03
+123.635 ◀ LCD @  0 "Inst 1 Inst 2 St Out Master                             0      0      0                                        "
+123.638 ◀ ASSIGN display = "PN"
+123.639 ◀ ASSIGN display = "PN"
+123.639 ◀ LED REC-ARM ch1 OFF
+123.639 ◀ LED REC-ARM ch2 ON
+123.639 ◀ LED REC-ARM ch3 OFF
+123.640 ◀ LED REC-ARM ch4 OFF
+123.640 ◀ LED REC-ARM ch5 OFF
+123.640 ◀ LED REC-ARM ch6 OFF
+123.641 ◀ LED REC-ARM ch7 OFF
+123.641 ◀ LED REC-ARM ch8 OFF
+123.641 ◀ LED SOLO ch1 OFF
+123.641 ◀ LED SOLO ch2 OFF
+123.642 ◀ LED SOLO ch3 OFF
+123.642 ◀ LED SOLO ch4 OFF
+123.642 ◀ LED SOLO ch5 OFF
+123.643 ◀ LED SOLO ch6 OFF
+123.643 ◀ LED SOLO ch7 OFF
+123.643 ◀ LED SOLO ch8 OFF
+123.644 ◀ LED MUTE ch1 OFF
+123.644 ◀ LED MUTE ch2 OFF
+123.644 ◀ LED MUTE ch3 OFF
+123.645 ◀ LED MUTE ch4 OFF
+123.645 ◀ LED MUTE ch5 OFF
+123.645 ◀ LED MUTE ch6 OFF
+123.645 ◀ LED MUTE ch7 OFF
+123.646 ◀ LED MUTE ch8 OFF
+123.646 ◀ LED SELECT ch1 OFF
+123.647 ◀ LED SELECT ch2 ON
+123.647 ◀ LED SELECT ch3 OFF
+123.647 ◀ LED SELECT ch4 OFF
+123.648 ◀ LED SELECT ch5 OFF
+123.648 ◀ LED SELECT ch6 OFF
+123.648 ◀ LED SELECT ch7 OFF
+123.649 ◀ LED SELECT ch8 OFF
+123.649 ◀ LED VPOT PRESS ch1 OFF
+123.649 ◀ LED VPOT PRESS ch2 OFF
+123.650 ◀ LED VPOT PRESS ch3 OFF
+123.650 ◀ LED VPOT PRESS ch4 OFF
+123.650 ◀ LED VPOT PRESS ch5 OFF
+123.651 ◀ LED VPOT PRESS ch6 OFF
+123.651 ◀ LED VPOT PRESS ch7 OFF
+123.651 ◀ LED VPOT PRESS ch8 OFF
+123.652 ◀ LED TRACK OFF
+123.652 ◀ LED SEND OFF
+123.653 ◀ LED PAN ON
+123.654 ◀ LED PLUG-IN OFF
+123.654 ◀ LED EQ OFF
+123.655 ◀ LED INSTRUMENT OFF
+123.655 ◀ LED FLIP OFF
+123.655 ◀ LED GLOBAL VIEW OFF
+123.656 ◀ LED READ/OFF ON
+123.656 ◀ LED WRITE OFF
+123.656 ◀ LED TRIM OFF
+123.657 ◀ LED TOUCH OFF
+123.657 ◀ LED LATCH OFF
+123.657 ◀ LED GROUP OFF
+123.658 ◀ LED note 50 ON
+123.658 ◀ LED note 51 ON
+123.658 ◀ LED note 54 OFF
+123.658 ◀ LED note 55 OFF
+123.658 ◀ LED note 56 OFF
+123.659 ◀ LED note 57 OFF
+123.659 ◀ LED note 58 OFF
+123.660 ◀ LED note 59 OFF
+123.661 ◀ LED note 5A OFF
+123.661 ◀ LED REWIND OFF
+123.661 ◀ LED FFWD OFF
+123.662 ◀ LED STOP ON
+123.662 ◀ LED PLAY OFF
+123.662 ◀ LED RECORD OFF
+123.663 ◀ LED ZOOM OFF
+123.663 ◀ LED SCRUB OFF
+123.663 ◀ LED LED SMPTE OFF
+123.663 ◀ LED LED BEATS ON
+123.664 ◀ LED RUDE SOLO OFF
+123.664 ◀ SYSEX cmd 72: 02 02 05 04 07 07 07 07
+123.665 ◀ FADER ECHO strip 1 = 12443/16383
+123.665 ◀ FADER ECHO strip 2 = 12443/16383
+123.665 ◀ FADER ECHO strip 3 = 12443/16383
+123.666 ◀ FADER ECHO strip 4 = 12443/16383
+123.666 ◀ FADER ECHO strip 5 = 0/16383
+123.666 ◀ FADER ECHO strip 6 = 0/16383
+123.666 ◀ FADER ECHO strip 7 = 0/16383
+123.666 ◀ FADER ECHO strip 8 = 0/16383
+123.667 ◀ FADER ECHO strip 9 = 12443/16383
+123.667 ◀ FADER ECHO strip 10 = 0/16383
+123.668 ◀ RING 1 = 56 (boost/cut 6/11 +center)
+123.668 ◀ RING 2 = 56 (boost/cut 6/11 +center)
+123.668 ◀ RING 3 = 56 (boost/cut 6/11 +center)
+123.668 ◀ RING 4 = 00 (dot 0/11)
+123.669 ◀ RING 5 = 00 (dot 0/11)
+123.669 ◀ RING 6 = 00 (dot 0/11)
+123.669 ◀ RING 7 = 00 (dot 0/11)
+123.670 ◀ RING 8 = 00 (dot 0/11)
+123.670 ◀ SYSEX cmd 21: 01
+123.671 ◀ SYSEX cmd 20: 00 07
+123.671 ◀ SYSEX cmd 20: 01 07
+123.672 ◀ SYSEX cmd 20: 02 07
+123.673 ◀ SYSEX cmd 20: 03 07
+123.673 ◀ SYSEX cmd 20: 04 07
+123.674 ◀ SYSEX cmd 20: 05 07
+123.674 ◀ SYSEX cmd 20: 06 07
+123.675 ◀ SYSEX cmd 20: 07 07
+123.675 ◀ SYSEX cmd 0A: 01
+123.676 ◀ SYSEX cmd 0C: 00
+123.676 ◀ SYSEX cmd 0B: 0F
+123.763 LCD settled, assign="PN"
+   1       2       3       4       5       6       7       8       
+T: Inst 1Inst 2St OutMaster
+B: 000
+124.690 ◀ SYSEX cmd 0E: 00 03
+124.690 ◀ SYSEX cmd 0E: 01 03
+124.690 ◀ SYSEX cmd 0E: 02 03
+124.691 ◀ SYSEX cmd 0E: 03 03
+124.691 ◀ SYSEX cmd 0E: 04 03
+124.691 ◀ SYSEX cmd 0E: 05 03
+124.692 ◀ SYSEX cmd 0E: 06 03
+124.692 ◀ SYSEX cmd 0E: 07 03
+124.692 ◀ SYSEX cmd 0E: 08 03
+157.002 ▶ 90 18 7F
+157.002 ▶ 90 18 00
+157.023 ◀ LCD @  0 "Select"
+157.023 ◀ LCD @ 56 "Inst 1"
+157.054 ◀ LCD @  0 "Inst 1"
+157.055 ◀ LCD @ 56 "0     "
+157.055 ◀ LCD @  0 "Select"
+157.055 ◀ LCD @ 56 "Inst 1"
+157.056 ◀ LED REC-ARM ch2 OFF
+157.056 ◀ LED SELECT ch2 OFF
+157.058 ◀ LED REC-ARM ch1 ON
+157.058 ◀ LED SELECT ch1 ON
+157.185 LCD settled, assign="PN"
+   1       2       3       4       5       6       7       8       
+T: SelectInst 2St OutMaster
+B: Inst 100
+   1       2       3       4       5       6       7       8       
+T: SelectInst 2St OutMaster
+B: Inst 100
+ASSIGN: "PN"
+159.074 ◀ LCD @  0 "Inst 1"
+159.074 ◀ LCD @ 56 "0     "
+159.205 LCD settled, assign="PN"
+   1       2       3       4       5       6       7       8       
+T: Inst 1Inst 2St OutMaster
+B: 000
+159.251 ◀ LCD @  0 "Inst 1 Inst 2 St Out Master                             0      0      0                                        "
+159.256 ◀ ASSIGN display = "PN"
+159.256 ◀ ASSIGN display = "PN"
+159.257 ◀ LED REC-ARM ch1 ON
+159.257 ◀ LED REC-ARM ch2 OFF
+159.257 ◀ LED REC-ARM ch3 OFF
+159.258 ◀ LED REC-ARM ch4 OFF
+159.258 ◀ LED REC-ARM ch5 OFF
+159.258 ◀ LED REC-ARM ch6 OFF
+159.259 ◀ LED REC-ARM ch7 OFF
+159.259 ◀ LED REC-ARM ch8 OFF
+159.259 ◀ LED SOLO ch1 OFF
+159.260 ◀ LED SOLO ch2 OFF
+159.260 ◀ LED SOLO ch3 OFF
+159.260 ◀ LED SOLO ch4 OFF
+159.261 ◀ LED SOLO ch5 OFF
+159.261 ◀ LED SOLO ch6 OFF
+159.261 ◀ LED SOLO ch7 OFF
+159.262 ◀ LED SOLO ch8 OFF
+159.262 ◀ LED MUTE ch1 OFF
+159.262 ◀ LED MUTE ch2 OFF
+159.263 ◀ LED MUTE ch3 OFF
+159.263 ◀ LED MUTE ch4 OFF
+159.263 ◀ LED MUTE ch5 OFF
+159.263 ◀ LED MUTE ch6 OFF
+159.264 ◀ LED MUTE ch7 OFF
+159.264 ◀ LED MUTE ch8 OFF
+159.264 ◀ LED SELECT ch1 ON
+159.265 ◀ LED SELECT ch2 OFF
+159.265 ◀ LED SELECT ch3 OFF
+159.265 ◀ LED SELECT ch4 OFF
+159.266 ◀ LED SELECT ch5 OFF
+159.266 ◀ LED SELECT ch6 OFF
+159.266 ◀ LED SELECT ch7 OFF
+159.267 ◀ LED SELECT ch8 OFF
+159.267 ◀ LED VPOT PRESS ch1 OFF
+159.267 ◀ LED VPOT PRESS ch2 OFF
+159.268 ◀ LED VPOT PRESS ch3 OFF
+159.268 ◀ LED VPOT PRESS ch4 OFF
+159.268 ◀ LED VPOT PRESS ch5 OFF
+159.269 ◀ LED VPOT PRESS ch6 OFF
+159.269 ◀ LED VPOT PRESS ch7 OFF
+159.269 ◀ LED VPOT PRESS ch8 OFF
+159.269 ◀ LED TRACK OFF
+159.270 ◀ LED SEND OFF
+159.270 ◀ LED PAN ON
+159.270 ◀ LED PLUG-IN OFF
+159.271 ◀ LED EQ OFF
+159.271 ◀ LED INSTRUMENT OFF
+159.271 ◀ LED FLIP OFF
+159.272 ◀ LED GLOBAL VIEW OFF
+159.272 ◀ LED READ/OFF ON
+159.272 ◀ LED WRITE OFF
+159.273 ◀ LED TRIM OFF
+159.273 ◀ LED TOUCH OFF
+159.273 ◀ LED LATCH OFF
+159.273 ◀ LED GROUP OFF
+159.274 ◀ LED note 50 ON
+159.274 ◀ LED note 51 ON
+159.274 ◀ LED note 54 OFF
+159.275 ◀ LED note 55 OFF
+159.275 ◀ LED note 56 OFF
+159.275 ◀ LED note 57 OFF
+159.276 ◀ LED note 58 OFF
+159.276 ◀ LED note 59 OFF
+159.276 ◀ LED note 5A OFF
+159.276 ◀ LED REWIND OFF
+159.277 ◀ LED FFWD OFF
+159.277 ◀ LED STOP ON
+159.277 ◀ LED PLAY OFF
+159.278 ◀ LED RECORD OFF
+159.278 ◀ LED ZOOM OFF
+159.278 ◀ LED SCRUB OFF
+159.279 ◀ LED LED SMPTE OFF
+159.280 ◀ LED LED BEATS ON
+159.280 ◀ LED RUDE SOLO OFF
+159.280 ◀ SYSEX cmd 72: 02 02 05 04 07 07 07 07
+159.281 ◀ FADER ECHO strip 1 = 12443/16383
+159.281 ◀ FADER ECHO strip 2 = 12443/16383
+159.281 ◀ FADER ECHO strip 3 = 12443/16383
+159.281 ◀ FADER ECHO strip 4 = 12443/16383
+159.282 ◀ FADER ECHO strip 5 = 0/16383
+159.282 ◀ FADER ECHO strip 6 = 0/16383
+159.282 ◀ FADER ECHO strip 7 = 0/16383
+159.283 ◀ FADER ECHO strip 8 = 0/16383
+159.283 ◀ FADER ECHO strip 9 = 12443/16383
+159.283 ◀ FADER ECHO strip 10 = 73/16383
+159.284 ◀ RING 1 = 56 (boost/cut 6/11 +center)
+159.284 ◀ RING 2 = 56 (boost/cut 6/11 +center)
+159.284 ◀ RING 3 = 56 (boost/cut 6/11 +center)
+159.285 ◀ RING 4 = 00 (dot 0/11)
+159.285 ◀ RING 5 = 00 (dot 0/11)
+159.285 ◀ RING 6 = 00 (dot 0/11)
+159.286 ◀ RING 7 = 00 (dot 0/11)
+159.286 ◀ RING 8 = 00 (dot 0/11)
+159.287 ◀ SYSEX cmd 21: 01
+159.287 ◀ SYSEX cmd 20: 00 07
+159.288 ◀ SYSEX cmd 20: 01 07
+159.288 ◀ SYSEX cmd 20: 02 07
+159.289 ◀ SYSEX cmd 20: 03 07
+159.290 ◀ SYSEX cmd 20: 04 07
+159.290 ◀ SYSEX cmd 20: 05 07
+159.291 ◀ SYSEX cmd 20: 06 07
+159.292 ◀ SYSEX cmd 20: 07 07
+159.292 ◀ SYSEX cmd 0A: 01
+159.292 ◀ SYSEX cmd 0C: 00
+159.293 ◀ SYSEX cmd 0B: 0F
+159.382 LCD settled, assign="PN"
+   1       2       3       4       5       6       7       8       
+T: Inst 1Inst 2St OutMaster
+B: 000
+160.288 ◀ SYSEX cmd 0E: 00 03
+160.289 ◀ SYSEX cmd 0E: 01 03
+160.289 ◀ SYSEX cmd 0E: 02 03
+160.289 ◀ SYSEX cmd 0E: 03 03
+160.289 ◀ SYSEX cmd 0E: 04 03
+160.290 ◀ SYSEX cmd 0E: 05 03
+160.290 ◀ SYSEX cmd 0E: 06 03
+160.290 ◀ SYSEX cmd 0E: 07 03
+160.290 ◀ SYSEX cmd 0E: 08 03
+169.564 ▶ 90 2B 7F
+169.564 ▶ 90 2B 00
+169.604 ◀ LCD @ 56 "--     --     --"
+169.604 ◀ ASSIGN display = "P1"
+169.605 ◀ LED PAN OFF
+169.605 ◀ LED PLUG-IN ON
+169.605 ◀ SYSEX cmd 72: 07 07 07 07 07 07 07 07
+169.605 ◀ RING 1 = 01 (dot 1/11)
+169.606 ◀ RING 2 = 01 (dot 1/11)
+169.606 ◀ RING 3 = 01 (dot 1/11)
+169.733 LCD settled, assign="P1"
+   1       2       3       4       5       6       7       8       
+T: Inst 1Inst 2St OutMaster
+B: ------
+┌────────────────────────────────────────────────────────┐
+│Inst 1 Inst 2 St Out Master                             │
+│--     --     --                                        │
+└────────────────────────────────────────────────────────┘
+ASSIGN: "P1"
+ring 1: 01 (dot 1/11)
+ring 2: 01 (dot 1/11)
+ring 3: 01 (dot 1/11)
+ring 4: 00 (dot 0/11)
+ring 5: 00 (dot 0/11)
+ring 6: 00 (dot 0/11)
+ring 7: 00 (dot 0/11)
+ring 8: 00 (dot 0/11)
+174.142 ◀ LCD @  0 "Inst 1 Inst 2 St Out Master                             --     --     --                                       "
+174.145 ◀ ASSIGN display = "P1"
+174.145 ◀ ASSIGN display = "P1"
+174.146 ◀ LED REC-ARM ch1 ON
+174.146 ◀ LED REC-ARM ch2 OFF
+174.146 ◀ LED REC-ARM ch3 OFF
+174.147 ◀ LED REC-ARM ch4 OFF
+174.147 ◀ LED REC-ARM ch5 OFF
+174.148 ◀ LED REC-ARM ch6 OFF
+174.148 ◀ LED REC-ARM ch7 OFF
+174.148 ◀ LED REC-ARM ch8 OFF
+174.149 ◀ LED SOLO ch1 OFF
+174.149 ◀ LED SOLO ch2 OFF
+174.149 ◀ LED SOLO ch3 OFF
+174.149 ◀ LED SOLO ch4 OFF
+174.150 ◀ LED SOLO ch5 OFF
+174.151 ◀ LED SOLO ch6 OFF
+174.151 ◀ LED SOLO ch7 OFF
+174.151 ◀ LED SOLO ch8 OFF
+174.152 ◀ LED MUTE ch1 OFF
+174.152 ◀ LED MUTE ch2 OFF
+174.152 ◀ LED MUTE ch3 OFF
+174.153 ◀ LED MUTE ch4 OFF
+174.153 ◀ LED MUTE ch5 OFF
+174.153 ◀ LED MUTE ch6 OFF
+174.153 ◀ LED MUTE ch7 OFF
+174.154 ◀ LED MUTE ch8 OFF
+174.154 ◀ LED SELECT ch1 ON
+174.154 ◀ LED SELECT ch2 OFF
+174.154 ◀ LED SELECT ch3 OFF
+174.155 ◀ LED SELECT ch4 OFF
+174.155 ◀ LED SELECT ch5 OFF
+174.156 ◀ LED SELECT ch6 OFF
+174.157 ◀ LED SELECT ch7 OFF
+174.157 ◀ LED SELECT ch8 OFF
+174.158 ◀ LED VPOT PRESS ch1 OFF
+174.158 ◀ LED VPOT PRESS ch2 OFF
+174.158 ◀ LED VPOT PRESS ch3 OFF
+174.159 ◀ LED VPOT PRESS ch4 OFF
+174.159 ◀ LED VPOT PRESS ch5 OFF
+174.159 ◀ LED VPOT PRESS ch6 OFF
+174.160 ◀ LED VPOT PRESS ch7 OFF
+174.160 ◀ LED VPOT PRESS ch8 OFF
+174.160 ◀ LED TRACK OFF
+174.161 ◀ LED SEND OFF
+174.161 ◀ LED PAN OFF
+174.161 ◀ LED PLUG-IN ON
+174.161 ◀ LED EQ OFF
+174.161 ◀ LED INSTRUMENT OFF
+174.162 ◀ LED FLIP OFF
+174.163 ◀ LED GLOBAL VIEW OFF
+174.163 ◀ LED READ/OFF ON
+174.164 ◀ LED WRITE OFF
+174.164 ◀ LED TRIM OFF
+174.165 ◀ LED TOUCH OFF
+174.165 ◀ LED LATCH OFF
+174.165 ◀ LED GROUP OFF
+174.166 ◀ LED note 50 ON
+174.166 ◀ LED note 51 ON
+174.166 ◀ LED note 54 OFF
+174.167 ◀ LED note 55 OFF
+174.167 ◀ LED note 56 OFF
+174.167 ◀ LED note 57 OFF
+174.168 ◀ LED note 58 OFF
+174.168 ◀ LED note 59 OFF
+174.168 ◀ LED note 5A OFF
+174.168 ◀ LED REWIND OFF
+174.169 ◀ LED FFWD OFF
+174.169 ◀ LED STOP ON
+174.169 ◀ LED PLAY OFF
+174.170 ◀ LED RECORD OFF
+174.170 ◀ LED ZOOM OFF
+174.170 ◀ LED SCRUB OFF
+174.171 ◀ LED LED SMPTE OFF
+174.171 ◀ LED LED BEATS ON
+174.171 ◀ LED RUDE SOLO OFF
+174.172 ◀ SYSEX cmd 72: 07 07 07 07 07 07 07 07
+174.172 ◀ FADER ECHO strip 1 = 12443/16383
+174.173 ◀ FADER ECHO strip 2 = 12443/16383
+174.173 ◀ FADER ECHO strip 3 = 12443/16383
+174.173 ◀ FADER ECHO strip 4 = 12443/16383
+174.174 ◀ FADER ECHO strip 5 = 0/16383
+174.174 ◀ FADER ECHO strip 6 = 0/16383
+174.174 ◀ FADER ECHO strip 7 = 0/16383
+174.175 ◀ FADER ECHO strip 8 = 0/16383
+174.175 ◀ FADER ECHO strip 9 = 12443/16383
+174.175 ◀ FADER ECHO strip 10 = 73/16383
+174.175 ◀ RING 1 = 01 (dot 1/11)
+174.176 ◀ RING 2 = 01 (dot 1/11)
+174.176 ◀ RING 3 = 01 (dot 1/11)
+174.176 ◀ RING 4 = 00 (dot 0/11)
+174.177 ◀ RING 5 = 00 (dot 0/11)
+174.177 ◀ RING 6 = 00 (dot 0/11)
+174.177 ◀ RING 7 = 00 (dot 0/11)
+174.178 ◀ RING 8 = 00 (dot 0/11)
+174.178 ◀ SYSEX cmd 21: 01
+174.179 ◀ SYSEX cmd 20: 00 07
+174.179 ◀ SYSEX cmd 20: 01 07
+174.180 ◀ SYSEX cmd 20: 02 07
+174.180 ◀ SYSEX cmd 20: 03 07
+174.182 ◀ SYSEX cmd 20: 04 07
+174.183 ◀ SYSEX cmd 20: 05 07
+174.184 ◀ SYSEX cmd 20: 06 07
+174.185 ◀ SYSEX cmd 20: 07 07
+174.185 ◀ SYSEX cmd 0A: 01
+174.185 ◀ SYSEX cmd 0C: 00
+174.185 ◀ SYSEX cmd 0B: 0F
+174.272 LCD settled, assign="P1"
+   1       2       3       4       5       6       7       8       
+T: Inst 1Inst 2St OutMaster
+B: ------
+175.187 ◀ SYSEX cmd 0E: 00 03
+175.187 ◀ SYSEX cmd 0E: 01 03
+175.188 ◀ SYSEX cmd 0E: 02 03
+175.188 ◀ SYSEX cmd 0E: 03 03
+175.188 ◀ SYSEX cmd 0E: 04 03
+175.189 ◀ SYSEX cmd 0E: 05 03
+175.189 ◀ SYSEX cmd 0E: 06 03
+175.189 ◀ SYSEX cmd 0E: 07 03
+175.190 ◀ SYSEX cmd 0E: 08 03
+quiet on
+181.518 ▶ B0 10 01
+181.684 LCD settled, assign="P1"
+   1       2       3       4       5       6       7       8       
+T: Insert1 Plug-inMaster
+B: Parametric EQ(m/m)
+┌────────────────────────────────────────────────────────┐
+│Insert 1 Plug-in     Master                             │
+│Parametric EQ (m/m)                                     │
+└────────────────────────────────────────────────────────┘
+182.128 ▶ B0 10 01
+182.319 LCD settled, assign="P1"
+   1       2       3       4       5       6       7       8       
+T: Insert1 Plug-inMaster
+B: Low Pass Filter (m/m)
+┌────────────────────────────────────────────────────────┐
+│Insert 1 Plug-in     Master                             │
+│Low Pass Filter (m/m)                                   │
+└────────────────────────────────────────────────────────┘
+182.739 ▶ B0 10 03
+182.916 LCD settled, assign="P1"
+   1       2       3       4       5       6       7       8       
+T: Insert1 Plug-in
+B: High ShelvingEQ (m/m)
+┌────────────────────────────────────────────────────────┐
+│Insert 1 Plug-in                                        │
+│High Shelving EQ (m/m)                                  │
+└────────────────────────────────────────────────────────┘
+183.350 ▶ B0 10 41
+183.515 LCD settled, assign="P1"
+   1       2       3       4       5       6       7       8       
+T: Insert1 Plug-in
+B: Low Shelving EQ (m/m)
+┌────────────────────────────────────────────────────────┐
+│Insert 1 Plug-in                                        │
+│Low Shelving EQ (m/m)                                   │
+└────────────────────────────────────────────────────────┘
+185.518 LCD settled, assign="P1"
+   1       2       3       4       5       6       7       8       
+T: Inst 1Inst 2St OutMaster
+B: LoShlv----
+185.784 LCD settled, assign="P1"
+   1       2       3       4       5       6       7       8       
+T: Inst 1Inst 2St OutMaster
+B: ----
+186.516 LCD settled, assign="P1"
+   1       2       3       4       5       6       7       8       
+T: Inst 1Inst 2St OutMaster
+B: LoShlv----
+187.249 LCD settled, assign="P1"
+   1       2       3       4       5       6       7       8       
+T: Inst 1Inst 2St OutMaster
+B: ----
+187.983 LCD settled, assign="P1"
+   1       2       3       4       5       6       7       8       
+T: Inst 1Inst 2St OutMaster
+B: LoShlv----
+188.751 LCD settled, assign="P1"
+   1       2       3       4       5       6       7       8       
+T: Inst 1Inst 2St OutMaster
+B: ----
+189.483 LCD settled, assign="P1"
+   1       2       3       4       5       6       7       8       
+T: Inst 1Inst 2St OutMaster
+B: LoShlv----
+190.220 LCD settled, assign="P1"
+   1       2       3       4       5       6       7       8       
+T: Inst 1Inst 2St OutMaster
+B: ----
+190.966 LCD settled, assign="P1"
+   1       2       3       4       5       6       7       8       
+T: Inst 1Inst 2St OutMaster
+B: LoShlv----
+191.716 LCD settled, assign="P1"
+   1       2       3       4       5       6       7       8       
+T: Inst 1Inst 2St OutMaster
+B: ----
+192.449 LCD settled, assign="P1"
+   1       2       3       4       5       6       7       8       
+T: Inst 1Inst 2St OutMaster
+B: LoShlv----
+193.183 LCD settled, assign="P1"
+   1       2       3       4       5       6       7       8       
+T: Inst 1Inst 2St OutMaster
+B: ----
+watch off
+193.347 ▶ B0 10 01
+┌────────────────────────────────────────────────────────┐
+│Insert 1 Plug-in                                        │
+│High Shelving EQ (m/m)                                  │
+└────────────────────────────────────────────────────────┘
+193.766 ▶ B0 10 01
+┌────────────────────────────────────────────────────────┐
+│Insert 1 Plug-in                                        │
+│Chorus (m/m)                                            │
+└────────────────────────────────────────────────────────┘
+194.186 ▶ B0 10 01
+┌────────────────────────────────────────────────────────┐
+│Insert 1 Plug-in                                        │
+│Chorus (m/s)                                            │
+└────────────────────────────────────────────────────────┘
+194.605 ▶ B0 10 01
+┌────────────────────────────────────────────────────────┐
+│Insert 1 Plug-in                                        │
+│Flanger (m/m)                                           │
+└────────────────────────────────────────────────────────┘
+195.023 ▶ B0 10 01
+┌────────────────────────────────────────────────────────┐
+│Insert 1 Plug-in                                        │
+│Flanger (m/s)                                           │
+└────────────────────────────────────────────────────────┘
+195.442 ▶ B0 10 01
+┌────────────────────────────────────────────────────────┐
+│Insert 1 Plug-in                                        │
+│Tape Delay (m/m)                                        │
+└────────────────────────────────────────────────────────┘
+195.862 ▶ B0 10 01
+┌────────────────────────────────────────────────────────┐
+│Insert 1 Plug-in                                        │
+│Echo (m/m)                                              │
+└────────────────────────────────────────────────────────┘
+196.282 ▶ B0 10 01
+┌────────────────────────────────────────────────────────┐
+│Insert 1 Plug-in                                        │
+│Stereo Delay (m/m)                                      │
+└────────────────────────────────────────────────────────┘
+196.701 ▶ B0 10 01
+┌────────────────────────────────────────────────────────┐
+│Insert 1 Plug-in                                        │
+│Stereo Delay (m/s)                                      │
+└────────────────────────────────────────────────────────┘
+197.120 ▶ B0 10 01
+┌────────────────────────────────────────────────────────┐
+│Insert 1 Plug-in                                        │
+│SilverVerb (m/m)                                        │
+└────────────────────────────────────────────────────────┘
+197.539 ▶ B0 10 01
+┌────────────────────────────────────────────────────────┐
+│Insert 1 Plug-in                                        │
+│SilverVerb (m/s)                                        │
+└────────────────────────────────────────────────────────┘
+197.959 ▶ B0 10 01
+┌────────────────────────────────────────────────────────┐
+│Insert 1 Plug-in                                        │
+│PlatinumVerb (m/m)                                      │
+└────────────────────────────────────────────────────────┘
+198.379 ▶ B0 10 01
+┌────────────────────────────────────────────────────────┐
+│Insert 1 Plug-in                                        │
+│PlatinumVerb (m/s)                                      │
+└────────────────────────────────────────────────────────┘
+198.798 ▶ B0 10 01
+┌────────────────────────────────────────────────────────┐
+│Insert 1 Plug-in                                        │
+│Phaser (m/m)                                            │
+└────────────────────────────────────────────────────────┘
+199.218 ▶ B0 10 01
+┌────────────────────────────────────────────────────────┐
+│Insert 1 Plug-in                                        │
+│Phaser (m/s)                                            │
+└────────────────────────────────────────────────────────┘
+199.637 ▶ B0 10 01
+┌────────────────────────────────────────────────────────┐
+│Insert 1 Plug-in                                        │
+│Microphaser (m/m)                                       │
+└────────────────────────────────────────────────────────┘
+200.056 ▶ B0 10 01
+┌────────────────────────────────────────────────────────┐
+│Insert 1 Plug-in                                        │
+│Microphaser (m/s)                                       │
+└────────────────────────────────────────────────────────┘
+200.477 ▶ B0 10 01
+┌────────────────────────────────────────────────────────┐
+│Insert 1 Plug-in                                        │
+│Compressor (m/m)                                        │
+└────────────────────────────────────────────────────────┘
+200.895 ▶ B0 10 01
+┌────────────────────────────────────────────────────────┐
+│Insert 1 Plug-in                                        │
+│Fuzz-Wah (m/m)                                          │
+└────────────────────────────────────────────────────────┘
+201.314 ▶ B0 10 01
+┌────────────────────────────────────────────────────────┐
+│Insert 1 Plug-in                                        │
+│Expander (m/m)                                          │
+└────────────────────────────────────────────────────────┘
+201.732 ▶ B0 10 01
+┌────────────────────────────────────────────────────────┐
+│Insert 1 Plug-in                                        │
+│Enveloper (m/m)                                         │
+└────────────────────────────────────────────────────────┘
+202.151 ▶ B0 10 01
+┌────────────────────────────────────────────────────────┐
+│Insert 1 Plug-in                                        │
+│Pitch Shifter (m/m)                                     │
+└────────────────────────────────────────────────────────┘
+202.570 ▶ B0 10 01
+┌────────────────────────────────────────────────────────┐
+│Insert 1 Plug-in                                        │
+│DeEsser (m/m)                                           │
+└────────────────────────────────────────────────────────┘
+202.988 ▶ B0 10 01
+┌────────────────────────────────────────────────────────┐
+│Insert 1 Plug-in                                        │
+│Ensemble (m/m)                                          │
+└────────────────────────────────────────────────────────┘
+203.410 ▶ B0 10 01
+┌────────────────────────────────────────────────────────┐
+│Insert 1 Plug-in                                        │
+│Ensemble (m/s)                                          │
+└────────────────────────────────────────────────────────┘
+203.831 ▶ B0 10 01
+┌────────────────────────────────────────────────────────┐
+│Insert 1 Plug-in                                        │
+│AutoFilter (m/m)                                        │
+└────────────────────────────────────────────────────────┘
+204.250 ▶ B0 10 01
+┌────────────────────────────────────────────────────────┐
+│Insert 1 Plug-in                                        │
+│AutoFilter (m/s)                                        │
+└────────────────────────────────────────────────────────┘
+204.669 ▶ B0 10 01
+┌────────────────────────────────────────────────────────┐
+│Insert 1 Plug-in                                        │
+│Bitcrusher (m/m)                                        │
+└────────────────────────────────────────────────────────┘
+205.087 ▶ B0 10 01
+┌────────────────────────────────────────────────────────┐
+│Insert 1 Plug-in                                        │
+│Distortion (m/m)                                        │
+└────────────────────────────────────────────────────────┘
+205.506 ▶ B0 10 01
+┌────────────────────────────────────────────────────────┐
+│Insert 1 Plug-in                                        │
+│Overdrive (m/m)                                         │
+└────────────────────────────────────────────────────────┘
+205.924 ▶ B0 10 01
+┌────────────────────────────────────────────────────────┐
+│Insert 1 Plug-in                                        │
+│EnVerb (m/m)                                            │
+└────────────────────────────────────────────────────────┘
+206.343 ▶ B0 10 01
+┌────────────────────────────────────────────────────────┐
+│Insert 1 Plug-in                                        │
+│EnVerb (m/s)                                            │
+└────────────────────────────────────────────────────────┘
+206.764 ▶ B0 10 01
+┌────────────────────────────────────────────────────────┐
+│Insert 1 Plug-in                                        │
+│DJ EQ (m/m)                                             │
+└────────────────────────────────────────────────────────┘
+207.184 ▶ B0 10 01
+┌────────────────────────────────────────────────────────┐
+│Insert 1 Plug-in                                        │
+│Spectral Gate (m/m)                                     │
+└────────────────────────────────────────────────────────┘
+207.603 ▶ B0 10 01
+┌────────────────────────────────────────────────────────┐
+│Insert 1 Plug-in                                        │
+│High Cut (m/m)                                          │
+└────────────────────────────────────────────────────────┘
+208.023 ▶ B0 10 01
+┌────────────────────────────────────────────────────────┐
+│Insert 1 Plug-in                                        │
+│Low Cut (m/m)                                           │
+└────────────────────────────────────────────────────────┘
+208.444 ▶ B0 10 01
+┌────────────────────────────────────────────────────────┐
+│Insert 1 Plug-in                                        │
+│Fat EQ (m/m)                                            │
+└────────────────────────────────────────────────────────┘
+208.864 ▶ B0 10 01
+┌────────────────────────────────────────────────────────┐
+│Insert 1 Plug-in                                        │
+│Silver EQ (m/m)                                         │
+└────────────────────────────────────────────────────────┘
+209.284 ▶ B0 10 01
+┌────────────────────────────────────────────────────────┐
+│Insert 1 Plug-in                                        │
+│Silver Compressor (m/m)                                 │
+└────────────────────────────────────────────────────────┘
+209.703 ▶ B0 10 01
+┌────────────────────────────────────────────────────────┐
+│Insert 1 Plug-in                                        │
+│GoldVerb (m/m)                                          │
+└────────────────────────────────────────────────────────┘
+229.626 ▶ B0 10 56
+┌────────────────────────────────────────────────────────┐
+│Insert 1 Plug-in     Master                             │
+│Compressor (m/m)                                        │
+└────────────────────────────────────────────────────────┘
+quiet off
+235.248 ▶ 90 20 7F
+235.249 ▶ 90 20 00
+235.337 ◀ LCD @  0 "Select"
+235.337 ◀ LCD @ 56 "--"
+235.338 ◀ RING 1 = 01 (dot 1/11)
+235.362 ◀ LCD @  0 "Insert 1 Instantiate"
+235.363 ◀ LCD @  0 "CirTyp Thrs   Ratio  Attack Rel    AutRel MakeUp AutGai PltDig -20.0  2.1:1  15.0ms 51.0ms On     0.0 dB -12dB"
+235.363 ◀ ASSIGN display = "P1."
+235.363 ◀ SYSEX cmd 72: 02 02 02 02 02 02 02 02
+235.364 ◀ RING 1 = 41 (dot 1/11 +center)
+235.364 ◀ RING 2 = 47 (dot 7/11 +center)
+235.364 ◀ RING 3 = 03 (dot 3/11)
+235.364 ◀ RING 4 = 04 (dot 4/11)
+235.365 ◀ RING 5 = 04 (dot 4/11)
+235.365 ◀ RING 6 = 0B (dot 11/11)
+235.365 ◀ RING 7 = 45 (dot 5/11 +center)
+235.366 ◀ RING 8 = 0B (dot 11/11)
+┌────────────────────────────────────────────────────────┐
+│CirTyp Thrs   Ratio  Attack Rel    AutRel MakeUp AutGai │
+│PltDig -20.0  2.1:1  15.0ms 51.0ms On     0.0 dB -12dB  │
+└────────────────────────────────────────────────────────┘
+ASSIGN: "P1."
+ring 1: 41 (dot 1/11 +center)
+ring 2: 47 (dot 7/11 +center)
+ring 3: 03 (dot 3/11)
+ring 4: 04 (dot 4/11)
+ring 5: 04 (dot 4/11)
+ring 6: 0B (dot 11/11)
+ring 7: 45 (dot 5/11 +center)
+ring 8: 0B (dot 11/11)
+quiet on
+watch on
+249.562 ▶ B0 11 41
+249.714 LCD settled, assign="P1."
+   1       2       3       4       5       6       7       8       
+T: CirTypThresholdAttackRelAutRelMakeUpAutGai
+B: PltDig-20.5 dB15.0ms51.0msOn0.0 dB-12dB
+250.072 ▶ B0 11 4A
+250.215 LCD settled, assign="P1."
+   1       2       3       4       5       6       7       8       
+T: CirTypThresholdAttackRelAutRelMakeUpAutGai
+B: PltDig-25.5 dB15.0ms51.0msOn0.0 dB-12dB
+250.585 ▶ B0 11 01
+250.610 ▶ B0 11 01
+250.635 ▶ B0 11 01
+250.660 ▶ B0 11 01
+250.685 ▶ B0 11 01
+250.709 ▶ B0 11 01
+250.734 ▶ B0 11 01
+250.759 ▶ B0 11 01
+250.783 ▶ B0 11 01
+250.807 ▶ B0 11 01
+250.977 LCD settled, assign="P1."
+   1       2       3       4       5       6       7       8       
+T: CirTypThresholdAttackRelAutRelMakeUpAutGai
+B: PltDig-20.5 dB15.0ms51.0msOn0.0 dB-12dB
+251.396 ▶ B0 11 01
+251.550 LCD settled, assign="P1."
+   1       2       3       4       5       6       7       8       
+T: CirTypThresholdAttackRelAutRelMakeUpAutGai
+B: PltDig-20.0 dB15.0ms51.0msOn0.0 dB-12dB
+quiet off
+251.909 ▶ 90 63 7F
+251.909 ▶ 90 63 00
+251.918 ◀ LCD @  0 "Knee  "
+251.918 ◀ LCD @ 21 "LimThr Distrt Mix    SiChDe State  0.7   "
+251.918 ◀ LCD @ 77 "0.0 dB Off    100.0% Max    Off  "
+251.919 ◀ RING 1 = 08 (dot 8/11)
+251.919 ◀ RING 2 = 0B (dot 11/11)
+251.919 ◀ RING 3 = 41 (dot 1/11 +center)
+251.920 ◀ RING 4 = 4B (dot 11/11 +center)
+251.920 ◀ RING 5 = 41 (dot 1/11 +center)
+251.920 ◀ RING 6 = 4B (dot 11/11 +center)
+251.921 ◀ RING 7 = 41 (dot 1/11 +center)
+251.921 ◀ RING 8 = 41 (dot 1/11 +center)
+251.921 ◀ LCD @ 42 "     Page 2/3"
+252.050 LCD settled, assign="P1."
+   1       2       3       4       5       6       7       8       
+T: KneeThresholdLimThrDistrtMixPage 2/3
+B: 0.7-20.0 dB0.0 dBOff100.0%MaxOff
+ASSIGN: "P1."
+252.518 ▶ 90 63 7F
+252.518 ▶ 90 63 00
+252.552 ◀ LCD @  0 "Distrt"
+252.552 ◀ LCD @ 21 "State  Mode   Freq"
+252.552 ◀ LCD @ 56 "Off"
+252.553 ◀ LCD @ 77 "Off    LP     7040.0 1.00   0.0 dB"
+252.553 ◀ RING 1 = 41 (dot 1/11 +center)
+252.553 ◀ RING 2 = 4B (dot 11/11 +center)
+252.553 ◀ RING 4 = 41 (dot 1/11 +center)
+252.553 ◀ RING 6 = 4A (dot 10/11 +center)
+252.554 ◀ RING 7 = 44 (dot 4/11 +center)
+252.554 ◀ RING 8 = 46 (dot 6/11 +center)
+252.554 ◀ LCD @ 52 "3"
+252.684 LCD settled, assign="P1."
+   1       2       3       4       5       6       7       8       
+T: DistrtThresholdStateModeFreqPage 3/3
+B: Off-20.0 dBOffLP7040.01.000.0 dB
+ASSIGN: "P1."
+253.128 ▶ 90 63 7F
+253.128 ▶ 90 63 00
+ASSIGN: "P1."
+253.737 ▶ 90 62 7F
+253.737 ▶ 90 62 00
+253.752 ◀ LCD @  0 "Knee  "
+253.752 ◀ LCD @ 21 "LimThr Distrt Mix "
+253.752 ◀ LCD @ 56 "0.7"
+253.753 ◀ LCD @ 77 "0.0 dB Off    100.0% Max    Off   "
+253.753 ◀ RING 1 = 08 (dot 8/11)
+253.753 ◀ RING 2 = 0B (dot 11/11)
+253.753 ◀ RING 4 = 4B (dot 11/11 +center)
+253.754 ◀ RING 6 = 4B (dot 11/11 +center)
+253.754 ◀ RING 7 = 41 (dot 1/11 +center)
+253.754 ◀ RING 8 = 41 (dot 1/11 +center)
+253.755 ◀ LCD @ 52 "2"
+253.883 LCD settled, assign="P1."
+   1       2       3       4       5       6       7       8       
+T: KneeThresholdLimThrDistrtMixPage 2/3
+B: 0.7-20.0 dB0.0 dBOff100.0%MaxOff
+254.346 ▶ 90 62 7F
+254.346 ▶ 90 62 00
+254.352 ◀ LCD @  0 "CirTyp"
+254.352 ◀ LCD @ 21 "Attack Rel    AutRel"
+254.352 ◀ LCD @ 56 "PltDig"
+254.352 ◀ LCD @ 77 "15.0ms 51.0ms On     0.0 dB -12dB"
+254.353 ◀ RING 1 = 41 (dot 1/11 +center)
+254.353 ◀ RING 2 = 47 (dot 7/11 +center)
+254.353 ◀ RING 3 = 03 (dot 3/11)
+254.354 ◀ RING 4 = 04 (dot 4/11)
+254.354 ◀ RING 5 = 04 (dot 4/11)
+254.355 ◀ RING 6 = 0B (dot 11/11)
+254.355 ◀ RING 7 = 45 (dot 5/11 +center)
+254.356 ◀ RING 8 = 0B (dot 11/11)
+254.357 ◀ LCD @ 52 "1"
+254.483 LCD settled, assign="P1."
+   1       2       3       4       5       6       7       8       
+T: CirTypThresholdAttackRelAutRelPage 1/3
+B: PltDig-20.0 dB15.0ms51.0msOn0.0 dB-12dB
+254.955 ▶ 90 62 7F
+254.955 ▶ 90 62 00
+ASSIGN: "P1."
+256.984 ◀ LCD @ 10 "s   Ratio  Attack Rel    AutRel MakeUp AutGai"
+256.984 ◀ LCD @ 69 " 2.1:1"
+257.113 LCD settled, assign="P1."
+   1       2       3       4       5       6       7       8       
+T: CirTypThrsRatioAttackRelAutRelMakeUpAutGai
+B: PltDig-20.02.1:115.0ms51.0msOn0.0 dB-12dB
+watch off
+quiet off
+┌────────────────────────────────────────────────────────┐
+│CirTyp Thrs   Ratio  Attack Rel    AutRel MakeUp AutGai │
+│PltDig -20.0  2.1:1  15.0ms 51.0ms On     0.0 dB -12dB  │
+└────────────────────────────────────────────────────────┘
+285.076 ▶ B0 11 41
+285.083 ◀ LCD @ 10 "eshold   "
+285.083 ◀ LCD @ 67 "5 dB    "
+285.084 ◀ RING 2 = 07 (dot 7/11)
+┌────────────────────────────────────────────────────────┐
+│CirTyp Threshold     Attack Rel    AutRel MakeUp AutGai │
+│PltDig -20.5 dB      15.0ms 51.0ms On     0.0 dB -12dB  │
+└────────────────────────────────────────────────────────┘
+┌────────────────────────────────────────────────────────┐
+│CirTyp Threshold     Attack Rel    AutRel MakeUp AutGai │
+│PltDig -20.5 dB      15.0ms 51.0ms On     0.0 dB -12dB  │
+└────────────────────────────────────────────────────────┘
+287.115 ◀ LCD @ 10 "s   Ratio"
+287.116 ◀ LCD @ 69 " 2.1:1"
+┌────────────────────────────────────────────────────────┐
+│CirTyp Thrs   Ratio  Attack Rel    AutRel MakeUp AutGai │
+│PltDig -20.5  2.1:1  15.0ms 51.0ms On     0.0 dB -12dB  │
+└────────────────────────────────────────────────────────┘
+┌────────────────────────────────────────────────────────┐
+│CirTyp Thrs   Ratio  Attack Rel    AutRel MakeUp AutGai │
+│PltDig -20.5  2.1:1  15.0ms 51.0ms On     0.0 dB -12dB  │
+└────────────────────────────────────────────────────────┘
+288.913 ▶ 90 63 7F
+288.913 ▶ 90 63 00
+288.916 ◀ LCD @  0 "Knee   Peak/S LimrOn LimThr Distrt Mix    SiChDe State  0.7    RMS    Off    0.0 dB Off    100.0% Max    Off  "
+288.916 ◀ RING 1 = 08 (dot 8/11)
+288.916 ◀ RING 2 = 0B (dot 11/11)
+288.917 ◀ RING 3 = 41 (dot 1/11 +center)
+288.917 ◀ RING 4 = 4B (dot 11/11 +center)
+288.917 ◀ RING 5 = 41 (dot 1/11 +center)
+288.918 ◀ RING 6 = 4B (dot 11/11 +center)
+288.918 ◀ RING 7 = 41 (dot 1/11 +center)
+288.918 ◀ RING 8 = 41 (dot 1/11 +center)
+288.919 ◀ LCD @ 42 "     Page 2/3"
+┌────────────────────────────────────────────────────────┐
+│Knee   Peak/S LimrOn LimThr Distrt Mix         Page 2/3 │
+│0.7    RMS    Off    0.0 dB Off    100.0% Max    Off    │
+└────────────────────────────────────────────────────────┘
+290.949 ◀ LCD @ 42 "SiChDe State "
+┌────────────────────────────────────────────────────────┐
+│Knee   Peak/S LimrOn LimThr Distrt Mix    SiChDe State  │
+│0.7    RMS    Off    0.0 dB Off    100.0% Max    Off    │
+└────────────────────────────────────────────────────────┘
+291.731 ▶ 90 62 7F
+291.731 ▶ 90 62 00
+291.750 ◀ LCD @  0 "CirTyp Thrs   Ratio  Attack Rel    AutRel MakeUp AutGai PltDig -20.5  2.1:1  15.0ms 51.0ms On     0.0 dB -12dB"
+291.750 ◀ RING 1 = 41 (dot 1/11 +center)
+291.751 ◀ RING 2 = 07 (dot 7/11)
+291.751 ◀ RING 3 = 03 (dot 3/11)
+291.751 ◀ RING 4 = 04 (dot 4/11)
+291.752 ◀ RING 5 = 04 (dot 4/11)
+291.752 ◀ RING 6 = 0B (dot 11/11)
+291.752 ◀ RING 7 = 45 (dot 5/11 +center)
+291.752 ◀ RING 8 = 0B (dot 11/11)
+291.753 ◀ LCD @ 42 "     Page 1/3"
+293.782 ◀ LCD @ 42 "MakeUp AutGai"
+294.240 ▶ 90 34 7F
+294.240 ▶ 90 34 00
+294.249 ◀ LCD @  0 "Track 1 "Inst 1"   Ins.1 "Compressor (m/m)"    Page 1/3 CirTyp Thrs   Ratio  Attack Rel    AutRel MakeUp AutGai"
+┌────────────────────────────────────────────────────────┐
+│Track 1 "Inst 1"   Ins.1 "Compressor (m/m)"    Page 1/3 │
+│CirTyp Thrs   Ratio  Attack Rel    AutRel MakeUp AutGai │
+└────────────────────────────────────────────────────────┘
+┌────────────────────────────────────────────────────────┐
+│Track 1 "Inst 1"   Ins.1 "Compressor (m/m)"    Page 1/3 │
+│CirTyp Thrs   Ratio  Attack Rel    AutRel MakeUp AutGai │
+└────────────────────────────────────────────────────────┘
+296.761 ▶ 90 34 7F
+296.761 ▶ 90 34 00
+296.782 ◀ LCD @  0 "CirTyp Thrs   Ratio  Attack Rel    AutRel MakeUp AutGai PltDig -20.5  2.1:1  15.0ms 51.0ms On     0.0 dB -12dB "
+┌────────────────────────────────────────────────────────┐
+│CirTyp Thrs   Ratio  Attack Rel    AutRel MakeUp AutGai │
+│PltDig -20.5  2.1:1  15.0ms 51.0ms On     0.0 dB -12dB  │
+└────────────────────────────────────────────────────────┘
+297.270 ▶ 90 25 7F
+297.270 ▶ 90 25 00
+297.282 ◀ LCD @ 92 "ff"
+297.282 ◀ RING 6 = 41 (dot 1/11 +center)
+297.284 ◀ LCD @ 38 "o Release "
+┌────────────────────────────────────────────────────────┐
+│CirTyp Thrs   Ratio  Attack Rel    Auto Release  AutGai │
+│PltDig -20.5  2.1:1  15.0ms 51.0ms Off    0.0 dB -12dB  │
+└────────────────────────────────────────────────────────┘
+299.316 ◀ LCD @ 38 "Rel MakeUp"
+┌────────────────────────────────────────────────────────┐
+│CirTyp Thrs   Ratio  Attack Rel    AutRel MakeUp AutGai │
+│PltDig -20.5  2.1:1  15.0ms 51.0ms Off    0.0 dB -12dB  │
+└────────────────────────────────────────────────────────┘
+299.793 ▶ 90 25 7F
+299.793 ▶ 90 25 00
+299.816 ◀ LCD @ 92 "n "
+299.816 ◀ RING 6 = 0B (dot 11/11)
+299.817 ◀ LCD @ 38 "o Release "
+┌────────────────────────────────────────────────────────┐
+│CirTyp Thrs   Ratio  Attack Rel    Auto Release  AutGai │
+│PltDig -20.5  2.1:1  15.0ms 51.0ms On     0.0 dB -12dB  │
+└────────────────────────────────────────────────────────┘
+301.848 ◀ LCD @ 38 "Rel MakeUp"
+quiet on
+watch off
+323.610 ▶ B0 12 01
+┌────────────────────────────────────────────────────────┐
+│CirTyp Thrs   Ratio  Attack Rel    AutRel MakeUp AutGai │
+│PltDig -20.5  2.1:1  15.0ms 51.0ms On     0.0 dB -12dB  │
+└────────────────────────────────────────────────────────┘
+323.919 ▶ B0 12 41
+324.228 ▶ B0 13 01
+┌────────────────────────────────────────────────────────┐
+│CirTyp Thrs   Ratio  Attack        AutRel MakeUp AutGai │
+│PltDig -20.5  2.1:1  15.5 ms       On     0.0 dB -12dB  │
+└────────────────────────────────────────────────────────┘
+324.537 ▶ B0 13 41
+326.844 ▶ 90 63 7F
+326.844 ▶ 90 63 00
+327.097   page +1: 2 LCD writes, last at +6 ms  top="Knee   Peak/S LimrOn LimThr Distrt Mix         Page 2/3 "
+327.097 FOUND "LimThr" on row top strip 4 after 1 RIGHT presses; assign="P1."
+328.354 ▶ 90 63 7F
+328.354 ▶ 90 63 00
+328.609   page +1: 3 LCD writes, last at +30 ms  top="Distrt Mix    SiChDe State  Mode   Freq        Page 3/3 "
+328.609 ▶ 90 63 7F
+328.609 ▶ 90 63 00
+328.863   page +2: 0 LCD writes, last at +-224 ms  top="Distrt Mix    SiChDe State  Mode   Freq        Page 3/3 "
+328.864 ▶ 90 63 7F
+328.864 ▶ 90 63 00
+329.117   page +3: 0 LCD writes, last at +-479 ms  top="Distrt Mix    SiChDe State  Mode   Freq        Page 3/3 "
+329.117 NOT FOUND "Thrs" within 3 pages
+330.363 ▶ 90 62 7F
+330.363 ▶ 90 62 00
+330.671 ▶ 90 62 7F
+330.671 ▶ 90 62 00
+┌────────────────────────────────────────────────────────┐
+│CirTyp Thrs   Ratio  Attack Rel    AutRel MakeUp AutGai │
+│PltDig -20.5  2.1:1  15.0ms 51.0ms On     0.0 dB -12dB  │
+└────────────────────────────────────────────────────────┘
+quiet off
+332.978 ▶ 90 61 7F
+332.978 ▶ 90 61 00
+332.981 ◀ LCD @  0 "-      -      -      -      -      -      -      -                                                            "
+332.981 ◀ ASSIGN display = "P2."
+332.981 ◀ RING 1 = 00 (dot 0/11)
+332.982 ◀ RING 2 = 00 (dot 0/11)
+332.983 ◀ RING 3 = 00 (dot 0/11)
+332.983 ◀ RING 4 = 00 (dot 0/11)
+332.983 ◀ RING 5 = 00 (dot 0/11)
+332.983 ◀ RING 6 = 00 (dot 0/11)
+332.984 ◀ RING 7 = 00 (dot 0/11)
+332.984 ◀ RING 8 = 00 (dot 0/11)
+332.984 ◀ LCD @ 42 "Insert 2 "--""
+┌────────────────────────────────────────────────────────┐
+│-      -      -      -      -      -      Insert 2 "--" │
+│                                                        │
+└────────────────────────────────────────────────────────┘
+ASSIGN: "P2."
+333.696 ▶ 90 60 7F
+333.696 ▶ 90 60 00
+333.715 ◀ LCD @  0 "CirTyp Thrs   Ratio  Attack Rel    AutRel"
+333.715 ◀ LCD @ 56 "PltDig -20.5  2.1:1  15.0ms 51.0ms On     0.0 dB -12dB"
+333.715 ◀ ASSIGN display = "P1."
+333.715 ◀ RING 1 = 41 (dot 1/11 +center)
+333.716 ◀ RING 2 = 07 (dot 7/11)
+333.716 ◀ RING 3 = 03 (dot 3/11)
+333.716 ◀ RING 4 = 04 (dot 4/11)
+333.717 ◀ RING 5 = 04 (dot 4/11)
+333.717 ◀ RING 6 = 0B (dot 11/11)
+333.717 ◀ RING 7 = 45 (dot 5/11 +center)
+333.717 ◀ RING 8 = 0B (dot 11/11)
+333.718 ◀ LCD @ 28 "Insert 1 "Compressor (m/m)"
+┌────────────────────────────────────────────────────────┐
+│CirTyp Thrs   Ratio  Attack Insert 1 "Compressor (m/m)" │
+│PltDig -20.5  2.1:1  15.0ms 51.0ms On     0.0 dB -12dB  │
+└────────────────────────────────────────────────────────┘
+ASSIGN: "P1."
+335.747 ◀ LCD @ 28 "Rel    AutRel MakeUp AutGai"
+336.213 ▶ 90 32 7F
+336.213 ▶ 90 32 00
+336.216 ◀ LED FLIP ON
+336.216 ◀ FADER ECHO strip 1 = 0/16383
+336.217 ◀ FADER ECHO strip 2 = 9665/16383
+336.217 ◀ FADER ECHO strip 3 = 3469/16383
+336.217 ◀ FADER ECHO strip 4 = 4914/16383
+336.217 ◀ FADER ECHO strip 5 = 5506/16383
+336.218 ◀ FADER ECHO strip 6 = 16383/16383
+336.218 ◀ FADER ECHO strip 7 = 5957/16383
+336.218 ◀ FADER ECHO strip 8 = 16383/16383
+┌────────────────────────────────────────────────────────┐
+│CirTyp Thrs   Ratio  Attack Rel    AutRel MakeUp AutGai │
+│PltDig -20.5  2.1:1  15.0ms 51.0ms On     0.0 dB -12dB  │
+└────────────────────────────────────────────────────────┘
+336.721 ▶ 90 69 7F
+336.721 ▶ E1 00 40
+336.721 ▶ 90 69 00
+336.747 ◀ LCD @ 10 "eshold   "
+336.748 ◀ LCD @ 65 "5.0 dB    "
+336.748 ◀ FADER ECHO strip 2 = 8191/16383
+336.748 ◀ RING 2 = 06 (dot 6/11)
+┌────────────────────────────────────────────────────────┐
+│CirTyp Threshold     Attack Rel    AutRel MakeUp AutGai │
+│PltDig -25.0 dB      15.0ms 51.0ms On     0.0 dB -12dB  │
+└────────────────────────────────────────────────────────┘
+338.814 ◀ LCD @ 10 "s   Ratio"
+338.814 ◀ LCD @ 69 " 2.1:1"
+339.440 ▶ 90 32 7F
+339.440 ▶ 90 32 00
+339.448 ◀ LED FLIP OFF
+339.448 ◀ FADER ECHO strip 1 = 12443/16383
+339.449 ◀ FADER ECHO strip 2 = 12443/16383
+339.449 ◀ FADER ECHO strip 3 = 12443/16383
+339.450 ◀ FADER ECHO strip 4 = 12443/16383
+339.450 ◀ FADER ECHO strip 5 = 0/16383
+339.451 ◀ FADER ECHO strip 6 = 0/16383
+339.451 ◀ FADER ECHO strip 7 = 0/16383
+339.451 ◀ FADER ECHO strip 8 = 0/16383
+┌────────────────────────────────────────────────────────┐
+│CirTyp Thrs   Ratio  Attack Rel    AutRel MakeUp AutGai │
+│PltDig -25.0  2.1:1  15.0ms 51.0ms On     0.0 dB -12dB  │
+└────────────────────────────────────────────────────────┘
+quiet on
+362.702 ▶ B0 12 05
+┌────────────────────────────────────────────────────────┐
+│CirTyp Thrs   Ratio  Attack Rel    AutRel MakeUp AutGai │
+│PltDig -25.0  2.5:1  15.0ms 51.0ms On     0.0 dB -12dB  │
+└────────────────────────────────────────────────────────┘
+363.110 ▶ B0 12 45
+365.419 ▶ 90 32 7F
+365.419 ▶ 90 32 00
+365.728 ▶ 90 69 7F
+365.728 ▶ E1 66 4C
+365.728 ▶ 90 69 00
+┌────────────────────────────────────────────────────────┐
+│CirTyp Threshold     Attack Rel    AutRel MakeUp AutGai │
+│PltDig -20.0 dB      15.0ms 51.0ms On     0.0 dB -12dB  │
+└────────────────────────────────────────────────────────┘
+366.136 ▶ 90 32 7F
+366.136 ▶ 90 32 00
+┌────────────────────────────────────────────────────────┐
+│CirTyp Thrs   Ratio  Attack Rel    AutRel MakeUp AutGai │
+│PltDig -20.0  2.1:1  15.0ms 51.0ms On     0.0 dB -12dB  │
+└────────────────────────────────────────────────────────┘
+quiet off
+368.445 ▶ 90 2B 7F
+368.446 ▶ 90 2B 00
+368.447 ◀ LCD @  0 "Inst 1 Inst 2 St Out Master                             Comprs --     --                                      "
+368.447 ◀ ASSIGN display = "P1"
+368.447 ◀ SYSEX cmd 72: 07 07 07 07 07 07 07 07
+368.448 ◀ RING 1 = 02 (dot 2/11)
+368.448 ◀ RING 2 = 01 (dot 1/11)
+368.448 ◀ RING 3 = 01 (dot 1/11)
+368.449 ◀ RING 4 = 00 (dot 0/11)
+368.449 ◀ RING 5 = 00 (dot 0/11)
+368.449 ◀ RING 6 = 00 (dot 0/11)
+368.450 ◀ RING 7 = 00 (dot 0/11)
+368.450 ◀ RING 8 = 00 (dot 0/11)
+┌────────────────────────────────────────────────────────┐
+│Inst 1 Inst 2 St Out Master                             │
+│Comprs --     --                                        │
+└────────────────────────────────────────────────────────┘
+ASSIGN: "P1"
+391.631 ▶ 90 2A 7F
+391.631 ▶ 90 2A 00
+391.645 ◀ LCD @  0 "                           "
+391.645 ◀ LCD @ 56 "Angle  Divers LFE    Spread"
+391.646 ◀ LCD @ 91 "CStrip Ang/Dv X/Y"
+391.646 ◀ ASSIGN display = "P_"
+391.646 ◀ LED PAN ON
+391.646 ◀ LED PLUG-IN OFF
+391.646 ◀ RING 1 = 00 (dot 0/11)
+391.647 ◀ RING 2 = 00 (dot 0/11)
+391.648 ◀ RING 3 = 00 (dot 0/11)
+391.649 ◀ LCD @  0 "Inst 1 Inst 2 St Out Master"
+391.649 ◀ LCD @ 56 "0      0      0            "
+391.649 ◀ LCD @ 91 "                 "
+391.649 ◀ ASSIGN display = "PN"
+391.650 ◀ SYSEX cmd 72: 02 02 05 04 07 07 07 07
+391.650 ◀ RING 1 = 56 (boost/cut 6/11 +center)
+391.650 ◀ RING 2 = 56 (boost/cut 6/11 +center)
+391.651 ◀ RING 3 = 56 (boost/cut 6/11 +center)
+391.651 ◀ LCD @ 28 "Pan/Surround parameter: Pan"
