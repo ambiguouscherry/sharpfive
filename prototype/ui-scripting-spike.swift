@@ -161,6 +161,40 @@ func sheetCancel() {
     print("cancel -> \(AXUIElementPerformAction(c, kAXPressAction as CFString).rawValue)")
 }
 
+// ---- delete a track by exact name ------------------------------------------------------
+func deleteTrack(named name: String) {
+    let before = tracks()
+    guard before.filter({ $0.name == name }).count == 1 else { print("need exactly one track named '\(name)'; have \(before.filter { $0.name == name }.count)"); return }
+    guard let win = mainWindow(), let header = find(win, { desc($0) == "Tracks header" }),
+          let item = kids(header).first(where: { desc($0).hasSuffix("“\(name)”") }),
+          let focusBtn = kids(item).first(where: { desc($0) == "Has Focus" }) else { print("header item not found"); return }
+    print("\(ms()) focus '\(name)' -> \(AXUIElementPerformAction(focusBtn, kAXPressAction as CFString).rawValue)")
+    usleep(150_000)
+    let focused = tracks().first { $0.focus }
+    guard focused?.name == name else { print("focus check failed: focused=\(focused?.name ?? "nil"); aborting"); return }
+    guard press(["Track", "Delete Track"]) else { return }
+    let start = Date(); var after = before
+    while Date().timeIntervalSince(start) < 5 {
+        if let sh = sheet() { print("\(ms()) sheet appeared:"); dump(sh, 0, maxD: 4); return }
+        after = tracks(); if after.count != before.count { break }; usleep(20_000)
+    }
+    print(String(format: "readback: %d -> %d tracks after %.0f ms", before.count, after.count, Date().timeIntervalSince(start) * 1000))
+    printTracks(after)
+}
+
+// ---- arrow keys: Logic's default Select Previous/Next Track ---------------------------
+func arrow(_ dir: String, times: Int) {
+    app.activate(); usleep(200_000)
+    let code: CGKeyCode = dir == "up" ? 126 : 125
+    let src = CGEventSource(stateID: .hidSystemState)
+    for _ in 0..<times {
+        for down in [true, false] { let ev = CGEvent(keyboardEventSource: src, virtualKey: code, keyDown: down)!; ev.postToPid(app.processIdentifier) }
+        usleep(80_000)
+    }
+    usleep(200_000)
+    print("\(ms()) arrow \(dir) x\(times); focused: \(tracks().first { $0.focus }?.name ?? "none")")
+}
+
 let args = Array(CommandLine.arguments.dropFirst())
 switch args.first ?? "" {
 case "tracks": printTracks(tracks())
@@ -185,6 +219,12 @@ case "sheet":
     guard args.count >= 3 else { print("usage: sheet <GroupPrefix> <Radio> [count]"); exit(1) }
     sheetCreate(group: args[1], radio: args[2], count: args.count > 3 ? Int(args[3]) : nil)
 case "cancel": sheetCancel()
+case "alert":  // press a titled button on the focused alert/sheet window
+    if let fw = attr(ax, kAXFocusedWindowAttribute), let b = find(fw as! AXUIElement, { s($0, kAXRoleAttribute) == "AXButton" && s($0, kAXTitleAttribute) == args[1] }) {
+        print("\(ms()) press '\(args[1])' -> \(AXUIElementPerformAction(b, kAXPressAction as CFString).rawValue)"); usleep(600_000); printTracks(tracks())
+    } else { print("no button '\(args[1])' on focused window") }
+case "arrow": arrow(args[1], times: args.count > 2 ? Int(args[2]) ?? 1 : 1)
+case "delete": deleteTrack(named: args.dropFirst().joined(separator: " "))
 case "headers":
     if let win = mainWindow(), let header = find(win, { desc($0) == "Tracks header" }) {
         for item in kids(header) where s(item, kAXRoleAttribute) == "AXLayoutItem" {
