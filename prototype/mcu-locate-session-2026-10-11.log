@@ -1,0 +1,787 @@
+── MIDI-write spike up. Ports: "MCU Spike" (surface in+out), "Sharpfive Notes" (note source).
+   Logic Pro Virtual In found as alternative target.
+
+COMMANDS
+  select <1-8> | arm <1-8>         SELECT / REC-ARM strip buttons
+  play|stop|rec|rewind|ffwd|cycle|click|smpte|zoom ...   transport & misc buttons
+  btn <hexnote>                    press+release any note
+  target notes|logicin             where note messages go (default: our virtual source)
+  pattern <bpm> <bars> <live|stamped> [note=48] [vel=100] [ch=1] [dur_ms=200]
+                                   quarter notes; live = sleep between sends, stamped =
+                                   all packets queued now with host-time stamps
+  note <n> <vel> [ch] [dur_ms]     one note on/off
+  tc | tcwatch on|off              timecode display (bars.beats.div.ticks or SMPTE)
+  leds                             LED state snapshot (transport, rec-arm, smpte/beats)
+  meters on|off                    log meter onsets per strip with timecode
+  lcd                              2x56 framebuffer
+  quiet on|off | sleep <ms> | raw <hex> | quit
+LOCATE (#26)
+  pos                              parsed beats display bar.beat.div.tick
+  jog <±n> [gap_ms] | jogv <hex>   jog wheel ticks (CC 3C), logs position before/after
+  goto <bar> [beat]                closed loop jog until the display shows bar.beat
+  hold <btn> | release <btn>       note-on only / note-off only (for button chords)
+  tx <hex> | mmc locate h m s f    raw bytes / MMC to the note target (notes|logicin)
+   0.271 ▶ MCU F0 00 00 66 14 01 53 50 49 4B 45 30 31 01 02 03 04 F7
+   0.284 ◀ LED REC-ARM ch1 ON   tc=  3 4 3107
+   0.284 ◀ LED REC-ARM ch2 OFF   tc=  3 4 3107
+   0.285 ◀ LED REC-ARM ch3 OFF   tc=  3 4 3107
+   0.285 ◀ LED REC-ARM ch4 OFF   tc=  3 4 3107
+   0.285 ◀ LED REC-ARM ch5 OFF   tc=  3 4 3107
+   0.286 ◀ LED REC-ARM ch6 OFF   tc=  3 4 3107
+   0.286 ◀ LED REC-ARM ch7 OFF   tc=  3 4 3107
+   0.286 ◀ LED REC-ARM ch8 OFF   tc=  3 4 3107
+   0.287 ◀ LED SOLO ch1 OFF   tc=  3 4 3107
+   0.287 ◀ LED SOLO ch2 OFF   tc=  3 4 3107
+   0.287 ◀ LED SOLO ch3 OFF   tc=  3 4 3107
+   0.287 ◀ LED SOLO ch4 OFF   tc=  3 4 3107
+   0.288 ◀ LED SOLO ch5 OFF   tc=  3 4 3107
+   0.288 ◀ LED SOLO ch6 OFF   tc=  3 4 3107
+   0.288 ◀ LED SOLO ch7 OFF   tc=  3 4 3107
+   0.289 ◀ LED SOLO ch8 OFF   tc=  3 4 3107
+   0.289 ◀ LED MUTE ch1 OFF   tc=  3 4 3107
+   0.289 ◀ LED MUTE ch2 OFF   tc=  3 4 3107
+   0.290 ◀ LED MUTE ch3 OFF   tc=  3 4 3107
+   0.290 ◀ LED MUTE ch4 OFF   tc=  3 4 3107
+   0.290 ◀ LED MUTE ch5 OFF   tc=  3 4 3107
+   0.291 ◀ LED MUTE ch6 OFF   tc=  3 4 3107
+   0.291 ◀ LED MUTE ch7 OFF   tc=  3 4 3107
+   0.291 ◀ LED MUTE ch8 OFF   tc=  3 4 3107
+   0.291 ◀ LED SELECT ch1 ON   tc=  3 4 3107
+   0.292 ◀ LED SELECT ch2 OFF   tc=  3 4 3107
+   0.292 ◀ LED SELECT ch3 OFF   tc=  3 4 3107
+   0.292 ◀ LED SELECT ch4 OFF   tc=  3 4 3107
+   0.293 ◀ LED SELECT ch5 OFF   tc=  3 4 3107
+   0.293 ◀ LED SELECT ch6 OFF   tc=  3 4 3107
+   0.293 ◀ LED SELECT ch7 OFF   tc=  3 4 3107
+   0.293 ◀ LED SELECT ch8 OFF   tc=  3 4 3107
+   0.294 ◀ LED VPOT PRESS ch1 OFF   tc=  3 4 3107
+   0.294 ◀ LED VPOT PRESS ch2 OFF   tc=  3 4 3107
+   0.294 ◀ LED VPOT PRESS ch3 OFF   tc=  3 4 3107
+   0.294 ◀ LED VPOT PRESS ch4 OFF   tc=  3 4 3107
+   0.294 ◀ LED VPOT PRESS ch5 OFF   tc=  3 4 3107
+   0.295 ◀ LED VPOT PRESS ch6 OFF   tc=  3 4 3107
+   0.295 ◀ LED VPOT PRESS ch7 OFF   tc=  3 4 3107
+   0.295 ◀ LED VPOT PRESS ch8 OFF   tc=  3 4 3107
+   0.295 ◀ LED TRACK OFF   tc=  3 4 3107
+   0.296 ◀ LED note 29 OFF   tc=  3 4 3107
+   0.296 ◀ LED note 2A OFF   tc=  3 4 3107
+   0.296 ◀ LED PLUG-IN OFF   tc=  3 4 3107
+   0.297 ◀ LED note 2C OFF   tc=  3 4 3107
+   0.297 ◀ LED note 2D ON   tc=  3 4 3107
+   0.297 ◀ LED FLIP OFF   tc=  3 4 3107
+   0.297 ◀ LED GLOBAL VIEW OFF   tc=  3 4 3107
+   0.298 ◀ LED note 4A ON   tc=  3 4 3107
+   0.298 ◀ LED note 4B OFF   tc=  3 4 3107
+   0.298 ◀ LED note 4C OFF   tc=  3 4 3107
+   0.299 ◀ LED note 4D OFF   tc=  3 4 3107
+   0.299 ◀ LED note 4E OFF   tc=  3 4 3107
+   0.299 ◀ LED note 4F OFF   tc=  3 4 3107
+   0.299 ◀ LED note 50 ON   tc=  3 4 3107
+   0.300 ◀ LED note 51 ON   tc=  3 4 3107
+   0.300 ◀ LED note 54 OFF   tc=  3 4 3107
+   0.300 ◀ LED note 55 OFF   tc=  3 4 3107
+   0.300 ◀ LED CYCLE OFF   tc=  3 4 3107
+   0.301 ◀ LED DROP OFF   tc=  3 4 3107
+   0.301 ◀ LED REPLACE OFF   tc=  3 4 3107
+   0.301 ◀ LED CLICK OFF   tc=  3 4 3107
+   0.301 ◀ LED SOLO OFF   tc=  3 4 3107
+   0.302 ◀ LED REWIND OFF   tc=  3 4 3107
+   0.302 ◀ LED FFWD OFF   tc=  3 4 3107
+   0.302 ◀ LED STOP ON   tc=  3 4 3107
+   0.303 ◀ LED PLAY OFF   tc=  3 4 3107
+   0.303 ◀ LED RECORD OFF   tc=  3 4 3107
+   0.303 ◀ LED ZOOM OFF   tc=  3 4 3107
+   0.304 ◀ LED SCRUB OFF   tc=  3 4 3107
+   0.304 ◀ LED LED SMPTE OFF   tc=  3 4 3107
+   0.304 ◀ LED LED BEATS ON   tc=  3 4 3107
+   0.305 ◀ LED RUDE SOLO OFF   tc=  3 4 3107
+   0.305 ◀ FADER ECHO strip 1 = 12443
+   0.305 ◀ FADER ECHO strip 2 = 12443
+   0.306 ◀ FADER ECHO strip 3 = 12443
+   0.306 ◀ FADER ECHO strip 4 = 12443
+   0.306 ◀ FADER ECHO strip 5 = 0
+   0.307 ◀ FADER ECHO strip 6 = 0
+   0.307 ◀ FADER ECHO strip 7 = 0
+   0.307 ◀ FADER ECHO strip 8 = 0
+   0.308 ◀ FADER ECHO strip 9 = 12443
+   0.308 ◀ FADER ECHO strip 10 = 0
+   0.311 ▶ MCU F0 00 00 66 14 01 53 50 49 4B 45 30 31 01 02 03 04 F7
+   0.311 ▶ MCU F0 00 00 66 14 01 53 50 49 4B 45 30 31 01 02 03 04 F7
+   0.311 ▶ MCU F0 00 00 66 14 01 53 50 49 4B 45 30 31 01 02 03 04 F7
+   0.311 ▶ MCU F0 00 00 66 14 14 56 31 2E 30 F7
+   0.312 ▶ MCU F0 00 00 66 14 01 53 50 49 4B 45 30 31 01 02 03 04 F7
+   0.312 ▶ MCU F0 00 00 66 14 14 56 31 2E 30 F7
+   0.312 ▶ MCU F0 00 00 66 14 01 53 50 49 4B 45 30 31 01 02 03 04 F7
+   0.312 ▶ MCU F0 00 00 66 14 14 56 31 2E 30 F7
+   0.312 ▶ MCU F0 00 00 66 14 01 53 50 49 4B 45 30 31 01 02 03 04 F7
+   0.312 ▶ MCU F0 00 00 66 14 14 56 31 2E 30 F7
+   0.312 ▶ MCU F0 00 00 66 14 01 53 50 49 4B 45 30 31 01 02 03 04 F7
+   0.312 ▶ MCU F0 00 00 66 14 14 56 31 2E 30 F7
+   0.313 ▶ MCU F0 00 00 66 14 01 53 50 49 4B 45 30 31 01 02 03 04 F7
+   0.313 ▶ MCU F0 00 00 66 14 14 56 31 2E 30 F7
+   0.313 ▶ MCU F0 00 00 66 14 01 53 50 49 4B 45 30 31 01 02 03 04 F7
+   0.313 ▶ MCU F0 00 00 66 14 14 56 31 2E 30 F7
+   0.350 ▶ MCU F0 00 00 66 14 14 56 31 2E 30 F7
+   0.350 ▶ MCU F0 00 00 66 14 14 56 31 2E 30 F7
+   0.351 ▶ MCU F0 00 00 66 14 14 56 31 2E 30 F7
+   0.351 ▶ MCU F0 00 00 66 14 14 56 31 2E 30 F7
+   0.363 ◀ LED REC-ARM ch1 ON   tc=  3 4 3107
+   0.364 ◀ LED REC-ARM ch2 OFF   tc=  3 4 3107
+   0.364 ◀ LED REC-ARM ch3 OFF   tc=  3 4 3107
+   0.364 ◀ LED REC-ARM ch4 OFF   tc=  3 4 3107
+   0.365 ◀ LED REC-ARM ch5 OFF   tc=  3 4 3107
+   0.365 ◀ LED REC-ARM ch6 OFF   tc=  3 4 3107
+   0.365 ◀ LED REC-ARM ch7 OFF   tc=  3 4 3107
+   0.365 ◀ LED REC-ARM ch8 OFF   tc=  3 4 3107
+   0.366 ◀ LED SOLO ch1 OFF   tc=  3 4 3107
+   0.366 ◀ LED SOLO ch2 OFF   tc=  3 4 3107
+   0.366 ◀ LED SOLO ch3 OFF   tc=  3 4 3107
+   0.367 ◀ LED SOLO ch4 OFF   tc=  3 4 3107
+   0.367 ◀ LED SOLO ch5 OFF   tc=  3 4 3107
+   0.367 ◀ LED SOLO ch6 OFF   tc=  3 4 3107
+   0.367 ◀ LED SOLO ch7 OFF   tc=  3 4 3107
+   0.368 ◀ LED SOLO ch8 OFF   tc=  3 4 3107
+   0.368 ◀ LED MUTE ch1 OFF   tc=  3 4 3107
+   0.368 ◀ LED MUTE ch2 OFF   tc=  3 4 3107
+   0.369 ◀ LED MUTE ch3 OFF   tc=  3 4 3107
+   0.369 ◀ LED MUTE ch4 OFF   tc=  3 4 3107
+   0.369 ◀ LED MUTE ch5 OFF   tc=  3 4 3107
+   0.369 ◀ LED MUTE ch6 OFF   tc=  3 4 3107
+   0.370 ◀ LED MUTE ch7 OFF   tc=  3 4 3107
+   0.370 ◀ LED MUTE ch8 OFF   tc=  3 4 3107
+   0.370 ◀ LED SELECT ch1 ON   tc=  3 4 3107
+   0.371 ◀ LED SELECT ch2 OFF   tc=  3 4 3107
+   0.371 ◀ LED SELECT ch3 OFF   tc=  3 4 3107
+   0.371 ◀ LED SELECT ch4 OFF   tc=  3 4 3107
+   0.372 ◀ LED SELECT ch5 OFF   tc=  3 4 3107
+   0.372 ◀ LED SELECT ch6 OFF   tc=  3 4 3107
+   0.372 ◀ LED SELECT ch7 OFF   tc=  3 4 3107
+   0.373 ◀ LED SELECT ch8 OFF   tc=  3 4 3107
+   0.373 ◀ LED VPOT PRESS ch1 OFF   tc=  3 4 3107
+   0.373 ◀ LED VPOT PRESS ch2 OFF   tc=  3 4 3107
+   0.373 ◀ LED VPOT PRESS ch3 OFF   tc=  3 4 3107
+   0.374 ◀ LED VPOT PRESS ch4 OFF   tc=  3 4 3107
+   0.374 ◀ LED VPOT PRESS ch5 OFF   tc=  3 4 3107
+   0.374 ◀ LED VPOT PRESS ch6 OFF   tc=  3 4 3107
+   0.375 ◀ LED VPOT PRESS ch7 OFF   tc=  3 4 3107
+   0.375 ◀ LED VPOT PRESS ch8 OFF   tc=  3 4 3107
+   0.375 ◀ LED TRACK OFF   tc=  3 4 3107
+   0.376 ◀ LED note 29 OFF   tc=  3 4 3107
+   0.376 ◀ LED note 2A OFF   tc=  3 4 3107
+   0.376 ◀ LED PLUG-IN OFF   tc=  3 4 3107
+   0.377 ◀ LED note 2C OFF   tc=  3 4 3107
+   0.377 ◀ LED note 2D ON   tc=  3 4 3107
+   0.377 ◀ LED FLIP OFF   tc=  3 4 3107
+   0.377 ◀ LED GLOBAL VIEW OFF   tc=  3 4 3107
+   0.378 ◀ LED note 4A ON   tc=  3 4 3107
+   0.378 ◀ LED note 4B OFF   tc=  3 4 3107
+   0.378 ◀ LED note 4C OFF   tc=  3 4 3107
+   0.379 ◀ LED note 4D OFF   tc=  3 4 3107
+   0.379 ◀ LED note 4E OFF   tc=  3 4 3107
+   0.379 ◀ LED note 4F OFF   tc=  3 4 3107
+   0.380 ◀ LED note 50 ON   tc=  3 4 3107
+   0.380 ◀ LED note 51 ON   tc=  3 4 3107
+   0.380 ◀ LED note 54 OFF   tc=  3 4 3107
+   0.380 ◀ LED note 55 OFF   tc=  3 4 3107
+   0.381 ◀ LED CYCLE OFF   tc=  3 4 3107
+   0.381 ◀ LED DROP OFF   tc=  3 4 3107
+   0.381 ◀ LED REPLACE OFF   tc=  3 4 3107
+   0.382 ◀ LED CLICK OFF   tc=  3 4 3107
+   0.382 ◀ LED SOLO OFF   tc=  3 4 3107
+   0.382 ◀ LED REWIND OFF   tc=  3 4 3107
+   0.382 ◀ LED FFWD OFF   tc=  3 4 3107
+   0.383 ◀ LED STOP ON   tc=  3 4 3107
+   0.383 ◀ LED PLAY OFF   tc=  3 4 3107
+   0.383 ◀ LED RECORD OFF   tc=  3 4 3107
+   0.384 ◀ LED ZOOM OFF   tc=  3 4 3107
+   0.384 ◀ LED SCRUB OFF   tc=  3 4 3107
+   0.384 ◀ LED LED SMPTE OFF   tc=  3 4 3107
+   0.385 ◀ LED LED BEATS ON   tc=  3 4 3107
+   0.385 ◀ LED RUDE SOLO OFF   tc=  3 4 3107
+   0.385 ◀ FADER ECHO strip 1 = 12443
+   0.386 ◀ FADER ECHO strip 2 = 12443
+   0.386 ◀ FADER ECHO strip 3 = 12443
+   0.386 ◀ FADER ECHO strip 4 = 12443
+   0.387 ◀ FADER ECHO strip 5 = 0
+   0.387 ◀ FADER ECHO strip 6 = 0
+   0.387 ◀ FADER ECHO strip 7 = 0
+   0.388 ◀ FADER ECHO strip 8 = 0
+   0.388 ◀ FADER ECHO strip 9 = 12443
+   0.388 ◀ FADER ECHO strip 10 = 0
+quiet true
+POS 3.4.3.107  raw=[  3 4 3107] assign=IN
+LEDs: PLAY=off STOP=ON RECORD=off CYCLE=off CLICK=off LED SMPTE=off LED BEATS=ON | arm: 1:ON 2:off 3:off 4:off 5:off 6:off 7:off 8:off | select: 1:ON 2:off 3:off 4:off 5:off 6:off 7:off 8:off  tc=  3 4 3107 assign=IN
+┌────────────────────────────────────────────────────────┐
+│Octave Wf     SuOsWa OscMix Cutoff Res    ADSMax ADSMin │
+│4'     Sawtot -2Oct( 47 %   37.795 37.007 50.793 3.174% │
+└────────────────────────────────────────────────────────┘
+  14.879 JOG 1 ticks: 3.4.3.107 -> 3.4.3.107 (18 ms)
+  14.898 JOG 1 ticks: 3.4.3.107 -> 3.4.3.107 (18 ms)
+  14.917 JOG -1 ticks: 3.4.3.107 -> 3.4.3.107 (18 ms)
+  14.917 JOGV 05: 3.4.3.107 -> 3.4.3.107
+  14.917 JOGV 45: 3.4.3.107 -> 3.4.3.107
+  15.207 JOG 10 ticks: 3.4.3.107 -> 22.1.1.1 (290 ms)
+  15.507 JOG -10 ticks: 22.1.1.1 -> 3.1.1.1 (299 ms)
+  15.530 JOG 10 ticks: 3.1.1.1 -> 3.1.1.1 (22 ms)
+tcwatch true
+POS 17.1.1.1  raw=[ 17 1 1  1] assign=IN
+  29.207 JOG 1 ticks: 17.1.1.1 -> 17.1.1.1 (18 ms)
+POS 18.1.1.1  raw=[ 18 1 1  1] assign=IN
+  29.930 JOG 1 ticks: 18.1.1.1 -> 18.1.1.1 (18 ms)
+POS 19.1.1.1  raw=[ 19 1 1  1] assign=IN
+  30.653 JOG -1 ticks: 19.1.1.1 -> 19.1.1.1 (18 ms)
+POS 18.1.1.1  raw=[ 18 1 1  1] assign=IN
+  31.357 JOGV 03: 18.1.1.1 -> 18.1.1.1
+POS 19.1.1.1  raw=[ 19 1 1  1] assign=IN
+  32.061 JOGV 43: 19.1.1.1 -> 19.1.1.1
+POS 18.1.1.1  raw=[ 18 1 1  1] assign=IN
+tcwatch false
+── MIDI-write spike up. Ports: "MCU Spike" (surface in+out), "Sharpfive Notes" (note source).
+   Logic Pro Virtual In found as alternative target.
+
+COMMANDS
+  select <1-8> | arm <1-8>         SELECT / REC-ARM strip buttons
+  play|stop|rec|rewind|ffwd|cycle|click|smpte|zoom ...   transport & misc buttons
+  btn <hexnote>                    press+release any note
+  target notes|logicin             where note messages go (default: our virtual source)
+  pattern <bpm> <bars> <live|stamped> [note=48] [vel=100] [ch=1] [dur_ms=200]
+                                   quarter notes; live = sleep between sends, stamped =
+                                   all packets queued now with host-time stamps
+  note <n> <vel> [ch] [dur_ms]     one note on/off
+  tc | tcwatch on|off              timecode display (bars.beats.div.ticks or SMPTE)
+  leds                             LED state snapshot (transport, rec-arm, smpte/beats)
+  meters on|off                    log meter onsets per strip with timecode
+  lcd                              2x56 framebuffer
+  quiet on|off | sleep <ms> | raw <hex> | quit
+LOCATE (#26)
+  pos                              parsed beats display bar.beat.div.tick
+  jog <±n> [gap_ms] | jogv <hex>   jog wheel ticks (CC 3C), logs position before/after
+  goto <bar> [beat]                closed loop jog until the display shows bar.beat
+  hold <btn> | release <btn>       note-on only / note-off only (for button chords)
+  tx <hex> | mmc locate h m s f    raw bytes / MMC to the note target (notes|logicin)
+   0.273 ▶ MCU F0 00 00 66 14 01 53 50 49 4B 45 30 31 01 02 03 04 F7
+   0.283 ◀ LED REC-ARM ch1 ON   tc= 18 1 1  1
+   0.284 ◀ LED REC-ARM ch2 OFF   tc= 18 1 1  1
+   0.284 ◀ LED REC-ARM ch3 OFF   tc= 18 1 1  1
+   0.284 ◀ LED REC-ARM ch4 OFF   tc= 18 1 1  1
+   0.284 ◀ LED REC-ARM ch5 OFF   tc= 18 1 1  1
+   0.284 ◀ LED REC-ARM ch6 OFF   tc= 18 1 1  1
+   0.284 ◀ LED REC-ARM ch7 OFF   tc= 18 1 1  1
+   0.285 ◀ LED REC-ARM ch8 OFF   tc= 18 1 1  1
+   0.285 ◀ LED SOLO ch1 OFF   tc= 18 1 1  1
+   0.285 ◀ LED SOLO ch2 OFF   tc= 18 1 1  1
+   0.286 ◀ LED SOLO ch3 OFF   tc= 18 1 1  1
+   0.286 ◀ LED SOLO ch4 OFF   tc= 18 1 1  1
+   0.286 ◀ LED SOLO ch5 OFF   tc= 18 1 1  1
+   0.287 ◀ LED SOLO ch6 OFF   tc= 18 1 1  1
+   0.287 ◀ LED SOLO ch7 OFF   tc= 18 1 1  1
+   0.287 ◀ LED SOLO ch8 OFF   tc= 18 1 1  1
+   0.288 ◀ LED MUTE ch1 OFF   tc= 18 1 1  1
+   0.288 ◀ LED MUTE ch2 OFF   tc= 18 1 1  1
+   0.288 ◀ LED MUTE ch3 OFF   tc= 18 1 1  1
+   0.288 ◀ LED MUTE ch4 OFF   tc= 18 1 1  1
+   0.289 ◀ LED MUTE ch5 OFF   tc= 18 1 1  1
+   0.289 ◀ LED MUTE ch6 OFF   tc= 18 1 1  1
+   0.289 ◀ LED MUTE ch7 OFF   tc= 18 1 1  1
+   0.290 ◀ LED MUTE ch8 OFF   tc= 18 1 1  1
+   0.290 ◀ LED SELECT ch1 ON   tc= 18 1 1  1
+   0.290 ◀ LED SELECT ch2 OFF   tc= 18 1 1  1
+   0.290 ◀ LED SELECT ch3 OFF   tc= 18 1 1  1
+   0.291 ◀ LED SELECT ch4 OFF   tc= 18 1 1  1
+   0.292 ◀ LED SELECT ch5 OFF   tc= 18 1 1  1
+   0.292 ◀ LED SELECT ch6 OFF   tc= 18 1 1  1
+   0.292 ◀ LED SELECT ch7 OFF   tc= 18 1 1  1
+   0.292 ◀ LED SELECT ch8 OFF   tc= 18 1 1  1
+   0.293 ◀ LED VPOT PRESS ch1 OFF   tc= 18 1 1  1
+   0.293 ◀ LED VPOT PRESS ch2 OFF   tc= 18 1 1  1
+   0.293 ◀ LED VPOT PRESS ch3 OFF   tc= 18 1 1  1
+   0.294 ◀ LED VPOT PRESS ch4 OFF   tc= 18 1 1  1
+   0.294 ◀ LED VPOT PRESS ch5 OFF   tc= 18 1 1  1
+   0.294 ◀ LED VPOT PRESS ch6 OFF   tc= 18 1 1  1
+   0.294 ◀ LED VPOT PRESS ch7 OFF   tc= 18 1 1  1
+   0.295 ◀ LED VPOT PRESS ch8 OFF   tc= 18 1 1  1
+   0.295 ◀ LED TRACK OFF   tc= 18 1 1  1
+   0.295 ◀ LED note 29 OFF   tc= 18 1 1  1
+   0.296 ◀ LED note 2A OFF   tc= 18 1 1  1
+   0.296 ◀ LED PLUG-IN OFF   tc= 18 1 1  1
+   0.296 ◀ LED note 2C OFF   tc= 18 1 1  1
+   0.296 ◀ LED note 2D ON   tc= 18 1 1  1
+   0.297 ◀ LED FLIP OFF   tc= 18 1 1  1
+   0.297 ◀ LED GLOBAL VIEW OFF   tc= 18 1 1  1
+   0.297 ◀ LED note 4A ON   tc= 18 1 1  1
+   0.298 ◀ LED note 4B OFF   tc= 18 1 1  1
+   0.298 ◀ LED note 4C OFF   tc= 18 1 1  1
+   0.298 ◀ LED note 4D OFF   tc= 18 1 1  1
+   0.299 ◀ LED note 4E OFF   tc= 18 1 1  1
+   0.299 ◀ LED note 4F OFF   tc= 18 1 1  1
+   0.299 ◀ LED note 50 ON   tc= 18 1 1  1
+   0.300 ◀ LED note 51 ON   tc= 18 1 1  1
+   0.300 ◀ LED note 54 OFF   tc= 18 1 1  1
+   0.300 ◀ LED note 55 OFF   tc= 18 1 1  1
+   0.300 ◀ LED CYCLE OFF   tc= 18 1 1  1
+   0.300 ◀ LED DROP OFF   tc= 18 1 1  1
+   0.301 ◀ LED REPLACE OFF   tc= 18 1 1  1
+   0.301 ◀ LED CLICK OFF   tc= 18 1 1  1
+   0.301 ◀ LED SOLO OFF   tc= 18 1 1  1
+   0.302 ◀ LED REWIND OFF   tc= 18 1 1  1
+   0.302 ◀ LED FFWD OFF   tc= 18 1 1  1
+   0.302 ◀ LED STOP ON   tc= 18 1 1  1
+   0.303 ◀ LED PLAY OFF   tc= 18 1 1  1
+   0.303 ◀ LED RECORD OFF   tc= 18 1 1  1
+   0.303 ◀ LED ZOOM OFF   tc= 18 1 1  1
+   0.304 ◀ LED SCRUB OFF   tc= 18 1 1  1
+   0.304 ◀ LED LED SMPTE OFF   tc= 18 1 1  1
+   0.304 ◀ LED LED BEATS ON   tc= 18 1 1  1
+   0.304 ◀ LED RUDE SOLO OFF   tc= 18 1 1  1
+   0.305 ◀ FADER ECHO strip 1 = 12443
+   0.305 ◀ FADER ECHO strip 2 = 12443
+   0.306 ◀ FADER ECHO strip 3 = 12443
+   0.306 ◀ FADER ECHO strip 4 = 12443
+   0.306 ◀ FADER ECHO strip 5 = 0
+   0.306 ◀ FADER ECHO strip 6 = 0
+   0.307 ◀ FADER ECHO strip 7 = 0
+   0.308 ◀ FADER ECHO strip 8 = 0
+   0.308 ◀ FADER ECHO strip 9 = 12443
+   0.309 ◀ FADER ECHO strip 10 = 0
+   0.311 ▶ MCU F0 00 00 66 14 01 53 50 49 4B 45 30 31 01 02 03 04 F7
+   0.312 ▶ MCU F0 00 00 66 14 01 53 50 49 4B 45 30 31 01 02 03 04 F7
+   0.312 ▶ MCU F0 00 00 66 14 01 53 50 49 4B 45 30 31 01 02 03 04 F7
+   0.312 ▶ MCU F0 00 00 66 14 14 56 31 2E 30 F7
+   0.312 ▶ MCU F0 00 00 66 14 01 53 50 49 4B 45 30 31 01 02 03 04 F7
+   0.312 ▶ MCU F0 00 00 66 14 14 56 31 2E 30 F7
+   0.313 ▶ MCU F0 00 00 66 14 01 53 50 49 4B 45 30 31 01 02 03 04 F7
+   0.313 ▶ MCU F0 00 00 66 14 14 56 31 2E 30 F7
+   0.313 ▶ MCU F0 00 00 66 14 01 53 50 49 4B 45 30 31 01 02 03 04 F7
+   0.313 ▶ MCU F0 00 00 66 14 14 56 31 2E 30 F7
+   0.313 ▶ MCU F0 00 00 66 14 01 53 50 49 4B 45 30 31 01 02 03 04 F7
+   0.313 ▶ MCU F0 00 00 66 14 14 56 31 2E 30 F7
+   0.313 ▶ MCU F0 00 00 66 14 01 53 50 49 4B 45 30 31 01 02 03 04 F7
+   0.313 ▶ MCU F0 00 00 66 14 14 56 31 2E 30 F7
+   0.314 ▶ MCU F0 00 00 66 14 01 53 50 49 4B 45 30 31 01 02 03 04 F7
+   0.314 ▶ MCU F0 00 00 66 14 14 56 31 2E 30 F7
+   0.351 ▶ MCU F0 00 00 66 14 14 56 31 2E 30 F7
+   0.351 ▶ MCU F0 00 00 66 14 14 56 31 2E 30 F7
+   0.352 ▶ MCU F0 00 00 66 14 14 56 31 2E 30 F7
+   0.352 ▶ MCU F0 00 00 66 14 14 56 31 2E 30 F7
+   0.364 ◀ LED REC-ARM ch1 ON   tc= 18 1 1  1
+   0.365 ◀ LED REC-ARM ch2 OFF   tc= 18 1 1  1
+   0.365 ◀ LED REC-ARM ch3 OFF   tc= 18 1 1  1
+   0.365 ◀ LED REC-ARM ch4 OFF   tc= 18 1 1  1
+   0.366 ◀ LED REC-ARM ch5 OFF   tc= 18 1 1  1
+   0.366 ◀ LED REC-ARM ch6 OFF   tc= 18 1 1  1
+   0.366 ◀ LED REC-ARM ch7 OFF   tc= 18 1 1  1
+   0.366 ◀ LED REC-ARM ch8 OFF   tc= 18 1 1  1
+   0.367 ◀ LED SOLO ch1 OFF   tc= 18 1 1  1
+   0.367 ◀ LED SOLO ch2 OFF   tc= 18 1 1  1
+   0.367 ◀ LED SOLO ch3 OFF   tc= 18 1 1  1
+   0.368 ◀ LED SOLO ch4 OFF   tc= 18 1 1  1
+   0.368 ◀ LED SOLO ch5 OFF   tc= 18 1 1  1
+   0.368 ◀ LED SOLO ch6 OFF   tc= 18 1 1  1
+   0.369 ◀ LED SOLO ch7 OFF   tc= 18 1 1  1
+   0.369 ◀ LED SOLO ch8 OFF   tc= 18 1 1  1
+   0.369 ◀ LED MUTE ch1 OFF   tc= 18 1 1  1
+   0.370 ◀ LED MUTE ch2 OFF   tc= 18 1 1  1
+   0.370 ◀ LED MUTE ch3 OFF   tc= 18 1 1  1
+   0.370 ◀ LED MUTE ch4 OFF   tc= 18 1 1  1
+   0.371 ◀ LED MUTE ch5 OFF   tc= 18 1 1  1
+   0.371 ◀ LED MUTE ch6 OFF   tc= 18 1 1  1
+   0.371 ◀ LED MUTE ch7 OFF   tc= 18 1 1  1
+   0.371 ◀ LED MUTE ch8 OFF   tc= 18 1 1  1
+   0.372 ◀ LED SELECT ch1 ON   tc= 18 1 1  1
+   0.372 ◀ LED SELECT ch2 OFF   tc= 18 1 1  1
+   0.372 ◀ LED SELECT ch3 OFF   tc= 18 1 1  1
+   0.372 ◀ LED SELECT ch4 OFF   tc= 18 1 1  1
+   0.373 ◀ LED SELECT ch5 OFF   tc= 18 1 1  1
+   0.373 ◀ LED SELECT ch6 OFF   tc= 18 1 1  1
+   0.373 ◀ LED SELECT ch7 OFF   tc= 18 1 1  1
+   0.374 ◀ LED SELECT ch8 OFF   tc= 18 1 1  1
+   0.374 ◀ LED VPOT PRESS ch1 OFF   tc= 18 1 1  1
+   0.374 ◀ LED VPOT PRESS ch2 OFF   tc= 18 1 1  1
+   0.374 ◀ LED VPOT PRESS ch3 OFF   tc= 18 1 1  1
+   0.375 ◀ LED VPOT PRESS ch4 OFF   tc= 18 1 1  1
+   0.375 ◀ LED VPOT PRESS ch5 OFF   tc= 18 1 1  1
+   0.376 ◀ LED VPOT PRESS ch6 OFF   tc= 18 1 1  1
+   0.377 ◀ LED VPOT PRESS ch7 OFF   tc= 18 1 1  1
+   0.377 ◀ LED VPOT PRESS ch8 OFF   tc= 18 1 1  1
+   0.378 ◀ LED TRACK OFF   tc= 18 1 1  1
+   0.378 ◀ LED note 29 OFF   tc= 18 1 1  1
+   0.378 ◀ LED note 2A OFF   tc= 18 1 1  1
+   0.378 ◀ LED PLUG-IN OFF   tc= 18 1 1  1
+   0.379 ◀ LED note 2C OFF   tc= 18 1 1  1
+   0.379 ◀ LED note 2D ON   tc= 18 1 1  1
+   0.379 ◀ LED FLIP OFF   tc= 18 1 1  1
+   0.379 ◀ LED GLOBAL VIEW OFF   tc= 18 1 1  1
+   0.380 ◀ LED note 4A ON   tc= 18 1 1  1
+   0.380 ◀ LED note 4B OFF   tc= 18 1 1  1
+   0.380 ◀ LED note 4C OFF   tc= 18 1 1  1
+   0.381 ◀ LED note 4D OFF   tc= 18 1 1  1
+   0.381 ◀ LED note 4E OFF   tc= 18 1 1  1
+   0.381 ◀ LED note 4F OFF   tc= 18 1 1  1
+   0.382 ◀ LED note 50 ON   tc= 18 1 1  1
+   0.382 ◀ LED note 51 ON   tc= 18 1 1  1
+   0.382 ◀ LED note 54 OFF   tc= 18 1 1  1
+   0.382 ◀ LED note 55 OFF   tc= 18 1 1  1
+   0.383 ◀ LED CYCLE OFF   tc= 18 1 1  1
+   0.383 ◀ LED DROP OFF   tc= 18 1 1  1
+   0.383 ◀ LED REPLACE OFF   tc= 18 1 1  1
+   0.384 ◀ LED CLICK OFF   tc= 18 1 1  1
+   0.384 ◀ LED SOLO OFF   tc= 18 1 1  1
+   0.384 ◀ LED REWIND OFF   tc= 18 1 1  1
+   0.385 ◀ LED FFWD OFF   tc= 18 1 1  1
+   0.385 ◀ LED STOP ON   tc= 18 1 1  1
+   0.385 ◀ LED PLAY OFF   tc= 18 1 1  1
+   0.385 ◀ LED RECORD OFF   tc= 18 1 1  1
+   0.386 ◀ LED ZOOM OFF   tc= 18 1 1  1
+   0.386 ◀ LED SCRUB OFF   tc= 18 1 1  1
+   0.386 ◀ LED LED SMPTE OFF   tc= 18 1 1  1
+   0.387 ◀ LED LED BEATS ON   tc= 18 1 1  1
+   0.387 ◀ LED RUDE SOLO OFF   tc= 18 1 1  1
+   0.388 ◀ FADER ECHO strip 1 = 12443
+   0.388 ◀ FADER ECHO strip 2 = 12443
+   0.388 ◀ FADER ECHO strip 3 = 12443
+   0.389 ◀ FADER ECHO strip 4 = 12443
+   0.389 ◀ FADER ECHO strip 5 = 0
+   0.389 ◀ FADER ECHO strip 6 = 0
+   0.389 ◀ FADER ECHO strip 7 = 0
+   0.390 ◀ FADER ECHO strip 8 = 0
+   0.390 ◀ FADER ECHO strip 9 = 12443
+   0.390 ◀ FADER ECHO strip 10 = 0
+quiet true
+POS 18.1.1.1  raw=[ 18 1 1  1] assign=IN
+   6.963 JOG 1 ticks: 18.1.1.1 -> 19.1.1.1 (first change 62 ms after last tick, total 160 ms)
+   7.130 JOG 1 ticks: 19.1.1.1 -> 20.1.1.1 (first change 68 ms after last tick, total 166 ms)
+   7.297 JOG -1 ticks: 20.1.1.1 -> 19.1.1.1 (first change 67 ms after last tick, total 166 ms)
+   7.464 JOG 1 ticks: 19.1.1.1 -> 20.1.1.1 (first change 68 ms after last tick, total 166 ms)
+   7.629 JOG 1 ticks: 20.1.1.1 -> 21.1.1.1 (first change 67 ms after last tick, total 165 ms)
+   7.796 JOG 1 ticks: 21.1.1.1 -> 129.1.1.1 (first change 68 ms after last tick, total 166 ms)
+   8.816 JOG 1 ticks: 129.1.1.1 -> 129.1.1.1 (first change -1 ms after last tick, total 1019 ms)
+LEDs: PLAY=off STOP=ON RECORD=off CYCLE=off CLICK=off LED SMPTE=off LED BEATS=ON | arm: 1:ON 2:off 3:off 4:off 5:off 6:off 7:off 8:off | select: 1:ON 2:off 3:off 4:off 5:off 6:off 7:off 8:off  tc=129 1 1  1 assign=IN
+   9.835 JOG 1 ticks: 129.1.1.1 -> 129.1.1.1 (first change -1 ms after last tick, total 1019 ms)
+  10.854 JOG 1 ticks: 129.1.1.1 -> 129.1.1.1 (first change -1 ms after last tick, total 1018 ms)
+LEDs: PLAY=off STOP=ON RECORD=off CYCLE=off CLICK=off LED SMPTE=off LED BEATS=ON | arm: 1:ON 2:off 3:off 4:off 5:off 6:off 7:off 8:off | select: 1:ON 2:off 3:off 4:off 5:off 6:off 7:off 8:off  tc=129 1 1  1 assign=IN
+POS 129.1.1.1  raw=[129 1 1  1] assign=IN
+  33.769 JOG -119 ticks: 129.1.1.1 -> 1.1.1.1 (first change -1 ms after last tick, total 2435 ms)
+POS 1.1.1.1  raw=[  1 1 1  1] assign=IN
+quiet false
+  33.769 ▶ MCU 90 48 7F
+  33.769 ▶ MCU B0 3C 41
+  34.788 JOG -1 ticks: 1.1.1.1 -> 1.1.1.1 (first change -1 ms after last tick, total 1019 ms)
+  34.788 ▶ MCU 90 48 00
+  34.788 ▶ MCU 90 48 7F
+  34.788 ▶ MCU B0 3C 01
+  34.963 JOG 1 ticks: 1.1.1.1 -> 2.1.1.1 (first change 75 ms after last tick, total 174 ms)
+  34.963 ▶ MCU 90 48 00
+  34.963 ▶ MCU 90 49 7F
+  34.963 ▶ MCU B0 3C 01
+  35.129 JOG 1 ticks: 2.1.1.1 -> 3.1.1.1 (first change 67 ms after last tick, total 166 ms)
+  35.130 ▶ MCU 90 49 00
+  35.130 ▶ MCU 90 49 7F
+  35.130 ▶ MCU B0 3C 41
+  35.296 JOG -1 ticks: 3.1.1.1 -> 2.1.1.1 (first change 67 ms after last tick, total 166 ms)
+  35.296 ▶ MCU 90 49 00
+  35.296 ▶ MCU 90 65 7F
+  35.296 ▶ MCU 90 65 00
+  35.316 ◀ LED SCRUB ON   tc=  2 1 1  1
+  35.601 ▶ MCU B0 3C 01
+  35.649 ◀ LED STOP OFF   tc=  2 1 1  1
+  35.649 ◀ LED PLAY ON   tc=  2 1 1  1
+  35.763 JOG 1 ticks: 2.1.1.1 -> 2.1.1.31 (first change 63 ms after last tick, total 161 ms)
+  36.068 ▶ MCU B0 3C 41
+  36.262 JOG -1 ticks: 2.1.1.31 -> 2.1.1.1 (first change 96 ms after last tick, total 194 ms)
+  36.262 ▶ MCU 90 65 7F
+  36.263 ▶ MCU 90 65 00
+  36.284 ◀ LED SCRUB OFF   tc=  2 1 1  1
+  36.315 ◀ LED STOP ON   tc=  2 1 1  1
+  36.316 ◀ LED PLAY OFF   tc=  2 1 1  1
+quiet true
+POS 2.1.1.1  raw=[  2 1 1  1] assign=IN
+  77.704 GOTO 8.1 from 2.1.1.1
+  77.929 GOTO done ticks=6 in 224 ms now 10.1.1.1
+  77.929 GOTO 5.1 from 10.1.1.1
+  79.337 GOTO done ticks=4 in 1407 ms now 5.1.1.1
+  79.337 GOTO 3.1 from 5.1.1.1
+  79.662 GOTO done ticks=12 in 325 ms now 1.1.1.1
+target notes
+  79.662 ▶ NOTE F0 7F 7F 06 44 06 01 20 00 08 00 00 F7 raw tc=  1 1 1  1
+  80.663 MMC LOCATE 0:0:8:0 -> 1.1.1.1
+  80.663 ▶ NOTE F0 7F 7F 06 44 06 01 60 00 08 00 00 F7 raw tc=  1 1 1  1
+  81.664 MMC LOCATE 0:0:8:0 -> 1.1.1.1
+target logicin
+  81.664 ▶ NOTE F0 7F 7F 06 44 06 01 20 00 08 00 00 F7 raw tc=  1 1 1  1
+  82.664 MMC LOCATE 0:0:8:0 -> 1.1.1.1
+  82.664 ▶ NOTE F0 7F 7F 06 44 06 01 60 00 08 00 00 F7 raw tc=  1 1 1  1
+  83.665 MMC LOCATE 0:0:8:0 -> 1.1.1.1
+  83.665 ▶ NOTE F0 7F 7F 06 44 06 01 00 00 08 00 00 F7 raw tc=  1 1 1  1
+  84.666 MMC LOCATE 0:0:8:0 -> 1.1.1.1
+POS 1.1.1.1  raw=[  1 1 1  1] assign=IN
+quiet false
+  84.667 ▶ MCU 90 54 7F
+  84.667 ▶ MCU 90 5C 7F
+  84.667 ▶ MCU 90 5C 00
+  84.667 ▶ MCU 90 54 00
+  84.684 ◀ LED note 54 ON   tc=  1 1 1  1
+  84.691 ◀ LED note 54 OFF   tc=  1 1 1  1
+POS 1.1.1.1  raw=[  1 1 1  1] assign=IN
+  84.972 ▶ MCU 90 54 7F
+  84.972 ▶ MCU 90 5B 7F
+  84.972 ▶ MCU 90 5B 00
+  84.972 ▶ MCU 90 54 00
+  84.986 ◀ LED note 54 ON   tc=  1 1 1  1
+  84.993 ◀ LED note 54 OFF   tc=  1 1 1  1
+POS 1.1.1.1  raw=[  1 1 1  1] assign=IN
+  85.277 ▶ MCU 90 54 7F
+  85.277 ▶ MCU 90 54 00
+  85.283 ◀ LED note 54 ON   tc=  1 1 1  1
+LEDs: PLAY=off STOP=ON RECORD=off CYCLE=off CLICK=off LED SMPTE=off LED BEATS=ON | arm: 1:ON 2:off 3:off 4:off 5:off 6:off 7:off 8:off | select: 1:ON 2:off 3:off 4:off 5:off 6:off 7:off 8:off  tc=  1 1 1  1 assign=IN
+┌────────────────────────────────────────────────────────┐
+│Octave Wf     SuOsWa OscMix Cutoff Res    ADSMax ADSMin │
+│4'     Sawtot -2Oct( 47 %   37.795 37.007 50.793 3.174% │
+└────────────────────────────────────────────────────────┘
+  85.582 ▶ MCU 90 54 7F
+  85.582 ▶ MCU 90 54 00
+  85.583 ◀ LED note 54 OFF   tc=  1 1 1  1
+LEDs: PLAY=off STOP=ON RECORD=off CYCLE=off CLICK=off LED SMPTE=off LED BEATS=ON | arm: 1:ON 2:off 3:off 4:off 5:off 6:off 7:off 8:off | select: 1:ON 2:off 3:off 4:off 5:off 6:off 7:off 8:off  tc=  1 1 1  1 assign=IN
+┌────────────────────────────────────────────────────────┐
+│Octave Wf     SuOsWa OscMix Cutoff Res    ADSMax ADSMin │
+│4'     Sawtot -2Oct( 47 %   37.795 37.007 50.793 3.174% │
+└────────────────────────────────────────────────────────┘
+  85.887 ▶ MCU 90 56 7F
+  85.887 ▶ MCU 90 56 00
+  85.887 ◀ LED CYCLE ON   tc=  1 1 1  1
+┌────────────────────────────────────────────────────────┐
+│Octave Wf     SuOsWa OscMix Cutoff Res    ADSMax ADSMin │
+│4'     Sawtot -2Oct( 47 %   37.795 37.007 50.793 3.174% │
+└────────────────────────────────────────────────────────┘
+  86.191 ▶ MCU 90 56 7F
+  86.191 ▶ MCU 90 5B 7F
+  86.191 ▶ MCU 90 5B 00
+  86.191 ▶ MCU 90 56 00
+  86.191 ◀ LED CYCLE OFF   tc=  1 1 1  1
+  86.248 ◀ LED CYCLE ON   tc=  1 1 1  1
+┌────────────────────────────────────────────────────────┐
+│Octave Wf     SuOsWa OscMix Cutoff Res    ADSMax ADSMin │
+│4'     Sawtot -2Oct( 47 %   37.795 37.007 50.793 3.174% │
+└────────────────────────────────────────────────────────┘
+POS 1.1.1.1  raw=[  1 1 1  1] assign=IN
+  86.496 ▶ MCU 90 56 7F
+  86.496 ▶ MCU 90 5C 7F
+  86.496 ▶ MCU 90 5C 00
+  86.496 ▶ MCU 90 56 00
+  86.496 ◀ LED CYCLE OFF   tc=  1 1 1  1
+  86.548 ◀ LED CYCLE ON   tc=  1 1 1  1
+┌────────────────────────────────────────────────────────┐
+│Octave Wf     SuOsWa OscMix Cutoff Res    ADSMax ADSMin │
+│4'     Sawtot -2Oct( 47 %   37.795 37.007 50.793 3.174% │
+└────────────────────────────────────────────────────────┘
+POS 1.1.1.1  raw=[  1 1 1  1] assign=IN
+  86.801 ▶ MCU 90 56 7F
+  86.801 ▶ MCU 90 56 00
+  86.801 ◀ LED CYCLE OFF   tc=  1 1 1  1
+LEDs: PLAY=off STOP=ON RECORD=off CYCLE=off CLICK=off LED SMPTE=off LED BEATS=ON | arm: 1:ON 2:off 3:off 4:off 5:off 6:off 7:off 8:off | select: 1:ON 2:off 3:off 4:off 5:off 6:off 7:off 8:off  tc=  1 1 1  1 assign=IN
+quiet true
+ 136.278 GOTO 10.1 from 1.1.1.1
+ 138.169 GOTO done ticks=9 in 1891 ms now 10.1.1.1
+ 138.462 JOG 10 ticks: 10.1.1.1 -> 26.1.1.1 (first change 26 ms after last tick, total 292 ms)
+ 138.462 GOTO 10.1 from 26.1.1.1
+ 140.970 GOTO done ticks=15 in 2507 ms now 10.1.1.1
+ 142.316 JOG 10 ticks: 10.1.1.1 -> 28.1.1.1 (first change -1 ms after last tick, total 1346 ms)
+ 142.316 GOTO 10.1 from 28.1.1.1
+ 145.135 GOTO done ticks=18 in 2819 ms now 10.1.1.1
+ 146.681 JOG 10 ticks: 10.1.1.1 -> 27.1.1.1 (first change -1 ms after last tick, total 1545 ms)
+ 146.681 GOTO 10.1 from 27.1.1.1
+ 149.403 GOTO done ticks=17 in 2721 ms now 10.1.1.1
+ 151.249 JOG 10 ticks: 10.1.1.1 -> 20.1.1.1 (first change -1 ms after last tick, total 1846 ms)
+ 151.250 GOTO 10.1 from 20.1.1.1
+ 153.270 GOTO done ticks=10 in 2020 ms now 10.1.1.1
+ 155.516 JOG 10 ticks: 10.1.1.1 -> 20.1.1.1 (first change -1 ms after last tick, total 2245 ms)
+ 155.516 GOTO 10.1 from 20.1.1.1
+ 157.535 GOTO done ticks=10 in 2019 ms now 10.1.1.1
+ 160.579 JOG 10 ticks: 10.1.1.1 -> 20.1.1.1 (first change -1 ms after last tick, total 3043 ms)
+ 160.579 GOTO 10.1 from 20.1.1.1
+ 162.568 GOTO done ticks=10 in 1988 ms now 10.1.1.1
+ 162.568 GOTO 3.1 from 10.1.1.1
+ 164.284 GOTO done ticks=7 in 1715 ms now 3.1.1.1
+ 164.284 GOTO 17.1 from 3.1.1.1
+ 166.701 GOTO done ticks=14 in 2416 ms now 17.1.1.1
+ 166.701 GOTO 8.1 from 17.1.1.1
+ 168.597 GOTO done ticks=9 in 1895 ms now 8.1.1.1
+ 168.597 GOTO 8.1 from 8.1.1.1
+ 169.598 GOTO done ticks=0 in 1000 ms now 8.1.1.1
+ 169.598 GOTO 9.1 from 8.1.1.1
+ 170.693 GOTO done ticks=1 in 1095 ms now 9.1.1.1
+ 170.694 GOTO 1.1 from 9.1.1.1
+ 172.491 GOTO done ticks=8 in 1797 ms now 1.1.1.1
+ 186.340 JOG 32 ticks: 1.1.1.1 -> 1.4.2.1 (first change -1 ms after last tick, total 3699 ms)
+ 188.757 JOG 32 ticks: 1.4.2.1 -> 3.2.3.31 (first change -1 ms after last tick, total 2417 ms)
+ 194.265 JOG -64 ticks: 3.2.3.31 -> 1.3.4.61 (first change 41 ms after last tick, total 5507 ms)
+POS 1.3.4.61  raw=[  1 3 4 61] assign=IN
+ 253.081 GOTO 1.1 from 1.3.4.61
+ 254.200 GOTO done ticks=1 in 1119 ms now 1.1.1.1
+ 256.642 JOG 8 ticks: 1.1.1.1 -> 1.1.2.181 (first change -1 ms after last tick, total 2237 ms)
+ 260.074 JOG 8 ticks: 1.1.2.181 -> 1.1.3.181 (first change -1 ms after last tick, total 3431 ms)
+ 265.941 JOG -16 ticks: 1.1.3.181 -> 1.1.1.181 (first change -1 ms after last tick, total 5866 ms)
+POS 1.1.1.181  raw=[  1 1 1181] assign=IN
+── MIDI-write spike up. Ports: "MCU Spike" (surface in+out), "Sharpfive Notes" (note source).
+   Logic Pro Virtual In found as alternative target.
+
+COMMANDS
+  select <1-8> | arm <1-8>         SELECT / REC-ARM strip buttons
+  play|stop|rec|rewind|ffwd|cycle|click|smpte|zoom ...   transport & misc buttons
+  btn <hexnote>                    press+release any note
+  target notes|logicin             where note messages go (default: our virtual source)
+  pattern <bpm> <bars> <live|stamped> [note=48] [vel=100] [ch=1] [dur_ms=200]
+                                   quarter notes; live = sleep between sends, stamped =
+                                   all packets queued now with host-time stamps
+  note <n> <vel> [ch] [dur_ms]     one note on/off
+  tc | tcwatch on|off              timecode display (bars.beats.div.ticks or SMPTE)
+  leds                             LED state snapshot (transport, rec-arm, smpte/beats)
+  meters on|off                    log meter onsets per strip with timecode
+  lcd                              2x56 framebuffer
+  quiet on|off | sleep <ms> | raw <hex> | quit
+LOCATE (#26)
+  pos                              parsed beats display bar.beat.div.tick
+  jog <±n> [gap_ms] | jogv <hex>   jog wheel ticks (CC 3C), logs position before/after
+  goto <bar> [beat]                jog bars (90 ms apart, closed loop) then SCRUB-jog to the beat
+  hold <btn> | release <btn>       note-on only / note-off only (for button chords)
+  tx <hex> | mmc locate h m s f    raw bytes / MMC to the note target (notes|logicin)
+quiet true
+POS 1.1.1.181  raw=[  1 1 1181] assign=IN
+   1.523 GOTO 12.1 from 1.1.1.181
+   3.060 GOTO bar phase: 11 ticks, 1536 ms, now 12.1.1.1
+   3.060 GOTO done in 1537 ms now 12.1.1.1
+   3.060 GOTO 3.1 from 12.1.1.1
+   4.427 GOTO bar phase: 9 ticks, 1366 ms, now 3.1.1.1
+   4.427 GOTO done in 1366 ms now 3.1.1.1
+   4.427 GOTO 5.3 from 3.1.1.1
+   5.126 GOTO bar phase: 2 ticks, 699 ms, now 5.1.1.1
+  44.216 GOTO beat phase: 64 scrub ticks, 39089 ms
+  44.216 GOTO done in 39788 ms now 5.3.1.1
+  44.216 GOTO 20.2 from 5.3.1.1
+  45.693 GOTO bar phase: 15 ticks, 1477 ms, now 20.1.1.1
+  65.695 GOTO beat phase: 32 scrub ticks, 20001 ms
+  65.695 GOTO done in 21479 ms now 20.2.1.1
+  65.695 GOTO 7.1 from 20.2.1.1
+  67.526 GOTO bar phase: 14 ticks, 1830 ms, now 7.1.1.1
+  67.526 GOTO done in 1830 ms now 7.1.1.1
+POS 7.1.1.1  raw=[  7 1 1  1] assign=IN
+── MIDI-write spike up. Ports: "MCU Spike" (surface in+out), "Sharpfive Notes" (note source).
+   Logic Pro Virtual In found as alternative target.
+
+COMMANDS
+  select <1-8> | arm <1-8>         SELECT / REC-ARM strip buttons
+  play|stop|rec|rewind|ffwd|cycle|click|smpte|zoom ...   transport & misc buttons
+  btn <hexnote>                    press+release any note
+  target notes|logicin             where note messages go (default: our virtual source)
+  pattern <bpm> <bars> <live|stamped> [note=48] [vel=100] [ch=1] [dur_ms=200]
+                                   quarter notes; live = sleep between sends, stamped =
+                                   all packets queued now with host-time stamps
+  note <n> <vel> [ch] [dur_ms]     one note on/off
+  tc | tcwatch on|off              timecode display (bars.beats.div.ticks or SMPTE)
+  leds                             LED state snapshot (transport, rec-arm, smpte/beats)
+  meters on|off                    log meter onsets per strip with timecode
+  lcd                              2x56 framebuffer
+  quiet on|off | sleep <ms> | raw <hex> | quit
+LOCATE (#26)
+  pos                              parsed beats display bar.beat.div.tick
+  jog <±n> [gap_ms] | jogv <hex>   jog wheel ticks (CC 3C), logs position before/after
+  goto <bar> [beat]                jog bars (90 ms apart, closed loop) then SCRUB-jog to the beat
+  hold <btn> | release <btn>       note-on only / note-off only (for button chords)
+  tx <hex> | mmc locate h m s f    raw bytes / MMC to the note target (notes|logicin)
+quiet true
+POS 7.1.1.1  raw=[  7 1 1  1] assign=IN
+   1.521 GOTO 1.1 from 7.1.1.1
+   2.604 GOTO bar phase: 6 ticks, 1083 ms, now 1.1.1.1
+   2.604 GOTO done in 1083 ms now 1.1.1.1
+meters true
+   2.718 ◀ METER ONSET strip 1 level 9  tc=  1 1 1 83
+   2.718 ◀ METER strip 1 0->9 tc=  1 1 1 83
+   2.718 ◀ METER ONSET strip 3 level 9  tc=  1 1 1 83
+   2.818 ◀ METER strip 1 9->8 tc=  1 1 2 43
+   2.985 ◀ METER strip 1 8->7 tc=  1 1 3127
+   3.685 ◀ METER strip 1 7->6 tc=  1 3 1 30
+   3.718 ◀ METER strip 1 6->7 tc=  1 3 1 95
+   4.118 ◀ METER strip 1 7->6 tc=  1 3 4145
+   4.251 ◀ METER strip 1 6->7 tc=  1 4 1165
+   4.685 ◀ METER strip 1 7->6 tc=  2 1 1 38
+   4.718 ◀ METER strip 1 6->7 tc=  2 1 1101
+   5.118 ◀ METER strip 1 7->6 tc=  2 1 4149
+meters false
+LEDs: PLAY=ON STOP=off RECORD=off CYCLE=off CLICK=off LED SMPTE=off LED BEATS=ON | arm: 1:ON 2:off 3:off 4:off 5:off 6:off 7:off 8:off | select: 1:ON 2:off 3:off 4:off 5:off 6:off 7:off 8:off  tc=  2 2 1100 assign=IN
+   5.209 GOTO 1.1 from 2.2.1.100
+   5.306 GOTO bar phase: 3 ticks, 96 ms, now 1.1.1.1
+   5.306 GOTO done in 97 ms now 1.1.1.1
+   7.386 WAITBAR fired after 574 ms tc=  1 1 4232
+   7.641 PATTERN 4 quarter notes @120.0 bpm (500 ms) mode=stamped target=notes start tc=  1 1 3 24
+   7.641 ▶ NOTE 90 3C 64 on  k=0 +0ms tc=  1 1 3 24
+   7.641 ▶ NOTE 80 3C 00 off k=0 tc=  1 1 3 24
+   7.641 ▶ NOTE 90 3C 64 on  k=1 +500ms tc=  1 1 3 24
+   7.641 ▶ NOTE 80 3C 00 off k=1 tc=  1 1 3 24
+   7.641 ▶ NOTE 90 3C 64 on  k=2 +1000ms tc=  1 1 3 24
+   7.641 ▶ NOTE 80 3C 00 off k=2 tc=  1 1 3 24
+   7.641 ▶ NOTE 90 3C 64 on  k=3 +1500ms tc=  1 1 3 24
+   7.641 ▶ NOTE 80 3C 00 off k=3 tc=  1 1 3 24
+   7.641 PATTERN all 8 packets queued; waiting 2000 ms
+   9.946 PATTERN done tc=  2 2 1119
+LEDs: PLAY=off STOP=ON RECORD=off CYCLE=off CLICK=off LED SMPTE=off LED BEATS=ON | arm: 1:ON 2:off 3:off 4:off 5:off 6:off 7:off 8:off | select: 1:ON 2:off 3:off 4:off 5:off 6:off 7:off 8:off  tc=  2 2 4 43 assign=IN
+  10.755 GOTO 1.1 from 2.2.4.43
+  10.973 GOTO bar phase: 2 ticks, 217 ms, now 1.1.1.1
+  10.973 GOTO done in 217 ms now 1.1.1.1
+meters true
+  11.085 ◀ METER ONSET strip 1 level 9  tc=  1 1 1 92
+  11.085 ◀ METER strip 1 5->9 tc=  1 1 1 92
+  11.085 ◀ METER ONSET strip 3 level 9  tc=  1 1 1 92
+  11.184 ◀ METER strip 1 9->8 tc=  1 1 2 43
+  11.352 ◀ METER strip 1 8->7 tc=  1 1 3124
+  12.352 ◀ METER strip 1 7->6 tc=  1 3 3126
+  12.418 ◀ METER strip 1 6->7 tc=  1 3 4 16
+  12.851 ◀ METER strip 1 7->6 tc=  1 4 3129
+  12.885 ◀ METER strip 1 6->8 tc=  1 4 3192
+  13.018 ◀ METER strip 1 8->7 tc=  1 4 4208
+  13.352 ◀ METER strip 1 7->6 tc=  2 1 3128
+meters false
+LEDs: PLAY=off STOP=ON RECORD=off CYCLE=off CLICK=off LED SMPTE=off LED BEATS=ON | arm: 1:ON 2:off 3:off 4:off 5:off 6:off 7:off 8:off | select: 1:ON 2:off 3:off 4:off 5:off 6:off 7:off 8:off  tc=  2 2 1147 assign=IN
+  13.882 GOTO 3.1 from 2.2.1.147
+  13.975 GOTO bar phase: 1 ticks, 92 ms, now 3.1.1.1
+  13.975 GOTO done in 92 ms now 3.1.1.1
+  16.052 WAITBAR fired after 572 ms tc=  3 1 4233
+  16.307 PATTERN 4 quarter notes @120.0 bpm (500 ms) mode=stamped target=notes start tc=  3 1 3 25
+  16.307 ▶ NOTE 90 3C 64 on  k=0 +0ms tc=  3 1 3 25
+  16.307 ▶ NOTE 80 3C 00 off k=0 tc=  3 1 3 25
+  16.307 ▶ NOTE 90 3C 64 on  k=1 +500ms tc=  3 1 3 25
+  16.307 ▶ NOTE 80 3C 00 off k=1 tc=  3 1 3 25
+  16.307 ▶ NOTE 90 3C 64 on  k=2 +1000ms tc=  3 1 3 25
+  16.307 ▶ NOTE 80 3C 00 off k=2 tc=  3 1 3 25
+  16.307 ▶ NOTE 90 3C 64 on  k=3 +1500ms tc=  3 1 3 25
+  16.307 ▶ NOTE 80 3C 00 off k=3 tc=  3 1 3 25
+  16.307 PATTERN all 8 packets queued; waiting 2000 ms
+  18.611 PATTERN done tc=  4 2 1120
+LEDs: PLAY=off STOP=ON RECORD=off CYCLE=off CLICK=off LED SMPTE=off LED BEATS=ON | arm: 1:ON 2:off 3:off 4:off 5:off 6:off 7:off 8:off | select: 1:ON 2:off 3:off 4:off 5:off 6:off 7:off 8:off  tc=  4 2 4 36 assign=IN
+  19.726 GOTO 3.1 from 4.2.4.36
+  19.940 GOTO bar phase: 2 ticks, 214 ms, now 3.1.1.1
+  19.940 GOTO done in 214 ms now 3.1.1.1
+meters true
+  20.418 ◀ METER ONSET strip 1 level 8  tc=  3 1 4 77
+  20.418 ◀ METER strip 1 4->8 tc=  3 1 4 77
+  20.419 ◀ METER ONSET strip 3 level 8  tc=  3 1 4 77
+  20.618 ◀ METER strip 1 8->7 tc=  3 2 1221
+  21.318 ◀ METER strip 1 7->6 tc=  3 3 3126
+  21.418 ◀ METER strip 1 6->8 tc=  3 3 4 79
+  21.551 ◀ METER strip 1 8->7 tc=  3 4 1 95
+  22.317 ◀ METER strip 1 7->6 tc=  4 1 3128
+meters false
+unknown: RECTEST_DONE
+quiet false
+  55.429 ▶ MCU 90 58 7F
+  55.430 ▶ MCU 90 58 00
+  55.430 ◀ LED REPLACE ON   tc=  4 2 1146
+  55.734 ▶ MCU 90 58 7F
+  55.734 ▶ MCU 90 58 00
+  55.735 ◀ LED REPLACE OFF   tc=  4 2 1146
+  56.039 ▶ MCU 90 57 7F
+  56.039 ▶ MCU 90 57 00
+  56.074 ◀ LED DROP ON   tc=  4 2 1146
+  56.344 ▶ MCU 90 57 7F
+  56.344 ▶ MCU 90 57 00
+  56.358 ◀ LED DROP OFF   tc=  4 2 1146
+quiet true
+unknown: REPLACE_DONE
