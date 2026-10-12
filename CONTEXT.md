@@ -34,7 +34,7 @@ Verifying an action landed rather than firing blind — via control-surface feed
 
 ### Round-trip
 
-The pattern for editing notes in an existing region despite no protocol existing for it: export the region as MIDI, edit the sequence outside Logic, replace the region. Converts an impossible operation into two solved ones.
+The pattern for editing notes in an existing region despite no protocol existing for it: take an export snapshot, edit the note list outside Logic, clear the old region, place the edited one, compare. Converts an impossible operation into solved ones.
 
 ### Strip
 
@@ -59,3 +59,44 @@ One screen of up to eight parameters in plug-in edit view. A plug-in spans one o
 ### Transient
 
 A short-lived overlay the surface shows for about two seconds after a touch or a page change, carrying extra facts (full parameter name, unit, page count) that the steady display abbreviates. A source of facts, not noise.
+
+### Region
+
+One block of MIDI events on one track, with a start and an end. The unit a round-trip edits.
+
+### Region handle
+
+How the agent points at one region: the track plus the start bar, as read from Logic's accessibility tree. A region's name is shown beside the handle but never identifies it, because names repeat.
+
+### Export snapshot
+
+The MIDI file the agent writes out of Logic. A copy of every region at one moment. Taking one changes nothing in the project. The snapshot taken before an edit is also the proof for undo.
+
+### Place
+
+Put a prepared MIDI file onto a track at a bar. Positions in the file land exactly. The way an edited region goes back into Logic.
+_Avoid_: import, paste, drop
+
+### Record
+
+Play notes into Logic in real time from the agent's own MIDI source. Notes land late by a varying amount. The way new material is written when the musician asks for a performance; never the way an edit goes back.
+
+### Merge
+
+Recording with REPLACE off. The new notes join the old notes in the same region.
+
+### Replace
+
+Recording with REPLACE on. The old notes under the recording are erased, from the record start to the STOP press.
+
+### Compare
+
+The readback for a region edit: export again, parse, and check the result against the plan. The edit is confirmed only when they match.
+
+### Take folder
+
+A stack of recordings of the same bars on one track. Logic plays one take and keeps the rest. The round-trip refuses to edit inside one.
+
+### Humanize
+
+Move notes and velocities off the grid by small amounts, on request. The opposite of quantise. The agent's own new notes land on the grid unless asked otherwise; notes the musician played are never moved unless the edit names them.
