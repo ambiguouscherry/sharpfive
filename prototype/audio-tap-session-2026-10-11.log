@@ -1,0 +1,1141 @@
+# audio-tap spike session log, 2026-10-11 (ticket #7)
+# Run 1: AUNetReceive with hostname only never connects (no TCP attempt). Run 2: Disconnect=0 trigger connects;
+# Inst 1 slot-2 tap, two PLAY/STOP cycles, removal from the surface, Stereo Out slot-2 tap.
+
+## RUN 1
+── MIDI-write spike up. Ports: "MCU Spike" (surface in+out), "Sharpfive Notes" (note source).
+   Logic Pro Virtual In found as alternative target.
+
+COMMANDS
+  select <1-8> | arm <1-8>         SELECT / REC-ARM strip buttons
+  play|stop|rec|rewind|ffwd|cycle|click|smpte|zoom ...   transport & misc buttons
+  btn <hexnote>                    press+release any note
+  target notes|logicin             where note messages go (default: our virtual source)
+  pattern <bpm> <bars> <live|stamped> [note=48] [vel=100] [ch=1] [dur_ms=200]
+                                   quarter notes; live = sleep between sends, stamped =
+                                   all packets queued now with host-time stamps
+  note <n> <vel> [ch] [dur_ms]     one note on/off
+  tc | tcwatch on|off              timecode display (bars.beats.div.ticks or SMPTE)
+  leds                             LED state snapshot (transport, rec-arm, smpte/beats)
+  meters on|off                    log meter onsets per strip with timecode
+  lcd                              2x56 framebuffer
+  quiet on|off | sleep <ms> | raw <hex> | quit
+LOCATE (#26)
+  pos                              parsed beats display bar.beat.div.tick
+  jog <±n> [gap_ms] | jogv <hex>   jog wheel ticks (CC 3C), logs position before/after
+  goto <bar> [beat]                jog bars (90 ms apart, closed loop) then SCRUB-jog to the beat
+  hold <btn> | release <btn>       note-on only / note-off only (for button chords)
+  tx <hex> | mmc locate h m s f    raw bytes / MMC to the note target (notes|logicin)
+AUDIO TAP (#7)
+  tap connect [host:port] [rate]   host AUNetReceive, point it at AUNetSend (default 127.0.0.1:52800), start pulling
+  tap status | tap watch on|off     connection status / log every non-silent 100 ms window
+  tap disconnect
+  capture <seconds>                 collect 100 ms windows for N s and print them as JSON
+  scrollto <text> [maxticks] [strip] [gap_ms] [dir]   in PLUG-IN view: tick the v-pot until the LCD bottom row shows <text>
+   0.296 ▶ MCU F0 00 00 66 14 01 53 50 49 4B 45 30 31 01 02 03 04 F7
+   0.309 ◀ LED REC-ARM ch1 ON   tc= 13 1 3  9
+   0.310 ◀ LED REC-ARM ch2 OFF   tc= 13 1 3  9
+   0.311 ◀ LED REC-ARM ch3 OFF   tc= 13 1 3  9
+   0.311 ◀ LED REC-ARM ch4 OFF   tc= 13 1 3  9
+   0.311 ◀ LED REC-ARM ch5 OFF   tc= 13 1 3  9
+   0.311 ◀ LED REC-ARM ch6 OFF   tc= 13 1 3  9
+   0.312 ◀ LED REC-ARM ch7 OFF   tc= 13 1 3  9
+   0.313 ◀ LED REC-ARM ch8 OFF   tc= 13 1 3  9
+   0.313 ◀ LED SOLO ch1 OFF   tc= 13 1 3  9
+   0.314 ◀ LED SOLO ch2 OFF   tc= 13 1 3  9
+   0.314 ◀ LED SOLO ch3 OFF   tc= 13 1 3  9
+   0.314 ◀ LED SOLO ch4 OFF   tc= 13 1 3  9
+   0.314 ◀ LED SOLO ch5 OFF   tc= 13 1 3  9
+   0.315 ◀ LED SOLO ch6 OFF   tc= 13 1 3  9
+   0.315 ◀ LED SOLO ch7 OFF   tc= 13 1 3  9
+   0.315 ◀ LED SOLO ch8 OFF   tc= 13 1 3  9
+   0.316 ◀ LED MUTE ch1 OFF   tc= 13 1 3  9
+   0.316 ◀ LED MUTE ch2 OFF   tc= 13 1 3  9
+   0.316 ◀ LED MUTE ch3 OFF   tc= 13 1 3  9
+   0.316 ◀ LED MUTE ch4 OFF   tc= 13 1 3  9
+   0.317 ◀ LED MUTE ch5 OFF   tc= 13 1 3  9
+   0.317 ◀ LED MUTE ch6 OFF   tc= 13 1 3  9
+   0.317 ◀ LED MUTE ch7 OFF   tc= 13 1 3  9
+   0.318 ◀ LED MUTE ch8 OFF   tc= 13 1 3  9
+   0.318 ◀ LED SELECT ch1 ON   tc= 13 1 3  9
+   0.318 ◀ LED SELECT ch2 OFF   tc= 13 1 3  9
+   0.319 ◀ LED SELECT ch3 OFF   tc= 13 1 3  9
+   0.319 ◀ LED SELECT ch4 OFF   tc= 13 1 3  9
+   0.319 ◀ LED SELECT ch5 OFF   tc= 13 1 3  9
+   0.319 ◀ LED SELECT ch6 OFF   tc= 13 1 3  9
+   0.320 ◀ LED SELECT ch7 OFF   tc= 13 1 3  9
+   0.320 ◀ LED SELECT ch8 OFF   tc= 13 1 3  9
+   0.321 ◀ LED VPOT PRESS ch1 OFF   tc= 13 1 3  9
+   0.321 ◀ LED VPOT PRESS ch2 OFF   tc= 13 1 3  9
+   0.321 ◀ LED VPOT PRESS ch3 OFF   tc= 13 1 3  9
+   0.322 ◀ LED VPOT PRESS ch4 OFF   tc= 13 1 3  9
+   0.322 ◀ LED VPOT PRESS ch5 OFF   tc= 13 1 3  9
+   0.322 ◀ LED VPOT PRESS ch6 OFF   tc= 13 1 3  9
+   0.323 ◀ LED VPOT PRESS ch7 OFF   tc= 13 1 3  9
+   0.323 ◀ LED VPOT PRESS ch8 OFF   tc= 13 1 3  9
+   0.323 ◀ LED TRACK OFF   tc= 13 1 3  9
+   0.324 ◀ LED note 29 OFF   tc= 13 1 3  9
+   0.325 ◀ LED note 2A OFF   tc= 13 1 3  9
+   0.325 ◀ LED PLUG-IN OFF   tc= 13 1 3  9
+   0.325 ◀ LED note 2C OFF   tc= 13 1 3  9
+   0.326 ◀ LED note 2D ON   tc= 13 1 3  9
+   0.326 ◀ LED FLIP OFF   tc= 13 1 3  9
+   0.326 ◀ LED GLOBAL VIEW OFF   tc= 13 1 3  9
+   0.327 ◀ LED note 4A ON   tc= 13 1 3  9
+   0.327 ◀ LED note 4B OFF   tc= 13 1 3  9
+   0.327 ◀ LED note 4C OFF   tc= 13 1 3  9
+   0.327 ◀ LED note 4D OFF   tc= 13 1 3  9
+   0.328 ◀ LED note 4E OFF   tc= 13 1 3  9
+   0.328 ◀ LED note 4F OFF   tc= 13 1 3  9
+   0.328 ◀ LED note 50 ON   tc= 13 1 3  9
+   0.329 ◀ LED note 51 ON   tc= 13 1 3  9
+   0.329 ◀ LED note 54 OFF   tc= 13 1 3  9
+   0.329 ◀ LED note 55 OFF   tc= 13 1 3  9
+   0.330 ◀ LED CYCLE OFF   tc= 13 1 3  9
+   0.330 ◀ LED DROP OFF   tc= 13 1 3  9
+   0.330 ◀ LED REPLACE OFF   tc= 13 1 3  9
+   0.331 ◀ LED CLICK OFF   tc= 13 1 3  9
+   0.331 ◀ LED SOLO OFF   tc= 13 1 3  9
+   0.331 ◀ LED REWIND OFF   tc= 13 1 3  9
+   0.331 ◀ LED FFWD OFF   tc= 13 1 3  9
+   0.332 ◀ LED STOP ON   tc= 13 1 3  9
+   0.332 ◀ LED PLAY OFF   tc= 13 1 3  9
+   0.332 ◀ LED RECORD OFF   tc= 13 1 3  9
+   0.333 ◀ LED ZOOM OFF   tc= 13 1 3  9
+   0.333 ◀ LED SCRUB OFF   tc= 13 1 3  9
+   0.333 ◀ LED LED SMPTE OFF   tc= 13 1 3  9
+   0.333 ◀ LED LED BEATS ON   tc= 13 1 3  9
+   0.334 ◀ LED RUDE SOLO OFF   tc= 13 1 3  9
+   0.334 ◀ FADER ECHO strip 1 = 12443
+   0.335 ◀ FADER ECHO strip 2 = 12443
+   0.335 ◀ FADER ECHO strip 3 = 12443
+   0.335 ◀ FADER ECHO strip 4 = 12443
+   0.336 ◀ FADER ECHO strip 5 = 0
+   0.336 ◀ FADER ECHO strip 6 = 0
+   0.336 ◀ FADER ECHO strip 7 = 0
+   0.337 ◀ FADER ECHO strip 8 = 0
+   0.337 ◀ FADER ECHO strip 9 = 12443
+   0.337 ◀ FADER ECHO strip 10 = 0
+   0.340 ▶ MCU F0 00 00 66 14 01 53 50 49 4B 45 30 31 01 02 03 04 F7
+   0.340 ▶ MCU F0 00 00 66 14 01 53 50 49 4B 45 30 31 01 02 03 04 F7
+   0.341 ▶ MCU F0 00 00 66 14 01 53 50 49 4B 45 30 31 01 02 03 04 F7
+   0.341 ▶ MCU F0 00 00 66 14 14 56 31 2E 30 F7
+   0.341 ▶ MCU F0 00 00 66 14 01 53 50 49 4B 45 30 31 01 02 03 04 F7
+   0.341 ▶ MCU F0 00 00 66 14 14 56 31 2E 30 F7
+   0.341 ▶ MCU F0 00 00 66 14 01 53 50 49 4B 45 30 31 01 02 03 04 F7
+   0.341 ▶ MCU F0 00 00 66 14 14 56 31 2E 30 F7
+   0.341 ▶ MCU F0 00 00 66 14 01 53 50 49 4B 45 30 31 01 02 03 04 F7
+   0.342 ▶ MCU F0 00 00 66 14 14 56 31 2E 30 F7
+   0.342 ▶ MCU F0 00 00 66 14 01 53 50 49 4B 45 30 31 01 02 03 04 F7
+   0.342 ▶ MCU F0 00 00 66 14 14 56 31 2E 30 F7
+   0.342 ▶ MCU F0 00 00 66 14 01 53 50 49 4B 45 30 31 01 02 03 04 F7
+   0.342 ▶ MCU F0 00 00 66 14 14 56 31 2E 30 F7
+   0.342 ▶ MCU F0 00 00 66 14 01 53 50 49 4B 45 30 31 01 02 03 04 F7
+   0.342 ▶ MCU F0 00 00 66 14 14 56 31 2E 30 F7
+   0.380 ▶ MCU F0 00 00 66 14 14 56 31 2E 30 F7
+   0.380 ▶ MCU F0 00 00 66 14 14 56 31 2E 30 F7
+   0.381 ▶ MCU F0 00 00 66 14 14 56 31 2E 30 F7
+   0.381 ▶ MCU F0 00 00 66 14 14 56 31 2E 30 F7
+   0.395 ◀ LED REC-ARM ch1 ON   tc= 13 1 3  9
+   0.395 ◀ LED REC-ARM ch2 OFF   tc= 13 1 3  9
+   0.395 ◀ LED REC-ARM ch3 OFF   tc= 13 1 3  9
+   0.396 ◀ LED REC-ARM ch4 OFF   tc= 13 1 3  9
+   0.396 ◀ LED REC-ARM ch5 OFF   tc= 13 1 3  9
+   0.396 ◀ LED REC-ARM ch6 OFF   tc= 13 1 3  9
+   0.397 ◀ LED REC-ARM ch7 OFF   tc= 13 1 3  9
+   0.397 ◀ LED REC-ARM ch8 OFF   tc= 13 1 3  9
+   0.397 ◀ LED SOLO ch1 OFF   tc= 13 1 3  9
+   0.398 ◀ LED SOLO ch2 OFF   tc= 13 1 3  9
+   0.398 ◀ LED SOLO ch3 OFF   tc= 13 1 3  9
+   0.398 ◀ LED SOLO ch4 OFF   tc= 13 1 3  9
+   0.398 ◀ LED SOLO ch5 OFF   tc= 13 1 3  9
+   0.399 ◀ LED SOLO ch6 OFF   tc= 13 1 3  9
+   0.399 ◀ LED SOLO ch7 OFF   tc= 13 1 3  9
+   0.399 ◀ LED SOLO ch8 OFF   tc= 13 1 3  9
+   0.400 ◀ LED MUTE ch1 OFF   tc= 13 1 3  9
+   0.400 ◀ LED MUTE ch2 OFF   tc= 13 1 3  9
+   0.400 ◀ LED MUTE ch3 OFF   tc= 13 1 3  9
+   0.401 ◀ LED MUTE ch4 OFF   tc= 13 1 3  9
+   0.401 ◀ LED MUTE ch5 OFF   tc= 13 1 3  9
+   0.401 ◀ LED MUTE ch6 OFF   tc= 13 1 3  9
+   0.402 ◀ LED MUTE ch7 OFF   tc= 13 1 3  9
+   0.402 ◀ LED MUTE ch8 OFF   tc= 13 1 3  9
+   0.402 ◀ LED SELECT ch1 ON   tc= 13 1 3  9
+   0.402 ◀ LED SELECT ch2 OFF   tc= 13 1 3  9
+   0.403 ◀ LED SELECT ch3 OFF   tc= 13 1 3  9
+   0.403 ◀ LED SELECT ch4 OFF   tc= 13 1 3  9
+   0.403 ◀ LED SELECT ch5 OFF   tc= 13 1 3  9
+   0.404 ◀ LED SELECT ch6 OFF   tc= 13 1 3  9
+   0.404 ◀ LED SELECT ch7 OFF   tc= 13 1 3  9
+   0.404 ◀ LED SELECT ch8 OFF   tc= 13 1 3  9
+   0.405 ◀ LED VPOT PRESS ch1 OFF   tc= 13 1 3  9
+   0.405 ◀ LED VPOT PRESS ch2 OFF   tc= 13 1 3  9
+   0.405 ◀ LED VPOT PRESS ch3 OFF   tc= 13 1 3  9
+   0.406 ◀ LED VPOT PRESS ch4 OFF   tc= 13 1 3  9
+   0.406 ◀ LED VPOT PRESS ch5 OFF   tc= 13 1 3  9
+   0.406 ◀ LED VPOT PRESS ch6 OFF   tc= 13 1 3  9
+   0.407 ◀ LED VPOT PRESS ch7 OFF   tc= 13 1 3  9
+   0.407 ◀ LED VPOT PRESS ch8 OFF   tc= 13 1 3  9
+   0.407 ◀ LED TRACK OFF   tc= 13 1 3  9
+   0.407 ◀ LED note 29 OFF   tc= 13 1 3  9
+   0.408 ◀ LED note 2A OFF   tc= 13 1 3  9
+   0.408 ◀ LED PLUG-IN OFF   tc= 13 1 3  9
+   0.408 ◀ LED note 2C OFF   tc= 13 1 3  9
+   0.409 ◀ LED note 2D ON   tc= 13 1 3  9
+   0.409 ◀ LED FLIP OFF   tc= 13 1 3  9
+   0.409 ◀ LED GLOBAL VIEW OFF   tc= 13 1 3  9
+   0.410 ◀ LED note 4A ON   tc= 13 1 3  9
+   0.410 ◀ LED note 4B OFF   tc= 13 1 3  9
+   0.410 ◀ LED note 4C OFF   tc= 13 1 3  9
+   0.411 ◀ LED note 4D OFF   tc= 13 1 3  9
+   0.411 ◀ LED note 4E OFF   tc= 13 1 3  9
+   0.411 ◀ LED note 4F OFF   tc= 13 1 3  9
+   0.412 ◀ LED note 50 ON   tc= 13 1 3  9
+   0.412 ◀ LED note 51 ON   tc= 13 1 3  9
+   0.412 ◀ LED note 54 OFF   tc= 13 1 3  9
+   0.413 ◀ LED note 55 OFF   tc= 13 1 3  9
+   0.413 ◀ LED CYCLE OFF   tc= 13 1 3  9
+   0.413 ◀ LED DROP OFF   tc= 13 1 3  9
+   0.414 ◀ LED REPLACE OFF   tc= 13 1 3  9
+   0.414 ◀ LED CLICK OFF   tc= 13 1 3  9
+   0.414 ◀ LED SOLO OFF   tc= 13 1 3  9
+   0.415 ◀ LED REWIND OFF   tc= 13 1 3  9
+   0.415 ◀ LED FFWD OFF   tc= 13 1 3  9
+   0.415 ◀ LED STOP ON   tc= 13 1 3  9
+   0.415 ◀ LED PLAY OFF   tc= 13 1 3  9
+   0.416 ◀ LED RECORD OFF   tc= 13 1 3  9
+   0.416 ◀ LED ZOOM OFF   tc= 13 1 3  9
+   0.416 ◀ LED SCRUB OFF   tc= 13 1 3  9
+   0.417 ◀ LED LED SMPTE OFF   tc= 13 1 3  9
+   0.417 ◀ LED LED BEATS ON   tc= 13 1 3  9
+   0.417 ◀ LED RUDE SOLO OFF   tc= 13 1 3  9
+   0.418 ◀ FADER ECHO strip 1 = 12443
+   0.418 ◀ FADER ECHO strip 2 = 12443
+   0.419 ◀ FADER ECHO strip 3 = 12443
+   0.419 ◀ FADER ECHO strip 4 = 12443
+   0.419 ◀ FADER ECHO strip 5 = 0
+   0.420 ◀ FADER ECHO strip 6 = 0
+   0.420 ◀ FADER ECHO strip 7 = 0
+   0.420 ◀ FADER ECHO strip 8 = 0
+   0.421 ◀ FADER ECHO strip 9 = 12443
+   0.421 ◀ FADER ECHO strip 10 = 0
+quiet true
+POS 13.1.3.9  raw=[ 13 1 3  9] assign=IN
+LEDs: PLAY=off STOP=ON RECORD=off CYCLE=off CLICK=off LED SMPTE=off LED BEATS=ON | arm: 1:ON 2:off 3:off 4:off 5:off 6:off 7:off 8:off | select: 1:ON 2:off 3:off 4:off 5:off 6:off 7:off 8:off  tc= 13 1 3  9 assign=IN
+┌────────────────────────────────────────────────────────┐
+│Octave Wf     SuOsWa OscMix Cutoff Res    ADSMax ADSMin │
+│4'     Sawtot -2Oct( 47 %   37.795 37.007 50.793 3.174% │
+└────────────────────────────────────────────────────────┘
+   2.119 TAP set hostname "127.0.0.1:52800" -> 0
+   2.119 TAP set output format 48000 Hz float32 x2 non-interleaved -> 0
+   2.121 TAP initialize -> 0
+   2.121 TAP output format now: 48000 Hz, 2 ch, flags 29, 32 bit
+   2.121 TAP status NotConnected(0)
+   2.121 TAP pulling 512 frames per render at 48000 Hz
+┌────────────────────────────────────────────────────────┐
+│CirTyp Thrs   Ratio  Attack Rel    AutRel MakeUp AutGai │
+│PltDig -20.0  2.1:1  15.0ms 51.0ms On     0.0 dB -12dB  │
+└────────────────────────────────────────────────────────┘
+POS 13.1.3.9  raw=[ 13 1 3  9] assign=P1
+┌────────────────────────────────────────────────────────┐
+│-      -      -      -      -      -      Insert 2 "--" │
+│                                                        │
+└────────────────────────────────────────────────────────┘
+POS 13.1.3.9  raw=[ 13 1 3  9] assign=P2
+  23.252 SCROLLTO "AUNetSend" from bottom="                                                        "
+  23.507 SCROLLTO not found in 4 ticks
+┌────────────────────────────────────────────────────────┐
+│-      -      -      -      -      -      -      -      │
+│                                                        │
+└────────────────────────────────────────────────────────┘
+POS 13.1.3.9  raw=[ 13 1 3  9] assign=P2
+┌────────────────────────────────────────────────────────┐
+│hell:P Inst 2 St Out Master                             │
+│--     --     --                                        │
+└────────────────────────────────────────────────────────┘
+POS 13.1.3.9  raw=[ 13 1 3  9] assign=P2
+  30.972 SCROLLTO "AUNetSend" from bottom="--     --     --                                        "
+  31.035   tick 1: "--                                                      "
+  31.099   tick 2: "Low Pass Filter (m/m)                                   "
+  31.163   tick 3: "High Pass Filter (m/m)                                  "
+  31.163 SCROLLTO not found in 3 ticks
+┌────────────────────────────────────────────────────────┐
+│Insert 2 Plug-in                                        │
+│High Pass Filter (m/m)                                  │
+└────────────────────────────────────────────────────────┘
+  40.529 SCROLLTO "AUNetSend" from bottom="HiPass --     --                                        "
+  40.573   tick 1: "High Pass Filter (m/m)                                  "
+  40.618   tick 2: "High Shelving EQ (m/m)                                  "
+  40.707   tick 4: "Chorus (m/s)                                            "
+  40.752   tick 5: "Flanger (m/m)                                           "
+  40.840   tick 7: "Tape Delay (m/m)                                        "
+  40.929   tick 9: "Echo (m/m)                                              "
+  40.974   tick 10: "Stereo Delay (m/s)                                      "
+  41.063   tick 12: "SilverVerb (m/m)                                        "
+  41.107   tick 13: "PlatinumVerb (m/m)                                      "
+  41.197   tick 15: "PlatinumVerb (m/s)                                      "
+  41.240   tick 16: "Phaser (m/s)                                            "
+  41.330   tick 18: "Microphaser (m/m)                                       "
+  41.374   tick 19: "Compressor (m/m)                                        "
+  41.463   tick 21: "Fuzz-Wah (m/m)                                          "
+  41.507   tick 22: "Enveloper (m/m)                                         "
+  41.595   tick 24: "Pitch Shifter (m/m)                                     "
+  41.639   tick 25: "DeEsser (m/m)                                           "
+  41.683   tick 26: "Ensemble (m/s)                                          "
+  41.772   tick 28: "AutoFilter (m/m)                                        "
+  41.816   tick 29: "AutoFilter (m/s)                                        "
+  41.860   tick 30: "Bitcrusher (m/m)                                        "
+  41.904   tick 31: "Distortion (m/m)                                        "
+  41.949   tick 32: "EnVerb (m/m)                                            "
+  42.035   tick 34: "EnVerb (m/s)                                            "
+  42.078   tick 35: "Spectral Gate (m/m)                                     "
+  42.167   tick 37: "High Cut (m/m)                                          "
+  42.212   tick 38: "Fat EQ (m/m)                                            "
+  42.301   tick 40: "Silver EQ (m/m)                                         "
+  42.341   tick 41: "GoldVerb (m/m)                                          "
+  42.430   tick 43: "GoldVerb (m/s)                                          "
+  42.475   tick 44: "Silver Gate (m/m)                                       "
+  42.563   tick 46: "Modulation Delay (m/m)                                  "
+  42.607   tick 47: "Direction Mixer (m/s)                                   "
+  42.696   tick 49: "Gain (m/m)                                              "
+  42.741   tick 50: "Tremolo (m/m)                                           "
+  42.831   tick 52: "Tremolo (m/s)                                           "
+  42.875   tick 53: "EVOC 20 TrackOscillator (m/s)                           "
+  42.964   tick 55: "Clip Distortion (m/m)                                   "
+  43.009   tick 56: "AVerb (m/s)                                             "
+  43.098   tick 58: "Adaptive Limiter (m/m)                                  "
+  43.142   tick 59: "Denoiser (m/m)                                          "
+  43.229   tick 61: "Phase Distortion (m/m)                                  "
+  43.275   tick 62: "Stereo Spread (m/s)                                     "
+  43.363   tick 64: "Limiter (m/m)                                           "
+  43.407   tick 65: "Distortion II (m/m)                                     "
+  43.451   tick 66: "Scanner Vibrato (m/m)                                   "
+  43.540   tick 68: "Rotor Cabinet (m/s)                                     "
+  43.630   tick 70: "Space Designer (m/m)                                    "
+  43.675   tick 71: "Pitch Correction (m/m)                                  "
+  43.763   tick 73: "Channel EQ (m/m)                                        "
+  43.806   tick 74: "MultiMeter (m/m)                                        "
+  43.852   tick 75: "BPM Counter (m/m)                                       "
+  43.940   tick 77: "Guitar Amp Pro (m/m)                                    "
+  44.030   tick 79: "Match EQ (m/m)                                          "
+  44.074   tick 80: "Delay Designer (m/s)                                    "
+  44.162   tick 82: "Vocal Transformer (m/m)                                 "
+  44.206   tick 83: "Grooveshifter (m/m)                                     "
+  44.251   tick 84: "Ringshifter (m/m)                                       "
+  44.294   tick 85: "Ringshifter (m/s)                                       "
+  44.339   tick 86: "Level Meter (m/m)                                       "
+  44.382   tick 87: "Bass Amp (m/m)                                          "
+  44.472   tick 89: "Spreader (m/m)                                          "
+  44.516   tick 90: "Sample Delay (m/m)                                      "
+  44.603   tick 92: "Sample Delay (m/s)                                      "
+  44.646   tick 93: "Pedalboard (m/m)                                        "
+  44.734   tick 95: "Pedalboard (m/s)                                        "
+  44.779   tick 96: "Grinder (m/m)                                           "
+  44.868   tick 98: "Fuzz Machine (m/m)                                      "
+  44.912   tick 99: "Retro Chorus (m/s)                                      "
+  45.001   tick 101: "Robo Flanger (m/m)                                      "
+  45.045   tick 102: "The Vibe (m/m)                                          "
+  45.134   tick 104: "The Vibe (m/s)                                          "
+  45.179   tick 105: "Blue Echo (m/m)                                         "
+  45.268   tick 107: "Squash Compressor (m/m)                                 "
+  45.312   tick 108: "Happy Face Fuzz (m/m)                                   "
+  45.398   tick 110: "Monster Fuzz (m/m)                                      "
+  45.443   tick 111: "Double Dragon (m/m)                                     "
+  45.532   tick 113: "Rawk! Distortion (m/m)                                  "
+  45.577   tick 114: "Spin Box (m/m)                                          "
+  45.665   tick 116: "Spin Box (m/s)                                          "
+  45.710   tick 117: "Roto Phase (m/s)                                        "
+  45.795   tick 119: "Heavenly Chorus (m/m)                                   "
+  45.840   tick 120: "Trem-O-Tone (m/m)                                       "
+  45.929   tick 122: "Trem-O-Tone (m/s)                                       "
+  45.974   tick 123: "Phaze 2 (m/s)                                           "
+  46.019   tick 124: "Roswell Ringer (m/m)                                    "
+  46.107   tick 126: "Total Tremolo (m/m)                                     "
+  46.197   tick 128: "Total Tremolo (m/s)                                     "
+  46.241   tick 129: "Modern Wah (m/m)                                        "
+  46.328   tick 131: "Tru-Tape Delay (m/m)                                    "
+  46.373   tick 132: "Phase Tripper (m/m)                                     "
+  46.462   tick 134: "Phase Tripper (m/s)                                     "
+  46.508   tick 135: "Flange Factory (m/s)                                    "
+  46.597   tick 137: "Tube Burner (m/m)                                       "
+  46.640   tick 138: "Dr. Octave (m/m)                                        "
+  46.728   tick 140: "Graphic EQ (m/m)                                        "
+  46.773   tick 141: "Grit (m/m)                                              "
+  46.861   tick 143: "Amp Designer (m/m)                                      "
+  46.907   tick 144: "Vintage Graphic EQ (m/m)                                "
+  46.995   tick 146: "Vintage Console EQ (m/m)                                "
+  47.040   tick 147: "ChromaVerb (m/s)                                        "
+  47.128   tick 149: "Phat FX (m/m)                                           "
+  47.174   tick 150: "Step FX (m/m)                                           "
+  47.262   tick 152: "Step FX (m/s)                                           "
+  47.307   tick 153: "Bass Amp Designer (m/m)                                 "
+  47.350   tick 154: "Quantec Room Simulator (m/m)                            "
+  47.440   tick 156: "Beat Breaker (m/m)                                      "
+  47.528   tick 158: "Single Band EQ (m/m)                                    "
+  47.573   tick 159: "Loudness Meter (m/m)                                    "
+  47.662   tick 161: "Auto Sampler (m/m)                                      "
+  47.707   tick 162: "I/O (m/s)                                               "
+  47.750   tick 163: "Tape Fiasco (m/m)                                       "
+  47.840   tick 165: "AUDynamicsProcessor (m/m)                               "
+  47.928   tick 167: "AUDelay (m/m)                                           "
+  47.973   tick 168: "AUFilter (m/m)                                          "
+  48.062   tick 170: "AUGraphicEQ (m/m)                                       "
+  48.107   tick 171: "AUHighShelfFilter (m/m)                                 "
+  48.150   tick 172: "AUPeakLimiter (m/m)                                     "
+  48.240   tick 174: "AULowShelfFilter (m/m)                                  "
+  48.327   tick 176: "AUMultibandCompressor (m/m)                             "
+  48.371   tick 177: "AUMatrixReverb (m/s)                                    "
+  48.416   tick 178: "AUNetSend (m/m)                                         "
+  48.416 SCROLLTO found after 178 ticks
+┌────────────────────────────────────────────────────────┐
+│Insert 2 Plug-in                                        │
+│AUNetSend (m/m)                                         │
+└────────────────────────────────────────────────────────┘
+┌────────────────────────────────────────────────────────┐
+│status        -             -             -             │
+│0.00                                                    │
+└────────────────────────────────────────────────────────┘
+POS 13.1.3.9  raw=[ 13 1 3  9] assign=P2
+TAP status NotConnected(0)  pulls ok=5430 err=0 lastErr=0 frames=2780160 (57.9 s)  tc= 13 1 3  9
+TAP status NotConnected(0)  pulls ok=5711 err=0 lastErr=0 frames=2924032 (60.9 s)  tc= 13 1 3  9
+  80.113 TAP disconnected
+  80.113 TAP set hostname "127.0.0.1:52800" -> 0
+  80.113 TAP set output format 48000 Hz float32 x2 non-interleaved -> 0
+  80.114 TAP initialize -> 0
+  80.114 TAP output format now: 48000 Hz, 2 ch, flags 29, 32 bit
+  80.114 TAP status NotConnected(0)
+  80.114 TAP pulling 512 frames per render at 48000 Hz
+TAP status NotConnected(0)  pulls ok=7580 err=0 lastErr=0 frames=144384 (3.0 s)  tc= 13 1 3  9
+  96.315 TAP disconnected
+  96.316 TAP set hostname "localhost:52800" -> 0
+  96.316 TAP set output format 48000 Hz float32 x2 non-interleaved -> 0
+  96.317 TAP initialize -> 0
+  96.317 TAP output format now: 48000 Hz, 2 ch, flags 29, 32 bit
+  96.317 TAP status NotConnected(0)
+  96.317 TAP pulling 512 frames per render at 48000 Hz
+TAP status NotConnected(0)  pulls ok=9086 err=0 lastErr=0 frames=144384 (3.0 s)  tc= 13 1 3  9
+
+
+## RUN 2
+── MIDI-write spike up. Ports: "MCU Spike" (surface in+out), "Sharpfive Notes" (note source).
+   Logic Pro Virtual In found as alternative target.
+
+COMMANDS
+  select <1-8> | arm <1-8>         SELECT / REC-ARM strip buttons
+  play|stop|rec|rewind|ffwd|cycle|click|smpte|zoom ...   transport & misc buttons
+  btn <hexnote>                    press+release any note
+  target notes|logicin             where note messages go (default: our virtual source)
+  pattern <bpm> <bars> <live|stamped> [note=48] [vel=100] [ch=1] [dur_ms=200]
+                                   quarter notes; live = sleep between sends, stamped =
+                                   all packets queued now with host-time stamps
+  note <n> <vel> [ch] [dur_ms]     one note on/off
+  tc | tcwatch on|off              timecode display (bars.beats.div.ticks or SMPTE)
+  leds                             LED state snapshot (transport, rec-arm, smpte/beats)
+  meters on|off                    log meter onsets per strip with timecode
+  lcd                              2x56 framebuffer
+  quiet on|off | sleep <ms> | raw <hex> | quit
+LOCATE (#26)
+  pos                              parsed beats display bar.beat.div.tick
+  jog <±n> [gap_ms] | jogv <hex>   jog wheel ticks (CC 3C), logs position before/after
+  goto <bar> [beat]                jog bars (90 ms apart, closed loop) then SCRUB-jog to the beat
+  hold <btn> | release <btn>       note-on only / note-off only (for button chords)
+  tx <hex> | mmc locate h m s f    raw bytes / MMC to the note target (notes|logicin)
+AUDIO TAP (#7)
+  tap connect [host:port] [rate]   host AUNetReceive, point it at AUNetSend (default 127.0.0.1:52800), start pulling
+  tap status | tap watch on|off     connection status / log every non-silent 100 ms window
+  tap disconnect
+  capture <seconds>                 collect 100 ms windows for N s and print them as JSON
+  scrollto <text> [maxticks] [strip] [gap_ms] [dir]   in PLUG-IN view: tick the v-pot until the LCD bottom row shows <text>
+   0.274 ▶ MCU F0 00 00 66 14 01 53 50 49 4B 45 30 31 01 02 03 04 F7
+   0.286 ◀ LED REC-ARM ch1 ON   tc= 13 1 3  9
+   0.286 ◀ LED REC-ARM ch2 OFF   tc= 13 1 3  9
+   0.287 ◀ LED REC-ARM ch3 OFF   tc= 13 1 3  9
+   0.288 ◀ LED REC-ARM ch4 OFF   tc= 13 1 3  9
+   0.288 ◀ LED REC-ARM ch5 OFF   tc= 13 1 3  9
+   0.289 ◀ LED REC-ARM ch6 OFF   tc= 13 1 3  9
+   0.289 ◀ LED REC-ARM ch7 OFF   tc= 13 1 3  9
+   0.289 ◀ LED REC-ARM ch8 OFF   tc= 13 1 3  9
+   0.290 ◀ LED SOLO ch1 OFF   tc= 13 1 3  9
+   0.290 ◀ LED SOLO ch2 OFF   tc= 13 1 3  9
+   0.290 ◀ LED SOLO ch3 OFF   tc= 13 1 3  9
+   0.290 ◀ LED SOLO ch4 OFF   tc= 13 1 3  9
+   0.291 ◀ LED SOLO ch5 OFF   tc= 13 1 3  9
+   0.291 ◀ LED SOLO ch6 OFF   tc= 13 1 3  9
+   0.291 ◀ LED SOLO ch7 OFF   tc= 13 1 3  9
+   0.292 ◀ LED SOLO ch8 OFF   tc= 13 1 3  9
+   0.292 ◀ LED MUTE ch1 OFF   tc= 13 1 3  9
+   0.292 ◀ LED MUTE ch2 OFF   tc= 13 1 3  9
+   0.293 ◀ LED MUTE ch3 OFF   tc= 13 1 3  9
+   0.293 ◀ LED MUTE ch4 OFF   tc= 13 1 3  9
+   0.293 ◀ LED MUTE ch5 OFF   tc= 13 1 3  9
+   0.294 ◀ LED MUTE ch6 OFF   tc= 13 1 3  9
+   0.294 ◀ LED MUTE ch7 OFF   tc= 13 1 3  9
+   0.294 ◀ LED MUTE ch8 OFF   tc= 13 1 3  9
+   0.294 ◀ LED SELECT ch1 ON   tc= 13 1 3  9
+   0.295 ◀ LED SELECT ch2 OFF   tc= 13 1 3  9
+   0.295 ◀ LED SELECT ch3 OFF   tc= 13 1 3  9
+   0.295 ◀ LED SELECT ch4 OFF   tc= 13 1 3  9
+   0.296 ◀ LED SELECT ch5 OFF   tc= 13 1 3  9
+   0.296 ◀ LED SELECT ch6 OFF   tc= 13 1 3  9
+   0.296 ◀ LED SELECT ch7 OFF   tc= 13 1 3  9
+   0.296 ◀ LED SELECT ch8 OFF   tc= 13 1 3  9
+   0.297 ◀ LED VPOT PRESS ch1 OFF   tc= 13 1 3  9
+   0.297 ◀ LED VPOT PRESS ch2 OFF   tc= 13 1 3  9
+   0.298 ◀ LED VPOT PRESS ch3 OFF   tc= 13 1 3  9
+   0.298 ◀ LED VPOT PRESS ch4 OFF   tc= 13 1 3  9
+   0.298 ◀ LED VPOT PRESS ch5 OFF   tc= 13 1 3  9
+   0.299 ◀ LED VPOT PRESS ch6 OFF   tc= 13 1 3  9
+   0.299 ◀ LED VPOT PRESS ch7 OFF   tc= 13 1 3  9
+   0.299 ◀ LED VPOT PRESS ch8 OFF   tc= 13 1 3  9
+   0.299 ◀ LED TRACK OFF   tc= 13 1 3  9
+   0.300 ◀ LED note 29 OFF   tc= 13 1 3  9
+   0.300 ◀ LED note 2A OFF   tc= 13 1 3  9
+   0.300 ◀ LED PLUG-IN ON   tc= 13 1 3  9
+   0.301 ◀ LED note 2C OFF   tc= 13 1 3  9
+   0.301 ◀ LED note 2D OFF   tc= 13 1 3  9
+   0.301 ◀ LED FLIP OFF   tc= 13 1 3  9
+   0.302 ◀ LED GLOBAL VIEW OFF   tc= 13 1 3  9
+   0.302 ◀ LED note 4A ON   tc= 13 1 3  9
+   0.302 ◀ LED note 4B OFF   tc= 13 1 3  9
+   0.303 ◀ LED note 4C OFF   tc= 13 1 3  9
+   0.303 ◀ LED note 4D OFF   tc= 13 1 3  9
+   0.303 ◀ LED note 4E OFF   tc= 13 1 3  9
+   0.303 ◀ LED note 4F OFF   tc= 13 1 3  9
+   0.304 ◀ LED note 50 ON   tc= 13 1 3  9
+   0.304 ◀ LED note 51 ON   tc= 13 1 3  9
+   0.304 ◀ LED note 54 OFF   tc= 13 1 3  9
+   0.305 ◀ LED note 55 OFF   tc= 13 1 3  9
+   0.305 ◀ LED CYCLE OFF   tc= 13 1 3  9
+   0.305 ◀ LED DROP OFF   tc= 13 1 3  9
+   0.306 ◀ LED REPLACE OFF   tc= 13 1 3  9
+   0.306 ◀ LED CLICK OFF   tc= 13 1 3  9
+   0.306 ◀ LED SOLO OFF   tc= 13 1 3  9
+   0.306 ◀ LED REWIND OFF   tc= 13 1 3  9
+   0.307 ◀ LED FFWD OFF   tc= 13 1 3  9
+   0.307 ◀ LED STOP ON   tc= 13 1 3  9
+   0.307 ◀ LED PLAY OFF   tc= 13 1 3  9
+   0.308 ◀ LED RECORD OFF   tc= 13 1 3  9
+   0.308 ◀ LED ZOOM OFF   tc= 13 1 3  9
+   0.308 ◀ LED SCRUB OFF   tc= 13 1 3  9
+   0.309 ◀ LED LED SMPTE OFF   tc= 13 1 3  9
+   0.309 ◀ LED LED BEATS ON   tc= 13 1 3  9
+   0.309 ◀ LED RUDE SOLO OFF   tc= 13 1 3  9
+   0.310 ◀ FADER ECHO strip 1 = 12443
+   0.310 ◀ FADER ECHO strip 2 = 12443
+   0.311 ◀ FADER ECHO strip 3 = 12443
+   0.311 ◀ FADER ECHO strip 4 = 12443
+   0.311 ◀ FADER ECHO strip 5 = 0
+   0.312 ◀ FADER ECHO strip 6 = 0
+   0.312 ◀ FADER ECHO strip 7 = 0
+   0.312 ◀ FADER ECHO strip 8 = 0
+   0.312 ◀ FADER ECHO strip 9 = 12443
+   0.313 ◀ FADER ECHO strip 10 = 0
+   0.316 ▶ MCU F0 00 00 66 14 01 53 50 49 4B 45 30 31 01 02 03 04 F7
+   0.316 ▶ MCU F0 00 00 66 14 01 53 50 49 4B 45 30 31 01 02 03 04 F7
+   0.316 ▶ MCU F0 00 00 66 14 01 53 50 49 4B 45 30 31 01 02 03 04 F7
+   0.316 ▶ MCU F0 00 00 66 14 14 56 31 2E 30 F7
+   0.317 ▶ MCU F0 00 00 66 14 01 53 50 49 4B 45 30 31 01 02 03 04 F7
+   0.317 ▶ MCU F0 00 00 66 14 14 56 31 2E 30 F7
+   0.317 ▶ MCU F0 00 00 66 14 01 53 50 49 4B 45 30 31 01 02 03 04 F7
+   0.317 ▶ MCU F0 00 00 66 14 14 56 31 2E 30 F7
+   0.317 ▶ MCU F0 00 00 66 14 01 53 50 49 4B 45 30 31 01 02 03 04 F7
+   0.317 ▶ MCU F0 00 00 66 14 14 56 31 2E 30 F7
+   0.317 ▶ MCU F0 00 00 66 14 01 53 50 49 4B 45 30 31 01 02 03 04 F7
+   0.318 ▶ MCU F0 00 00 66 14 14 56 31 2E 30 F7
+   0.318 ▶ MCU F0 00 00 66 14 01 53 50 49 4B 45 30 31 01 02 03 04 F7
+   0.318 ▶ MCU F0 00 00 66 14 14 56 31 2E 30 F7
+   0.318 ▶ MCU F0 00 00 66 14 01 53 50 49 4B 45 30 31 01 02 03 04 F7
+   0.318 ▶ MCU F0 00 00 66 14 14 56 31 2E 30 F7
+   0.347 ▶ MCU F0 00 00 66 14 14 56 31 2E 30 F7
+   0.347 ▶ MCU F0 00 00 66 14 14 56 31 2E 30 F7
+   0.347 ▶ MCU F0 00 00 66 14 14 56 31 2E 30 F7
+   0.347 ▶ MCU F0 00 00 66 14 14 56 31 2E 30 F7
+   0.360 ◀ LED REC-ARM ch1 ON   tc= 13 1 3  9
+   0.360 ◀ LED REC-ARM ch2 OFF   tc= 13 1 3  9
+   0.360 ◀ LED REC-ARM ch3 OFF   tc= 13 1 3  9
+   0.360 ◀ LED REC-ARM ch4 OFF   tc= 13 1 3  9
+   0.361 ◀ LED REC-ARM ch5 OFF   tc= 13 1 3  9
+   0.361 ◀ LED REC-ARM ch6 OFF   tc= 13 1 3  9
+   0.361 ◀ LED REC-ARM ch7 OFF   tc= 13 1 3  9
+   0.362 ◀ LED REC-ARM ch8 OFF   tc= 13 1 3  9
+   0.362 ◀ LED SOLO ch1 OFF   tc= 13 1 3  9
+   0.362 ◀ LED SOLO ch2 OFF   tc= 13 1 3  9
+   0.363 ◀ LED SOLO ch3 OFF   tc= 13 1 3  9
+   0.363 ◀ LED SOLO ch4 OFF   tc= 13 1 3  9
+   0.363 ◀ LED SOLO ch5 OFF   tc= 13 1 3  9
+   0.363 ◀ LED SOLO ch6 OFF   tc= 13 1 3  9
+   0.364 ◀ LED SOLO ch7 OFF   tc= 13 1 3  9
+   0.364 ◀ LED SOLO ch8 OFF   tc= 13 1 3  9
+   0.364 ◀ LED MUTE ch1 OFF   tc= 13 1 3  9
+   0.364 ◀ LED MUTE ch2 OFF   tc= 13 1 3  9
+   0.365 ◀ LED MUTE ch3 OFF   tc= 13 1 3  9
+   0.365 ◀ LED MUTE ch4 OFF   tc= 13 1 3  9
+   0.365 ◀ LED MUTE ch5 OFF   tc= 13 1 3  9
+   0.366 ◀ LED MUTE ch6 OFF   tc= 13 1 3  9
+   0.366 ◀ LED MUTE ch7 OFF   tc= 13 1 3  9
+   0.366 ◀ LED MUTE ch8 OFF   tc= 13 1 3  9
+   0.367 ◀ LED SELECT ch1 ON   tc= 13 1 3  9
+   0.367 ◀ LED SELECT ch2 OFF   tc= 13 1 3  9
+   0.367 ◀ LED SELECT ch3 OFF   tc= 13 1 3  9
+   0.367 ◀ LED SELECT ch4 OFF   tc= 13 1 3  9
+   0.368 ◀ LED SELECT ch5 OFF   tc= 13 1 3  9
+   0.368 ◀ LED SELECT ch6 OFF   tc= 13 1 3  9
+   0.368 ◀ LED SELECT ch7 OFF   tc= 13 1 3  9
+   0.369 ◀ LED SELECT ch8 OFF   tc= 13 1 3  9
+   0.369 ◀ LED VPOT PRESS ch1 OFF   tc= 13 1 3  9
+   0.369 ◀ LED VPOT PRESS ch2 OFF   tc= 13 1 3  9
+   0.369 ◀ LED VPOT PRESS ch3 OFF   tc= 13 1 3  9
+   0.370 ◀ LED VPOT PRESS ch4 OFF   tc= 13 1 3  9
+   0.370 ◀ LED VPOT PRESS ch5 OFF   tc= 13 1 3  9
+   0.370 ◀ LED VPOT PRESS ch6 OFF   tc= 13 1 3  9
+   0.371 ◀ LED VPOT PRESS ch7 OFF   tc= 13 1 3  9
+   0.371 ◀ LED VPOT PRESS ch8 OFF   tc= 13 1 3  9
+   0.371 ◀ LED TRACK OFF   tc= 13 1 3  9
+   0.372 ◀ LED note 29 OFF   tc= 13 1 3  9
+   0.372 ◀ LED note 2A OFF   tc= 13 1 3  9
+   0.372 ◀ LED PLUG-IN ON   tc= 13 1 3  9
+   0.372 ◀ LED note 2C OFF   tc= 13 1 3  9
+   0.373 ◀ LED note 2D OFF   tc= 13 1 3  9
+   0.373 ◀ LED FLIP OFF   tc= 13 1 3  9
+   0.373 ◀ LED GLOBAL VIEW OFF   tc= 13 1 3  9
+   0.374 ◀ LED note 4A ON   tc= 13 1 3  9
+   0.374 ◀ LED note 4B OFF   tc= 13 1 3  9
+   0.374 ◀ LED note 4C OFF   tc= 13 1 3  9
+   0.374 ◀ LED note 4D OFF   tc= 13 1 3  9
+   0.375 ◀ LED note 4E OFF   tc= 13 1 3  9
+   0.375 ◀ LED note 4F OFF   tc= 13 1 3  9
+   0.375 ◀ LED note 50 ON   tc= 13 1 3  9
+   0.376 ◀ LED note 51 ON   tc= 13 1 3  9
+   0.376 ◀ LED note 54 OFF   tc= 13 1 3  9
+   0.376 ◀ LED note 55 OFF   tc= 13 1 3  9
+   0.376 ◀ LED CYCLE OFF   tc= 13 1 3  9
+   0.377 ◀ LED DROP OFF   tc= 13 1 3  9
+   0.377 ◀ LED REPLACE OFF   tc= 13 1 3  9
+   0.377 ◀ LED CLICK OFF   tc= 13 1 3  9
+   0.378 ◀ LED SOLO OFF   tc= 13 1 3  9
+   0.378 ◀ LED REWIND OFF   tc= 13 1 3  9
+   0.378 ◀ LED FFWD OFF   tc= 13 1 3  9
+   0.379 ◀ LED STOP ON   tc= 13 1 3  9
+   0.379 ◀ LED PLAY OFF   tc= 13 1 3  9
+   0.379 ◀ LED RECORD OFF   tc= 13 1 3  9
+   0.379 ◀ LED ZOOM OFF   tc= 13 1 3  9
+   0.380 ◀ LED SCRUB OFF   tc= 13 1 3  9
+   0.380 ◀ LED LED SMPTE OFF   tc= 13 1 3  9
+   0.380 ◀ LED LED BEATS ON   tc= 13 1 3  9
+   0.381 ◀ LED RUDE SOLO OFF   tc= 13 1 3  9
+   0.381 ◀ FADER ECHO strip 1 = 12443
+   0.382 ◀ FADER ECHO strip 2 = 12443
+   0.382 ◀ FADER ECHO strip 3 = 12443
+   0.382 ◀ FADER ECHO strip 4 = 12443
+   0.383 ◀ FADER ECHO strip 5 = 0
+   0.383 ◀ FADER ECHO strip 6 = 0
+   0.383 ◀ FADER ECHO strip 7 = 0
+   0.384 ◀ FADER ECHO strip 8 = 0
+   0.384 ◀ FADER ECHO strip 9 = 12443
+   0.384 ◀ FADER ECHO strip 10 = 0
+quiet true
+   2.126 TAP set hostname "127.0.0.1:52800" -> 0
+   2.126 TAP set output format 48000 Hz float32 x2 non-interleaved -> 0
+   2.127 TAP initialize -> 0
+   2.127 TAP output format now: 48000 Hz, 2 ch, flags 29, 32 bit
+   2.127 TAP set Disconnect=0 -> 0
+   2.127 TAP status NotConnected(0)
+   2.127 TAP pulling 512 frames per render at 48000 Hz
+TAP status Connected(1)  pulls ok=282 err=0 lastErr=0 frames=144384 (3.0 s)  tc= 13 1 3  9
+tap watch true
+  11.578 CAPTURE 2.0 s start tc= 13 1 3  9 status=Connected(1)
+{"sample_rate":48000,"channels":2,"window_ms":100,"windows":20,"non_silent_windows":0,"pulls_ok":1074,"pulls_err":0,"last_err":0,"status":"Connected(1)","data":[
+{"t":9.5,"tc":"13 1 3  9","peak_db":[-200.0,-200.0],"rms_db":[-200.0,-200.0],"clipped_samples":0,"status":"Connected(1)"},
+{"t":9.6,"tc":"13 1 3  9","peak_db":[-200.0,-200.0],"rms_db":[-200.0,-200.0],"clipped_samples":0,"status":"Connected(1)"},
+{"t":9.7,"tc":"13 1 3  9","peak_db":[-200.0,-200.0],"rms_db":[-200.0,-200.0],"clipped_samples":0,"status":"Connected(1)"},
+{"t":9.8,"tc":"13 1 3  9","peak_db":[-200.0,-200.0],"rms_db":[-200.0,-200.0],"clipped_samples":0,"status":"Connected(1)"},
+{"t":9.9,"tc":"13 1 3  9","peak_db":[-200.0,-200.0],"rms_db":[-200.0,-200.0],"clipped_samples":0,"status":"Connected(1)"},
+{"t":10.0,"tc":"13 1 3  9","peak_db":[-200.0,-200.0],"rms_db":[-200.0,-200.0],"clipped_samples":0,"status":"Connected(1)"},
+{"t":10.1,"tc":"13 1 3  9","peak_db":[-200.0,-200.0],"rms_db":[-200.0,-200.0],"clipped_samples":0,"status":"Connected(1)"},
+{"t":10.2,"tc":"13 1 3  9","peak_db":[-200.0,-200.0],"rms_db":[-200.0,-200.0],"clipped_samples":0,"status":"Connected(1)"},
+{"t":10.3,"tc":"13 1 3  9","peak_db":[-200.0,-200.0],"rms_db":[-200.0,-200.0],"clipped_samples":0,"status":"Connected(1)"},
+{"t":10.4,"tc":"13 1 3  9","peak_db":[-200.0,-200.0],"rms_db":[-200.0,-200.0],"clipped_samples":0,"status":"Connected(1)"},
+{"t":10.5,"tc":"13 1 3  9","peak_db":[-200.0,-200.0],"rms_db":[-200.0,-200.0],"clipped_samples":0,"status":"Connected(1)"},
+{"t":10.6,"tc":"13 1 3  9","peak_db":[-200.0,-200.0],"rms_db":[-200.0,-200.0],"clipped_samples":0,"status":"Connected(1)"},
+{"t":10.7,"tc":"13 1 3  9","peak_db":[-200.0,-200.0],"rms_db":[-200.0,-200.0],"clipped_samples":0,"status":"Connected(1)"},
+{"t":10.8,"tc":"13 1 3  9","peak_db":[-200.0,-200.0],"rms_db":[-200.0,-200.0],"clipped_samples":0,"status":"Connected(1)"},
+{"t":10.9,"tc":"13 1 3  9","peak_db":[-200.0,-200.0],"rms_db":[-200.0,-200.0],"clipped_samples":0,"status":"Connected(1)"},
+{"t":11.0,"tc":"13 1 3  9","peak_db":[-200.0,-200.0],"rms_db":[-200.0,-200.0],"clipped_samples":0,"status":"Connected(1)"},
+{"t":11.1,"tc":"13 1 3  9","peak_db":[-200.0,-200.0],"rms_db":[-200.0,-200.0],"clipped_samples":0,"status":"Connected(1)"},
+{"t":11.2,"tc":"13 1 3  9","peak_db":[-200.0,-200.0],"rms_db":[-200.0,-200.0],"clipped_samples":0,"status":"Connected(1)"},
+{"t":11.3,"tc":"13 1 3  9","peak_db":[-200.0,-200.0],"rms_db":[-200.0,-200.0],"clipped_samples":0,"status":"Connected(1)"},
+{"t":11.4,"tc":"13 1 3  9","peak_db":[-200.0,-200.0],"rms_db":[-200.0,-200.0],"clipped_samples":0,"status":"Connected(1)"}
+]}
+  13.582 CAPTURE done tc= 13 1 3  9
+  13.582 GOTO 5.1 from 13.1.3.9
+  14.845 GOTO bar phase: 8 ticks, 1262 ms, now 5.1.1.1
+  14.845 GOTO done in 1262 ms now 5.1.1.1
+  14.845 CAPTURE 5.0 s start tc=  5 1 1  1 status=Connected(1)
+  14.918 TAP AUDIO ONSET peak -13.8 dB tc=4 4 4228 status=Underflow(3)  39 ms after PLAY LED on
+  14.919 TAP {"t":12.8,"tc":"4 4 4228","peak_db":[-13.8,-13.8],"rms_db":[-30.2,-30.2],"clipped_samples":0,"status":"Underflow(3)"}
+  15.026 TAP {"t":12.9,"tc":"5 1 1204","peak_db":[-7.8,-7.8],"rms_db":[-17.6,-17.6],"clipped_samples":0,"status":"Underflow(3)"}
+  15.121 TAP {"t":13.0,"tc":"5 1 2156","peak_db":[-14.3,-14.3],"rms_db":[-20.1,-20.1],"clipped_samples":0,"status":"Underflow(3)"}
+  15.227 TAP {"t":13.1,"tc":"5 1 3173","peak_db":[-17.4,-17.4],"rms_db":[-39.9,-39.9],"clipped_samples":0,"status":"Underflow(3)"}
+  15.324 TAP AUDIO ENDED tc=5 1 4 61
+  15.526 TAP AUDIO ONSET peak -10.0 dB tc=5 2 2 27 status=Connected(1)  647 ms after PLAY LED on
+  15.526 TAP {"t":13.4,"tc":"5 2 2 27","peak_db":[-10.0,-10.0],"rms_db":[-17.5,-17.5],"clipped_samples":0,"status":"Connected(1)"}
+  15.622 TAP {"t":13.5,"tc":"5 2 2146","peak_db":[-14.2,-14.2],"rms_db":[-20.1,-20.1],"clipped_samples":0,"status":"Connected(1)"}
+  15.718 TAP {"t":13.6,"tc":"5 2 3109","peak_db":[-15.5,-15.5],"rms_db":[-33.7,-33.7],"clipped_samples":0,"status":"Connected(1)"}
+  15.825 TAP AUDIO ENDED tc=5 2 4 60
+  16.027 TAP AUDIO ONSET peak -10.3 dB tc=5 3 2 28 status=Connected(1)  1149 ms after PLAY LED on
+  16.027 TAP {"t":13.9,"tc":"5 3 2 28","peak_db":[-10.3,-10.3],"rms_db":[-17.7,-17.7],"clipped_samples":0,"status":"Connected(1)"}
+  16.123 TAP {"t":14.0,"tc":"5 3 2157","peak_db":[-14.1,-14.1],"rms_db":[-20.0,-20.0],"clipped_samples":0,"status":"Connected(1)"}
+  16.220 TAP {"t":14.1,"tc":"5 3 3108","peak_db":[-17.6,-17.6],"rms_db":[-36.1,-36.1],"clipped_samples":0,"status":"Connected(1)"}
+  16.326 TAP AUDIO ENDED tc=5 3 4124
+  16.518 TAP AUDIO ONSET peak -10.2 dB tc=5 4 1205 status=Connected(1)  1639 ms after PLAY LED on
+  16.518 TAP {"t":14.4,"tc":"5 4 1205","peak_db":[-10.2,-10.2],"rms_db":[-17.6,-17.6],"clipped_samples":0,"status":"Connected(1)"}
+  16.625 TAP {"t":14.5,"tc":"5 4 2147","peak_db":[-14.0,-14.0],"rms_db":[-20.1,-20.1],"clipped_samples":0,"status":"Connected(1)"}
+  16.721 TAP {"t":14.6,"tc":"5 4 3111","peak_db":[-19.0,-19.0],"rms_db":[-35.5,-35.5],"clipped_samples":0,"status":"Connected(1)"}
+  16.826 TAP AUDIO ENDED tc=5 4 4127
+  17.019 TAP AUDIO ONSET peak -10.0 dB tc=6 1 1208 status=Connected(1)  2141 ms after PLAY LED on
+  17.019 TAP {"t":14.9,"tc":"6 1 1208","peak_db":[-10.0,-10.0],"rms_db":[-17.4,-17.4],"clipped_samples":0,"status":"Connected(1)"}
+  17.126 TAP {"t":15.0,"tc":"6 1 2223","peak_db":[-14.2,-14.2],"rms_db":[-20.3,-20.3],"clipped_samples":0,"status":"Connected(1)"}
+  17.222 TAP {"t":15.1,"tc":"6 1 3110","peak_db":[-15.5,-15.5],"rms_db":[-30.5,-30.5],"clipped_samples":0,"status":"Connected(1)"}
+  17.318 TAP AUDIO ENDED tc=6 1 4 63
+  17.521 TAP AUDIO ONSET peak -10.4 dB tc=6 2 1207 status=Connected(1)  2642 ms after PLAY LED on
+  17.521 TAP {"t":15.4,"tc":"6 2 1207","peak_db":[-10.4,-10.4],"rms_db":[-17.7,-17.7],"clipped_samples":0,"status":"Connected(1)"}
+  17.627 TAP {"t":15.5,"tc":"6 2 2223","peak_db":[-14.1,-14.1],"rms_db":[-20.0,-20.0],"clipped_samples":0,"status":"Connected(1)"}
+  17.723 TAP {"t":15.6,"tc":"6 2 3111","peak_db":[-17.6,-17.6],"rms_db":[-36.2,-36.2],"clipped_samples":0,"status":"Connected(1)"}
+  17.819 TAP AUDIO ENDED tc=6 2 4 64
+  18.023 TAP AUDIO ONSET peak -10.2 dB tc=6 3 1206 status=Connected(1)  3144 ms after PLAY LED on
+  18.023 TAP {"t":15.9,"tc":"6 3 1206","peak_db":[-10.2,-10.2],"rms_db":[-17.5,-17.5],"clipped_samples":0,"status":"Connected(1)"}
+  18.118 TAP {"t":16.0,"tc":"6 3 2160","peak_db":[-14.0,-14.0],"rms_db":[-20.2,-20.2],"clipped_samples":0,"status":"Connected(1)"}
+  18.225 TAP {"t":16.1,"tc":"6 3 3110","peak_db":[-17.1,-17.1],"rms_db":[-33.1,-33.1],"clipped_samples":0,"status":"Underflow(3)"}
+  18.321 TAP AUDIO ENDED tc=6 3 4 63
+  18.427 TAP AUDIO ONSET peak -10.1 dB tc=6 4 1 79 status=Underflow(3)  3548 ms after PLAY LED on
+  18.427 TAP {"t":16.3,"tc":"6 4 1 79","peak_db":[-10.1,-10.1],"rms_db":[-25.5,-25.5],"clipped_samples":0,"status":"Underflow(3)"}
+  18.523 TAP {"t":16.4,"tc":"6 4 1203","peak_db":[-11.1,-11.1],"rms_db":[-18.0,-18.0],"clipped_samples":0,"status":"Underflow(3)"}
+  18.619 TAP {"t":16.5,"tc":"6 4 2158","peak_db":[-14.2,-14.2],"rms_db":[-20.1,-20.1],"clipped_samples":0,"status":"Underflow(3)"}
+  18.726 TAP {"t":16.6,"tc":"6 4 3175","peak_db":[-27.7,-27.7],"rms_db":[-48.2,-48.2],"clipped_samples":0,"status":"Connected(1)"}
+  18.822 TAP AUDIO ENDED tc=6 4 4 63
+{"sample_rate":48000,"channels":2,"window_ms":100,"windows":50,"non_silent_windows":26,"pulls_ok":1662,"pulls_err":0,"last_err":0,"status":"Connected(1)","data":[
+{"t":12.8,"tc":"4 4 4228","peak_db":[-13.8,-13.8],"rms_db":[-30.2,-30.2],"clipped_samples":0,"status":"Underflow(3)"},
+{"t":12.9,"tc":"5 1 1204","peak_db":[-7.8,-7.8],"rms_db":[-17.6,-17.6],"clipped_samples":0,"status":"Underflow(3)"},
+{"t":13.0,"tc":"5 1 2156","peak_db":[-14.3,-14.3],"rms_db":[-20.1,-20.1],"clipped_samples":0,"status":"Underflow(3)"},
+{"t":13.1,"tc":"5 1 3173","peak_db":[-17.4,-17.4],"rms_db":[-39.9,-39.9],"clipped_samples":0,"status":"Underflow(3)"},
+{"t":13.2,"tc":"5 1 4 61","peak_db":[-200.0,-200.0],"rms_db":[-200.0,-200.0],"clipped_samples":0,"status":"Underflow(3)"},
+{"t":13.3,"tc":"5 2 1 12","peak_db":[-200.0,-200.0],"rms_db":[-200.0,-200.0],"clipped_samples":0,"status":"Connected(1)"},
+{"t":13.4,"tc":"5 2 2 27","peak_db":[-10.0,-10.0],"rms_db":[-17.5,-17.5],"clipped_samples":0,"status":"Connected(1)"},
+{"t":13.5,"tc":"5 2 2146","peak_db":[-14.2,-14.2],"rms_db":[-20.1,-20.1],"clipped_samples":0,"status":"Connected(1)"},
+{"t":13.6,"tc":"5 2 3109","peak_db":[-15.5,-15.5],"rms_db":[-33.7,-33.7],"clipped_samples":0,"status":"Connected(1)"},
+{"t":13.7,"tc":"5 2 4 60","peak_db":[-200.0,-200.0],"rms_db":[-200.0,-200.0],"clipped_samples":0,"status":"Connected(1)"},
+{"t":13.8,"tc":"5 3 1 13","peak_db":[-200.0,-200.0],"rms_db":[-200.0,-200.0],"clipped_samples":0,"status":"Connected(1)"},
+{"t":13.9,"tc":"5 3 2 28","peak_db":[-10.3,-10.3],"rms_db":[-17.7,-17.7],"clipped_samples":0,"status":"Connected(1)"},
+{"t":14.0,"tc":"5 3 2157","peak_db":[-14.1,-14.1],"rms_db":[-20.0,-20.0],"clipped_samples":0,"status":"Connected(1)"},
+{"t":14.1,"tc":"5 3 3108","peak_db":[-17.6,-17.6],"rms_db":[-36.1,-36.1],"clipped_samples":0,"status":"Connected(1)"},
+{"t":14.2,"tc":"5 3 4124","peak_db":[-200.0,-200.0],"rms_db":[-200.0,-200.0],"clipped_samples":0,"status":"Connected(1)"},
+{"t":14.3,"tc":"5 4 1 14","peak_db":[-200.0,-200.0],"rms_db":[-200.0,-200.0],"clipped_samples":0,"status":"Connected(1)"},
+{"t":14.4,"tc":"5 4 1205","peak_db":[-10.2,-10.2],"rms_db":[-17.6,-17.6],"clipped_samples":0,"status":"Connected(1)"},
+{"t":14.5,"tc":"5 4 2147","peak_db":[-14.0,-14.0],"rms_db":[-20.1,-20.1],"clipped_samples":0,"status":"Connected(1)"},
+{"t":14.6,"tc":"5 4 3111","peak_db":[-19.0,-19.0],"rms_db":[-35.5,-35.5],"clipped_samples":0,"status":"Connected(1)"},
+{"t":14.7,"tc":"5 4 4127","peak_db":[-200.0,-200.0],"rms_db":[-200.0,-200.0],"clipped_samples":0,"status":"Connected(1)"},
+{"t":14.8,"tc":"6 1 1 15","peak_db":[-200.0,-200.0],"rms_db":[-200.0,-200.0],"clipped_samples":0,"status":"Connected(1)"},
+{"t":14.9,"tc":"6 1 1208","peak_db":[-10.0,-10.0],"rms_db":[-17.4,-17.4],"clipped_samples":0,"status":"Connected(1)"},
+{"t":15.0,"tc":"6 1 2223","peak_db":[-14.2,-14.2],"rms_db":[-20.3,-20.3],"clipped_samples":0,"status":"Connected(1)"},
+{"t":15.1,"tc":"6 1 3110","peak_db":[-15.5,-15.5],"rms_db":[-30.5,-30.5],"clipped_samples":0,"status":"Connected(1)"},
+{"t":15.2,"tc":"6 1 4 63","peak_db":[-200.0,-200.0],"rms_db":[-200.0,-200.0],"clipped_samples":0,"status":"Connected(1)"},
+{"t":15.3,"tc":"6 2 1 15","peak_db":[-200.0,-200.0],"rms_db":[-200.0,-200.0],"clipped_samples":0,"status":"Connected(1)"},
+{"t":15.4,"tc":"6 2 1207","peak_db":[-10.4,-10.4],"rms_db":[-17.7,-17.7],"clipped_samples":0,"status":"Connected(1)"},
+{"t":15.5,"tc":"6 2 2223","peak_db":[-14.1,-14.1],"rms_db":[-20.0,-20.0],"clipped_samples":0,"status":"Connected(1)"},
+{"t":15.6,"tc":"6 2 3111","peak_db":[-17.6,-17.6],"rms_db":[-36.2,-36.2],"clipped_samples":0,"status":"Connected(1)"},
+{"t":15.7,"tc":"6 2 4 64","peak_db":[-200.0,-200.0],"rms_db":[-200.0,-200.0],"clipped_samples":0,"status":"Connected(1)"},
+{"t":15.8,"tc":"6 3 1 79","peak_db":[-200.0,-200.0],"rms_db":[-200.0,-200.0],"clipped_samples":0,"status":"Connected(1)"},
+{"t":15.9,"tc":"6 3 1206","peak_db":[-10.2,-10.2],"rms_db":[-17.5,-17.5],"clipped_samples":0,"status":"Connected(1)"},
+{"t":16.0,"tc":"6 3 2160","peak_db":[-14.0,-14.0],"rms_db":[-20.2,-20.2],"clipped_samples":0,"status":"Connected(1)"},
+{"t":16.1,"tc":"6 3 3110","peak_db":[-17.1,-17.1],"rms_db":[-33.1,-33.1],"clipped_samples":0,"status":"Underflow(3)"},
+{"t":16.2,"tc":"6 3 4 63","peak_db":[-200.0,-200.0],"rms_db":[-200.0,-200.0],"clipped_samples":0,"status":"Underflow(3)"},
+{"t":16.3,"tc":"6 4 1 79","peak_db":[-10.1,-10.1],"rms_db":[-25.5,-25.5],"clipped_samples":0,"status":"Underflow(3)"},
+{"t":16.4,"tc":"6 4 1203","peak_db":[-11.1,-11.1],"rms_db":[-18.0,-18.0],"clipped_samples":0,"status":"Underflow(3)"},
+{"t":16.5,"tc":"6 4 2158","peak_db":[-14.2,-14.2],"rms_db":[-20.1,-20.1],"clipped_samples":0,"status":"Underflow(3)"},
+{"t":16.6,"tc":"6 4 3175","peak_db":[-27.7,-27.7],"rms_db":[-48.2,-48.2],"clipped_samples":0,"status":"Connected(1)"},
+{"t":16.7,"tc":"6 4 4 63","peak_db":[-200.0,-200.0],"rms_db":[-200.0,-200.0],"clipped_samples":0,"status":"Connected(1)"},
+{"t":16.8,"tc":"7 1 1 15","peak_db":[-200.0,-200.0],"rms_db":[-200.0,-200.0],"clipped_samples":0,"status":"Connected(1)"},
+{"t":16.9,"tc":"7 1 1206","peak_db":[-200.0,-200.0],"rms_db":[-200.0,-200.0],"clipped_samples":0,"status":"Connected(1)"},
+{"t":17.0,"tc":"7 1 2159","peak_db":[-200.0,-200.0],"rms_db":[-200.0,-200.0],"clipped_samples":0,"status":"Connected(1)"},
+{"t":17.1,"tc":"7 1 3175","peak_db":[-200.0,-200.0],"rms_db":[-200.0,-200.0],"clipped_samples":0,"status":"Connected(1)"},
+{"t":17.2,"tc":"7 1 4 63","peak_db":[-200.0,-200.0],"rms_db":[-200.0,-200.0],"clipped_samples":0,"status":"Connected(1)"},
+{"t":17.3,"tc":"7 2 1 16","peak_db":[-200.0,-200.0],"rms_db":[-200.0,-200.0],"clipped_samples":0,"status":"Connected(1)"},
+{"t":17.4,"tc":"7 2 2 37","peak_db":[-200.0,-200.0],"rms_db":[-200.0,-200.0],"clipped_samples":0,"status":"Connected(1)"},
+{"t":17.5,"tc":"7 2 2159","peak_db":[-200.0,-200.0],"rms_db":[-200.0,-200.0],"clipped_samples":0,"status":"Connected(1)"},
+{"t":17.6,"tc":"7 2 3111","peak_db":[-200.0,-200.0],"rms_db":[-200.0,-200.0],"clipped_samples":0,"status":"Connected(1)"},
+{"t":17.7,"tc":"7 2 4 63","peak_db":[-200.0,-200.0],"rms_db":[-200.0,-200.0],"clipped_samples":0,"status":"Connected(1)"}
+]}
+  19.848 CAPTURE done tc=  7 2 4 63
+TAP status Connected(1)  pulls ok=1803 err=0 lastErr=0 frames=923136 (19.2 s)  tc=  7 3 1163
+LEDs: PLAY=off STOP=ON RECORD=off CYCLE=off CLICK=off LED SMPTE=off LED BEATS=ON | arm: 1:ON 2:off 3:off 4:off 5:off 6:off 7:off 8:off | select: 1:ON 2:off 3:off 4:off 5:off 6:off 7:off 8:off  tc=  7 3 1163 assign=P2
+POS 7.3.1.163  raw=[  7 3 1163] assign=P2
+  74.370 GOTO 5.1 from 7.3.1.163
+  75.179 GOTO bar phase: 3 ticks, 809 ms, now 5.1.1.1
+  75.179 GOTO done in 809 ms now 5.1.1.1
+  75.179 CAPTURE 4.0 s start tc=  5 1 1  1 status=Connected(1)
+  75.324 TAP AUDIO ONSET peak -7.8 dB tc=5 1 1159 status=Underflow(3)  125 ms after PLAY LED on
+  75.324 TAP {"t":73.2,"tc":"5 1 1159","peak_db":[-7.8,-7.8],"rms_db":[-17.8,-17.8],"clipped_samples":0,"status":"Underflow(3)"}
+  75.420 TAP {"t":73.3,"tc":"5 1 2111","peak_db":[-13.9,-13.9],"rms_db":[-20.1,-20.1],"clipped_samples":0,"status":"Underflow(3)"}
+  75.526 TAP {"t":73.4,"tc":"5 1 3126","peak_db":[-15.4,-15.4],"rms_db":[-26.7,-26.7],"clipped_samples":0,"status":"Underflow(3)"}
+  75.622 TAP AUDIO ENDED tc=5 1 4 15
+  75.825 TAP AUDIO ONSET peak -10.0 dB tc=5 2 1159 status=Connected(1)  627 ms after PLAY LED on
+  75.825 TAP {"t":73.7,"tc":"5 2 1159","peak_db":[-10.0,-10.0],"rms_db":[-18.1,-18.1],"clipped_samples":0,"status":"Connected(1)"}
+  75.921 TAP {"t":73.8,"tc":"5 2 2106","peak_db":[-13.8,-13.8],"rms_db":[-20.0,-20.0],"clipped_samples":0,"status":"Connected(1)"}
+  76.028 TAP {"t":73.9,"tc":"5 2 3127","peak_db":[-15.3,-15.3],"rms_db":[-26.2,-26.2],"clipped_samples":0,"status":"Connected(1)"}
+  76.124 TAP AUDIO ENDED tc=5 2 4 15
+  76.326 TAP AUDIO ONSET peak -10.3 dB tc=5 3 1223 status=Connected(1)  1128 ms after PLAY LED on
+  76.326 TAP {"t":74.2,"tc":"5 3 1223","peak_db":[-10.3,-10.3],"rms_db":[-18.3,-18.3],"clipped_samples":0,"status":"Connected(1)"}
+  76.422 TAP {"t":74.3,"tc":"5 3 2110","peak_db":[-13.7,-13.7],"rms_db":[-19.9,-19.9],"clipped_samples":0,"status":"Connected(1)"}
+  76.518 TAP {"t":74.4,"tc":"5 3 3 63","peak_db":[-15.3,-15.3],"rms_db":[-26.3,-26.3],"clipped_samples":0,"status":"Connected(1)"}
+  76.625 TAP AUDIO ENDED tc=5 3 4 15
+  76.828 TAP AUDIO ONSET peak -10.2 dB tc=5 4 1222 status=Connected(1)  1629 ms after PLAY LED on
+  76.828 TAP {"t":74.7,"tc":"5 4 1222","peak_db":[-10.2,-10.2],"rms_db":[-18.3,-18.3],"clipped_samples":0,"status":"Connected(1)"}
+  76.923 TAP {"t":74.8,"tc":"5 4 2107","peak_db":[-13.7,-13.7],"rms_db":[-19.7,-19.7],"clipped_samples":0,"status":"Connected(1)"}
+  77.020 TAP {"t":74.9,"tc":"5 4 3 65","peak_db":[-15.4,-15.4],"rms_db":[-27.5,-27.5],"clipped_samples":0,"status":"Connected(1)"}
+  77.126 TAP AUDIO ENDED tc=5 4 4 83
+  77.319 TAP AUDIO ONSET peak -10.0 dB tc=6 1 1163 status=Connected(1)  2120 ms after PLAY LED on
+  77.319 TAP {"t":75.2,"tc":"6 1 1163","peak_db":[-10.0,-10.0],"rms_db":[-18.0,-18.0],"clipped_samples":0,"status":"Connected(1)"}
+  77.425 TAP {"t":75.3,"tc":"6 1 2114","peak_db":[-13.6,-13.6],"rms_db":[-19.9,-19.9],"clipped_samples":0,"status":"Connected(1)"}
+  77.521 TAP {"t":75.4,"tc":"6 1 3 67","peak_db":[-15.4,-15.4],"rms_db":[-26.2,-26.2],"clipped_samples":0,"status":"Connected(1)"}
+  77.628 TAP AUDIO ENDED tc=6 1 4 83
+  77.820 TAP AUDIO ONSET peak -10.4 dB tc=6 2 1162 status=Connected(1)  2621 ms after PLAY LED on
+  77.820 TAP {"t":75.7,"tc":"6 2 1162","peak_db":[-10.4,-10.4],"rms_db":[-18.3,-18.3],"clipped_samples":0,"status":"Connected(1)"}
+  77.926 TAP {"t":75.8,"tc":"6 2 2179","peak_db":[-13.8,-13.8],"rms_db":[-20.0,-20.0],"clipped_samples":0,"status":"Connected(1)"}
+  78.022 TAP {"t":75.9,"tc":"6 2 3 67","peak_db":[-15.3,-15.3],"rms_db":[-26.1,-26.1],"clipped_samples":0,"status":"Connected(1)"}
+  78.118 TAP AUDIO ENDED tc=6 2 4 19
+  78.321 TAP AUDIO ONSET peak -10.2 dB tc=6 3 1163 status=Connected(1)  3123 ms after PLAY LED on
+  78.321 TAP {"t":76.2,"tc":"6 3 1163","peak_db":[-10.2,-10.2],"rms_db":[-18.3,-18.3],"clipped_samples":0,"status":"Connected(1)"}
+  78.428 TAP {"t":76.3,"tc":"6 3 2179","peak_db":[-13.7,-13.7],"rms_db":[-19.7,-19.7],"clipped_samples":0,"status":"Connected(1)"}
+  78.524 TAP {"t":76.4,"tc":"6 3 3 67","peak_db":[-15.4,-15.4],"rms_db":[-27.0,-27.0],"clipped_samples":0,"status":"Connected(1)"}
+  78.620 TAP AUDIO ENDED tc=6 3 4 18
+  78.821 TAP AUDIO ONSET peak -10.1 dB tc=6 4 1163 status=Connected(1)  3622 ms after PLAY LED on
+  78.821 TAP {"t":76.7,"tc":"6 4 1163","peak_db":[-10.1,-10.1],"rms_db":[-18.1,-18.1],"clipped_samples":0,"status":"Connected(1)"}
+  78.918 TAP {"t":76.8,"tc":"6 4 2106","peak_db":[-13.6,-13.6],"rms_db":[-19.9,-19.9],"clipped_samples":0,"status":"Connected(1)"}
+  79.025 TAP {"t":76.9,"tc":"6 4 3 67","peak_db":[-15.4,-15.4],"rms_db":[-26.4,-26.4],"clipped_samples":0,"status":"Connected(1)"}
+  79.121 TAP AUDIO ENDED tc=6 4 4 19
+{"sample_rate":48000,"channels":2,"window_ms":100,"windows":40,"non_silent_windows":24,"pulls_ok":7224,"pulls_err":0,"last_err":0,"status":"Connected(1)","data":[
+{"t":73.1,"tc":"5 1 1 31","peak_db":[-200.0,-200.0],"rms_db":[-200.0,-200.0],"clipped_samples":0,"status":"Underflow(3)"},
+{"t":73.2,"tc":"5 1 1159","peak_db":[-7.8,-7.8],"rms_db":[-17.8,-17.8],"clipped_samples":0,"status":"Underflow(3)"},
+{"t":73.3,"tc":"5 1 2111","peak_db":[-13.9,-13.9],"rms_db":[-20.1,-20.1],"clipped_samples":0,"status":"Underflow(3)"},
+{"t":73.4,"tc":"5 1 3126","peak_db":[-15.4,-15.4],"rms_db":[-26.7,-26.7],"clipped_samples":0,"status":"Underflow(3)"},
+{"t":73.5,"tc":"5 1 4 15","peak_db":[-200.0,-200.0],"rms_db":[-200.0,-200.0],"clipped_samples":0,"status":"Underflow(3)"},
+{"t":73.6,"tc":"5 1 4207","peak_db":[-200.0,-200.0],"rms_db":[-200.0,-200.0],"clipped_samples":0,"status":"Connected(1)"},
+{"t":73.7,"tc":"5 2 1159","peak_db":[-10.0,-10.0],"rms_db":[-18.1,-18.1],"clipped_samples":0,"status":"Connected(1)"},
+{"t":73.8,"tc":"5 2 2106","peak_db":[-13.8,-13.8],"rms_db":[-20.0,-20.0],"clipped_samples":0,"status":"Connected(1)"},
+{"t":73.9,"tc":"5 2 3127","peak_db":[-15.3,-15.3],"rms_db":[-26.2,-26.2],"clipped_samples":0,"status":"Connected(1)"},
+{"t":74.0,"tc":"5 2 4 15","peak_db":[-200.0,-200.0],"rms_db":[-200.0,-200.0],"clipped_samples":0,"status":"Connected(1)"},
+{"t":74.1,"tc":"5 2 4206","peak_db":[-200.0,-200.0],"rms_db":[-200.0,-200.0],"clipped_samples":0,"status":"Connected(1)"},
+{"t":74.2,"tc":"5 3 1223","peak_db":[-10.3,-10.3],"rms_db":[-18.3,-18.3],"clipped_samples":0,"status":"Connected(1)"},
+{"t":74.3,"tc":"5 3 2110","peak_db":[-13.7,-13.7],"rms_db":[-19.9,-19.9],"clipped_samples":0,"status":"Connected(1)"},
+{"t":74.4,"tc":"5 3 3 63","peak_db":[-15.3,-15.3],"rms_db":[-26.3,-26.3],"clipped_samples":0,"status":"Connected(1)"},
+{"t":74.5,"tc":"5 3 4 15","peak_db":[-200.0,-200.0],"rms_db":[-200.0,-200.0],"clipped_samples":0,"status":"Connected(1)"},
+{"t":74.6,"tc":"5 3 4207","peak_db":[-200.0,-200.0],"rms_db":[-200.0,-200.0],"clipped_samples":0,"status":"Connected(1)"},
+{"t":74.7,"tc":"5 4 1222","peak_db":[-10.2,-10.2],"rms_db":[-18.3,-18.3],"clipped_samples":0,"status":"Connected(1)"},
+{"t":74.8,"tc":"5 4 2107","peak_db":[-13.7,-13.7],"rms_db":[-19.7,-19.7],"clipped_samples":0,"status":"Connected(1)"},
+{"t":74.9,"tc":"5 4 3 65","peak_db":[-15.4,-15.4],"rms_db":[-27.5,-27.5],"clipped_samples":0,"status":"Connected(1)"},
+{"t":75.0,"tc":"5 4 4 83","peak_db":[-200.0,-200.0],"rms_db":[-200.0,-200.0],"clipped_samples":0,"status":"Connected(1)"},
+{"t":75.1,"tc":"5 4 4211","peak_db":[-200.0,-200.0],"rms_db":[-200.0,-200.0],"clipped_samples":0,"status":"Connected(1)"},
+{"t":75.2,"tc":"6 1 1163","peak_db":[-10.0,-10.0],"rms_db":[-18.0,-18.0],"clipped_samples":0,"status":"Connected(1)"},
+{"t":75.3,"tc":"6 1 2114","peak_db":[-13.6,-13.6],"rms_db":[-19.9,-19.9],"clipped_samples":0,"status":"Connected(1)"},
+{"t":75.4,"tc":"6 1 3 67","peak_db":[-15.4,-15.4],"rms_db":[-26.2,-26.2],"clipped_samples":0,"status":"Connected(1)"},
+{"t":75.5,"tc":"6 1 4 83","peak_db":[-200.0,-200.0],"rms_db":[-200.0,-200.0],"clipped_samples":0,"status":"Connected(1)"},
+{"t":75.6,"tc":"6 1 4210","peak_db":[-200.0,-200.0],"rms_db":[-200.0,-200.0],"clipped_samples":0,"status":"Connected(1)"},
+{"t":75.7,"tc":"6 2 1162","peak_db":[-10.4,-10.4],"rms_db":[-18.3,-18.3],"clipped_samples":0,"status":"Connected(1)"},
+{"t":75.8,"tc":"6 2 2179","peak_db":[-13.8,-13.8],"rms_db":[-20.0,-20.0],"clipped_samples":0,"status":"Connected(1)"},
+{"t":75.9,"tc":"6 2 3 67","peak_db":[-15.3,-15.3],"rms_db":[-26.1,-26.1],"clipped_samples":0,"status":"Connected(1)"},
+{"t":76.0,"tc":"6 2 4 19","peak_db":[-200.0,-200.0],"rms_db":[-200.0,-200.0],"clipped_samples":0,"status":"Connected(1)"},
+{"t":76.1,"tc":"6 2 4211","peak_db":[-200.0,-200.0],"rms_db":[-200.0,-200.0],"clipped_samples":0,"status":"Connected(1)"},
+{"t":76.2,"tc":"6 3 1163","peak_db":[-10.2,-10.2],"rms_db":[-18.3,-18.3],"clipped_samples":0,"status":"Connected(1)"},
+{"t":76.3,"tc":"6 3 2179","peak_db":[-13.7,-13.7],"rms_db":[-19.7,-19.7],"clipped_samples":0,"status":"Connected(1)"},
+{"t":76.4,"tc":"6 3 3 67","peak_db":[-15.4,-15.4],"rms_db":[-27.0,-27.0],"clipped_samples":0,"status":"Connected(1)"},
+{"t":76.5,"tc":"6 3 4 18","peak_db":[-200.0,-200.0],"rms_db":[-200.0,-200.0],"clipped_samples":0,"status":"Connected(1)"},
+{"t":76.6,"tc":"6 4 1 34","peak_db":[-200.0,-200.0],"rms_db":[-200.0,-200.0],"clipped_samples":0,"status":"Connected(1)"},
+{"t":76.7,"tc":"6 4 1163","peak_db":[-10.1,-10.1],"rms_db":[-18.1,-18.1],"clipped_samples":0,"status":"Connected(1)"},
+{"t":76.8,"tc":"6 4 2106","peak_db":[-13.6,-13.6],"rms_db":[-19.9,-19.9],"clipped_samples":0,"status":"Connected(1)"},
+{"t":76.9,"tc":"6 4 3 67","peak_db":[-15.4,-15.4],"rms_db":[-26.4,-26.4],"clipped_samples":0,"status":"Connected(1)"},
+{"t":77.0,"tc":"6 4 4 19","peak_db":[-200.0,-200.0],"rms_db":[-200.0,-200.0],"clipped_samples":0,"status":"Connected(1)"}
+]}
+  79.184 CAPTURE done tc=  6 4 4147
+TAP status Connected(1)  pulls ok=7319 err=0 lastErr=0 frames=3747328 (78.1 s)  tc=  6 4 4197
+┌────────────────────────────────────────────────────────┐
+│status        -             -             -             │
+│1.00                                                    │
+└────────────────────────────────────────────────────────┘
+┌────────────────────────────────────────────────────────┐
+│status        -             -             -             │
+│1.00                                                    │
+└────────────────────────────────────────────────────────┘
+┌────────────────────────────────────────────────────────┐
+│status        -             -             -             │
+│1.00                                                    │
+└────────────────────────────────────────────────────────┘
+┌────────────────────────────────────────────────────────┐
+│hell:P Inst 2 St Out Master                             │
+│ANeSed --     --                                        │
+└────────────────────────────────────────────────────────┘
+┌────────────────────────────────────────────────────────┐
+│hell:P Inst 2 Insert 2 Plug-in                          │
+│ANeSed --     Parametric EQ (s/s)                       │
+└────────────────────────────────────────────────────────┘
+┌────────────────────────────────────────────────────────┐
+│hell:P Inst 2 Insert 2 Plug-in                          │
+│ANeSed --     --                                        │
+└────────────────────────────────────────────────────────┘
+POS 6.4.4.197  raw=[  6 4 4197] assign=P2
+┌────────────────────────────────────────────────────────┐
+│Insert 2 Plug-in     Master                             │
+│--                                                      │
+└────────────────────────────────────────────────────────┘
+┌────────────────────────────────────────────────────────┐
+│-      -      -      -      -      -      -      -      │
+│                                                        │
+└────────────────────────────────────────────────────────┘
+TAP status Connecting(4)  pulls ok=18129 err=0 lastErr=0 frames=9282048 (193.4 s)  tc=  6 4 4197
+┌────────────────────────────────────────────────────────┐
+│hell:P Inst 2 St Out Master                             │
+│--     --     --                                        │
+└────────────────────────────────────────────────────────┘
+ 241.594 SCROLLTO "AUNetSend" from bottom="--     --     --                                        "
+ 241.683   tick 2: "--     --     Parametric EQ (s/s)                       "
+ 241.727   tick 3: "--     --     Low Pass Filter (s/s)                     "
+ 241.861   tick 6: "--     --     High Pass Filter (s/s)                    "
+ 241.949   tick 8: "--     --     Low Shelving EQ (s/s)                     "
+ 242.037   tick 10: "--     --     High Shelving EQ (s/s)                    "
+ 242.125   tick 12: "--     --     Chorus (s/s)                              "
+ 242.213   tick 14: "--     --     Flanger (s/s)                             "
+ 242.302   tick 16: "--     --     Tape Delay (s/s)                          "
+ 242.391   tick 18: "--     --     Echo (s/s)                                "
+ 242.436   tick 19: "--     --     Stereo Delay (s/s)                        "
+ 242.568   tick 22: "--     --     SilverVerb (s/s)                          "
+ 242.657   tick 24: "--     --     PlatinumVerb (s/s)                        "
+ 242.701   tick 25: "--     --     Phaser (s/s)                              "
+ 242.832   tick 28: "--     --     Microphaser (s/s)                         "
+ 242.922   tick 30: "--     --     Compressor (s/s)                          "
+ 242.965   tick 31: "--     --     Fuzz-Wah (s/s)                            "
+ 243.098   tick 34: "--     --     Expander (s/s)                            "
+ 243.188   tick 36: "--     --     Enveloper (s/s)                           "
+ 243.233   tick 37: "--     --     Pitch Shifter (s/s)                       "
+ 243.366   tick 40: "--     --     DeEsser (s/s)                             "
+ 243.455   tick 42: "--     --     Ensemble (s/s)                            "
+ 243.498   tick 43: "--     --     AutoFilter (s/s)                          "
+ 243.629   tick 46: "--     --     Bitcrusher (s/s)                          "
+ 243.717   tick 48: "--     --     Distortion (s/s)                          "
+ 243.762   tick 49: "--     --     Overdrive (s/s)                           "
+ 243.894   tick 52: "--     --     EnVerb (s/s)                              "
+ 243.938   tick 53: "--     --     DJ EQ (s/s)                               "
+ 244.069   tick 56: "--     --     Spectral Gate (s/s)                       "
+ 244.157   tick 58: "--     --     High Cut (s/s)                            "
+ 244.201   tick 59: "--     --     Low Cut (s/s)                             "
+ 244.333   tick 62: "--     --     Fat EQ (s/s)                              "
+ 244.422   tick 64: "--     --     Silver EQ (s/s)                           "
+ 244.466   tick 65: "--     --     Silver Compressor (s/s)                   "
+ 244.598   tick 68: "--     --     GoldVerb (s/s)                            "
+ 244.687   tick 70: "--     --     Noise Gate (s/s)                          "
+ 244.731   tick 71: "--     --     Silver Gate (s/s)                         "
+ 244.863   tick 74: "--     --     Modulation Delay (s/s)                    "
+ 244.951   tick 76: "--     --     Direction Mixer (s/s)                     "
+ 244.995   tick 77: "--     --     Gain (s/s)                                "
+ 245.082   tick 79: "--     --     Tremolo (s/s)                             "
+ 245.127   tick 80: "--     --     SubBass (s/s)                             "
+ 245.261   tick 83: "--     --     Clip Distortion (s/s)                     "
+ 245.393   tick 86: "--     --     AVerb (s/s)                               "
+ 245.482   tick 88: "--     --     Adaptive Limiter (s/s)                    "
+ 245.570   tick 90: "--     --     Multipressor (s/s)                        "
+ 245.656   tick 92: "--     --     Denoiser (s/s)                            "
+ 245.698   tick 93: "--     --     Phase Distortion (s/s)                    "
+ 245.831   tick 96: "--     --     Exciter (s/s)                             "
+ 245.919   tick 98: "--     --     Stereo Spread (s/s)                       "
+ 245.965   tick 99: "--     --     Limiter (s/s)                             "
+ 246.050   tick 101: "--     --     EVOC 20 Filterbank (s/s)                  "
+ 246.093   tick 102: "--     --     Distortion II (s/s)                       "
+ 246.181   tick 104: "--     --     Scanner Vibrato (s/s)                     "
+ 246.270   tick 106: "--     --     Rotor Cabinet (s/s)                       "
+ 246.314   tick 107: "--     --     Space Designer (s/s)                      "
+ 246.403   tick 109: "--     --     Pitch Correction (s/s)                    "
+ 246.491   tick 111: "--     --     Channel EQ (s/s)                          "
+ 246.536   tick 112: "--     --     Tuner (s/s)                               "
+ 246.624   tick 114: "--     --     MultiMeter (s/s)                          "
+ 246.669   tick 115: "--     --     BPM Counter (s/s)                         "
+ 246.758   tick 117: "--     --     Linear Phase EQ (s/s)                     "
+ 246.802   tick 118: "--     --     Guitar Amp Pro (s/s)                      "
+ 246.935   tick 121: "--     --     Match EQ (s/s)                            "
+ 247.023   tick 123: "--     --     Delay Designer (s/s)                      "
+ 247.068   tick 124: "--     --     Vocal Transformer (s/s)                   "
+ 247.200   tick 127: "--     --     Grooveshifter (s/s)                       "
+ 247.288   tick 129: "--     --     Ringshifter (s/s)                         "
+ 247.333   tick 130: "--     --     Test Oscillator (s/s)                     "
+ 247.466   tick 133: "--     --     Bass Amp (s/s)                            "
+ 247.598   tick 136: "--     --     Spreader (s/s)                            "
+ 247.686   tick 138: "--     --     Sample Delay (s/s)                        "
+ 247.730   tick 139: "--     --     Ducker (s/s)                              "
+ 247.863   tick 142: "--     --     Speech Enhancer (s/s)                     "
+ 247.951   tick 144: "--     --     Binaural Post-Processing (s/s)            "
+ 247.997   tick 145: "--     --     Pedalboard (s/s)                          "
+ 248.085   tick 147: "--     --     Vintage Drive (s/s)                       "
+ 248.130   tick 148: "--     --     Grinder (s/s)                             "
+ 248.263   tick 151: "--     --     Fuzz Machine (s/s)                        "
+ 248.353   tick 153: "--     --     Retro Chorus (s/s)                        "
+ 248.397   tick 154: "--     --     Robo Flanger (s/s)                        "
+ 248.531   tick 157: "--     --     The Vibe (s/s)                            "
+ 248.618   tick 159: "--     --     Auto-Funk (s/s)                           "
+ 248.663   tick 160: "--     --     Blue Echo (s/s)                           "
+ 248.797   tick 163: "--     --     Squash Compressor (s/s)                   "
+ 248.886   tick 165: "--     --     OctaFuzz (s/s)                            "
+ 248.930   tick 166: "--     --     Happy Face Fuzz (s/s)                     "
+ 249.063   tick 169: "--     --     Monster Fuzz (s/s)                        "
+ 249.152   tick 171: "--     --     Candy Fuzz (s/s)                          "
+ 249.197   tick 172: "--     --     Double Dragon (s/s)                       "
+ 249.330   tick 175: "--     --     Rawk! Distortion (s/s)                    "
+ 249.418   tick 177: "--     --     Hi-Drive (s/s)                            "
+ 249.461   tick 178: "--     --     Spin Box (s/s)                            "
+ 249.594   tick 181: "--     --     Roto Phase (s/s)                          "
+ 249.682   tick 183: "--     --     Heavenly Chorus (s/s)                     "
+ 249.770   tick 185: "--     --     Trem-O-Tone (s/s)                         "
+ 249.859   tick 187: "--     --     Phaze 2 (s/s)                             "
+ 249.948   tick 189: "--     --     Roswell Ringer (s/s)                      "
+ 250.037   tick 191: "--     --     Total Tremolo (s/s)                       "
+ 250.126   tick 193: "--     --     Classic Wah (s/s)                         "
+ 250.170   tick 194: "--     --     Modern Wah (s/s)                          "
+ 250.304   tick 197: "--     --     Tru-Tape Delay (s/s)                      "
+ 250.394   tick 199: "--     --     Spring Box (s/s)                          "
+ 250.482   tick 201: "--     --     Phase Tripper (s/s)                       "
+ 250.571   tick 203: "--     --     Flange Factory (s/s)                      "
+ 250.661   tick 205: "--     --     Tube Burner (s/s)                         "
+ 250.751   tick 207: "--     --     Tie Dye Delay (s/s)                       "
+ 250.795   tick 208: "--     --     Dr. Octave (s/s)                          "
+ 250.926   tick 211: "--     --     Graphic EQ (s/s)                          "
+ 251.015   tick 213: "--     --     Wham (s/s)                                "
+ 251.104   tick 215: "--     --     Grit (s/s)                                "
+ 251.192   tick 217: "--     --     Amp Designer (s/s)                        "
+ 251.281   tick 219: "--     --     Vintage Tube EQ (s/s)                     "
+ 251.368   tick 221: "--     --     Vintage Graphic EQ (s/s)                  "
+ 251.453   tick 223: "--     --     Vintage Console EQ (s/s)                  "
+ 251.498   tick 224: "--     --     ChromaVerb (s/s)                          "
+ 251.630   tick 227: "--     --     Phat FX (s/s)                             "
+ 251.718   tick 229: "--     --     Step FX (s/s)                             "
+ 251.762   tick 230: "--     --     DeEsser 2 (s/s)                           "
+ 251.894   tick 233: "--     --     Bass Amp Designer (s/s)                   "
+ 251.938   tick 234: "--     --     Quantec Room Simulator (s/s)              "
+ 252.028   tick 236: "--     --     Beat Breaker (s/s)                        "
+ 252.159   tick 239: "--     --     Single Band EQ (s/s)                      "
+ 252.248   tick 241: "--     --     Remix FX (s/s)                            "
+ 252.293   tick 242: "--     --     Loudness Meter (s/s)                      "
+ 252.336   tick 243: "--     --     Mastering Assistant (s/s)                 "
+ 252.381   tick 244: "--     --     Auto Sampler (s/s)                        "
+ 252.426   tick 245: "--     --     I/O (s/s)                                 "
+ 252.469   tick 246: "--     --     Tape Fiasco (s/s)                         "
+ 252.557   tick 248: "--     --     AUBandpass (s/s)                          "
+ 252.602   tick 249: "--     --     AUDynamicsProcessor (s/s)                 "
+ 252.733   tick 252: "--     --     AUDelay (s/s)                             "
+ 252.822   tick 254: "--     --     AUDistortion (s/s)                        "
+ 252.866   tick 255: "--     --     AUFilter (s/s)                            "
+ 252.999   tick 258: "--     --     AUGraphicEQ (s/s)                         "
+ 253.088   tick 260: "--     --     AUHipass (s/s)                            "
+ 253.133   tick 261: "--     --     AUHighShelfFilter (s/s)                   "
+ 253.265   tick 264: "--     --     AUPeakLimiter (s/s)                       "
+ 253.352   tick 266: "--     --     AULowpass (s/s)                           "
+ 253.397   tick 267: "--     --     AULowShelfFilter (s/s)                    "
+ 253.530   tick 270: "--     --     AUMultibandCompressor (s/s)               "
+ 253.618   tick 272: "--     --     AUMatrixReverb (s/s)                      "
+ 253.662   tick 273: "--     --     AUNBandEQ (s/s)                           "
+ 253.749   tick 275: "--     --     AUNetSend (s/s)                           "
+ 253.749 SCROLLTO found after 275 ticks
+┌────────────────────────────────────────────────────────┐
+│status        status        -             -             │
+│1.00          5.00                                      │
+└────────────────────────────────────────────────────────┘
+TAP status Connected(1)  pulls ok=23731 err=0 lastErr=0 frames=12150272 (253.1 s)  tc=  6 4 4197
+TAP status Connected(1)  pulls ok=24013 err=0 lastErr=0 frames=12294656 (256.1 s)  tc=  6 4 4197
+ 258.256 TAP set Disconnect=0 -> 0
+TAP status Connected(1)  pulls ok=24153 err=0 lastErr=0 frames=12366336 (257.6 s)  tc=  6 4 4197
+ 259.760 GOTO 5.1 from 6.4.4.197
+ 259.947 GOTO bar phase: 2 ticks, 187 ms, now 5.1.1.1
+ 259.947 GOTO done in 187 ms now 5.1.1.1
+ 259.947 CAPTURE 4.0 s start tc=  5 1 1  1 status=Connected(1)
+ 260.028 TAP AUDIO ONSET peak -7.8 dB tc=5 1 1 83 status=Underflow(3)  60 ms after PLAY LED on
+ 260.028 TAP {"t":257.9,"tc":"5 1 1 83","peak_db":[-7.8,-7.8],"rms_db":[-23.5,-23.5],"clipped_samples":0,"status":"Underflow(3)"}
+ 260.123 TAP {"t":258.0,"tc":"5 1 1221","peak_db":[-10.7,-10.7],"rms_db":[-18.1,-18.1],"clipped_samples":0,"status":"Underflow(3)"}
+ 260.218 TAP {"t":258.1,"tc":"5 1 2174","peak_db":[-14.5,-14.5],"rms_db":[-20.8,-20.8],"clipped_samples":0,"status":"Underflow(3)"}
+ 260.326 TAP AUDIO ENDED tc=5 1 3125
+ 260.519 TAP AUDIO ONSET peak -10.0 dB tc=5 2 1 30 status=Connected(1)  551 ms after PLAY LED on
+ 260.519 TAP {"t":258.4,"tc":"5 2 1 30","peak_db":[-10.0,-10.0],"rms_db":[-25.9,-25.9],"clipped_samples":0,"status":"Connected(1)"}
+ 260.626 TAP {"t":258.5,"tc":"5 2 1222","peak_db":[-10.6,-10.6],"rms_db":[-17.8,-17.8],"clipped_samples":0,"status":"Connected(1)"}
+ 260.721 TAP {"t":258.6,"tc":"5 2 2173","peak_db":[-14.4,-14.4],"rms_db":[-20.6,-20.6],"clipped_samples":0,"status":"Connected(1)"}
+ 260.828 TAP AUDIO ENDED tc=5 2 3189
+ 261.019 TAP AUDIO ONSET peak -10.6 dB tc=5 3 1 29 status=Connected(1)  1051 ms after PLAY LED on
+ 261.019 TAP {"t":258.9,"tc":"5 3 1 29","peak_db":[-10.6,-10.6],"rms_db":[-26.9,-26.9],"clipped_samples":0,"status":"Connected(1)"}
+ 261.126 TAP {"t":259.0,"tc":"5 3 1222","peak_db":[-10.3,-10.3],"rms_db":[-17.8,-17.8],"clipped_samples":0,"status":"Connected(1)"}
+ 261.222 TAP {"t":259.1,"tc":"5 3 2163","peak_db":[-14.4,-14.4],"rms_db":[-20.6,-20.6],"clipped_samples":0,"status":"Connected(1)"}
+ 261.318 TAP {"t":259.2,"tc":"5 3 3125","peak_db":[-48.2,-48.2],"rms_db":[-68.7,-68.7],"clipped_samples":0,"status":"Connected(1)"}
+ 261.424 TAP AUDIO ENDED tc=5 3 4 78
+ 261.521 TAP AUDIO ONSET peak -10.2 dB tc=5 4 1 31 status=Connected(1)  1554 ms after PLAY LED on
+ 261.522 TAP {"t":259.4,"tc":"5 4 1 31","peak_db":[-10.2,-10.2],"rms_db":[-24.3,-24.3],"clipped_samples":0,"status":"Connected(1)"}
+ 261.628 TAP {"t":259.5,"tc":"5 4 2 43","peak_db":[-11.2,-11.2],"rms_db":[-18.3,-18.3],"clipped_samples":0,"status":"Connected(1)"}
+ 261.723 TAP {"t":259.6,"tc":"5 4 2177","peak_db":[-14.3,-14.3],"rms_db":[-20.5,-20.5],"clipped_samples":0,"status":"Connected(1)"}
+ 261.818 TAP AUDIO ENDED tc=5 4 3130
+ 262.021 TAP AUDIO ONSET peak -10.0 dB tc=6 1 1 33 status=Connected(1)  2054 ms after PLAY LED on
+ 262.021 TAP {"t":259.9,"tc":"6 1 1 33","peak_db":[-10.0,-10.0],"rms_db":[-24.1,-24.1],"clipped_samples":0,"status":"Connected(1)"}
+ 262.118 TAP {"t":260.0,"tc":"6 1 1215","peak_db":[-11.0,-11.0],"rms_db":[-18.0,-18.0],"clipped_samples":0,"status":"Connected(1)"}
+ 262.225 TAP {"t":260.1,"tc":"6 1 2176","peak_db":[-14.5,-14.5],"rms_db":[-20.6,-20.6],"clipped_samples":0,"status":"Connected(1)"}
+ 262.321 TAP AUDIO ENDED tc=6 1 3129
+ 262.523 TAP AUDIO ONSET peak -10.5 dB tc=6 2 1 33 status=Connected(1)  2555 ms after PLAY LED on
+ 262.523 TAP {"t":260.4,"tc":"6 2 1 33","peak_db":[-10.5,-10.5],"rms_db":[-27.7,-27.7],"clipped_samples":0,"status":"Connected(1)"}
+ 262.618 TAP {"t":260.5,"tc":"6 2 1226","peak_db":[-10.4,-10.4],"rms_db":[-17.7,-17.7],"clipped_samples":0,"status":"Connected(1)"}
+ 262.726 TAP {"t":260.6,"tc":"6 2 2178","peak_db":[-14.4,-14.4],"rms_db":[-20.6,-20.6],"clipped_samples":0,"status":"Connected(1)"}
+ 262.821 TAP AUDIO ENDED tc=6 2 3129
+ 263.025 TAP AUDIO ONSET peak -10.2 dB tc=6 3 1 34 status=Connected(1)  3058 ms after PLAY LED on
+ 263.025 TAP {"t":260.9,"tc":"6 3 1 34","peak_db":[-10.2,-10.2],"rms_db":[-24.2,-24.2],"clipped_samples":0,"status":"Connected(1)"}
+ 263.121 TAP {"t":261.0,"tc":"6 3 1215","peak_db":[-11.2,-11.2],"rms_db":[-18.3,-18.3],"clipped_samples":0,"status":"Connected(1)"}
+ 263.228 TAP {"t":261.1,"tc":"6 3 3  1","peak_db":[-14.3,-14.3],"rms_db":[-20.4,-20.4],"clipped_samples":0,"status":"Connected(1)"}
+ 263.323 TAP AUDIO ENDED tc=6 3 3129
+ 263.526 TAP AUDIO ONSET peak -10.1 dB tc=6 4 1 33 status=Connected(1)  3558 ms after PLAY LED on
+ 263.526 TAP {"t":261.4,"tc":"6 4 1 33","peak_db":[-10.1,-10.1],"rms_db":[-24.1,-24.1],"clipped_samples":0,"status":"Connected(1)"}
+ 263.622 TAP {"t":261.5,"tc":"6 4 1225","peak_db":[-11.1,-11.1],"rms_db":[-18.1,-18.1],"clipped_samples":0,"status":"Connected(1)"}
+ 263.719 TAP {"t":261.6,"tc":"6 4 2177","peak_db":[-14.2,-14.2],"rms_db":[-20.6,-20.6],"clipped_samples":0,"status":"Connected(1)"}
+ 263.825 TAP AUDIO ENDED tc=6 4 3129
+{"sample_rate":48000,"channels":2,"window_ms":100,"windows":40,"non_silent_windows":32,"pulls_ok":24546,"pulls_err":0,"last_err":0,"status":"Connected(1)","data":[
+{"t":257.9,"tc":"5 1 1 83","peak_db":[-7.8,-7.8],"rms_db":[-23.5,-23.5],"clipped_samples":0,"status":"Underflow(3)"},
+{"t":258.0,"tc":"5 1 1221","peak_db":[-10.7,-10.7],"rms_db":[-18.1,-18.1],"clipped_samples":0,"status":"Underflow(3)"},
+{"t":258.1,"tc":"5 1 2174","peak_db":[-14.5,-14.5],"rms_db":[-20.8,-20.8],"clipped_samples":0,"status":"Underflow(3)"},
+{"t":258.2,"tc":"5 1 3125","peak_db":[-90.3,-90.3],"rms_db":[-109.1,-109.1],"clipped_samples":0,"status":"Underflow(3)"},
+{"t":258.3,"tc":"5 1 4 77","peak_db":[-200.0,-200.0],"rms_db":[-200.0,-200.0],"clipped_samples":0,"status":"Underflow(3)"},
+{"t":258.4,"tc":"5 2 1 30","peak_db":[-10.0,-10.0],"rms_db":[-25.9,-25.9],"clipped_samples":0,"status":"Connected(1)"},
+{"t":258.5,"tc":"5 2 1222","peak_db":[-10.6,-10.6],"rms_db":[-17.8,-17.8],"clipped_samples":0,"status":"Connected(1)"},
+{"t":258.6,"tc":"5 2 2173","peak_db":[-14.4,-14.4],"rms_db":[-20.6,-20.6],"clipped_samples":0,"status":"Connected(1)"},
+{"t":258.7,"tc":"5 2 3189","peak_db":[-63.9,-63.9],"rms_db":[-86.0,-86.0],"clipped_samples":0,"status":"Connected(1)"},
+{"t":258.8,"tc":"5 2 4 78","peak_db":[-200.0,-200.0],"rms_db":[-200.0,-200.0],"clipped_samples":0,"status":"Connected(1)"},
+{"t":258.9,"tc":"5 3 1 29","peak_db":[-10.6,-10.6],"rms_db":[-26.9,-26.9],"clipped_samples":0,"status":"Connected(1)"},
+{"t":259.0,"tc":"5 3 1222","peak_db":[-10.3,-10.3],"rms_db":[-17.8,-17.8],"clipped_samples":0,"status":"Connected(1)"},
+{"t":259.1,"tc":"5 3 2163","peak_db":[-14.4,-14.4],"rms_db":[-20.6,-20.6],"clipped_samples":0,"status":"Connected(1)"},
+{"t":259.2,"tc":"5 3 3125","peak_db":[-48.2,-48.2],"rms_db":[-68.7,-68.7],"clipped_samples":0,"status":"Connected(1)"},
+{"t":259.3,"tc":"5 3 4 78","peak_db":[-200.0,-200.0],"rms_db":[-200.0,-200.0],"clipped_samples":0,"status":"Connected(1)"},
+{"t":259.4,"tc":"5 4 1 31","peak_db":[-10.2,-10.2],"rms_db":[-24.3,-24.3],"clipped_samples":0,"status":"Connected(1)"},
+{"t":259.5,"tc":"5 4 2 43","peak_db":[-11.2,-11.2],"rms_db":[-18.3,-18.3],"clipped_samples":0,"status":"Connected(1)"},
+{"t":259.6,"tc":"5 4 2177","peak_db":[-14.3,-14.3],"rms_db":[-20.5,-20.5],"clipped_samples":0,"status":"Connected(1)"},
+{"t":259.7,"tc":"5 4 3130","peak_db":[-53.7,-53.7],"rms_db":[-76.2,-76.2],"clipped_samples":0,"status":"Connected(1)"},
+{"t":259.8,"tc":"5 4 4 81","peak_db":[-200.0,-200.0],"rms_db":[-200.0,-200.0],"clipped_samples":0,"status":"Connected(1)"},
+{"t":259.9,"tc":"6 1 1 33","peak_db":[-10.0,-10.0],"rms_db":[-24.1,-24.1],"clipped_samples":0,"status":"Connected(1)"},
+{"t":260.0,"tc":"6 1 1215","peak_db":[-11.0,-11.0],"rms_db":[-18.0,-18.0],"clipped_samples":0,"status":"Connected(1)"},
+{"t":260.1,"tc":"6 1 2176","peak_db":[-14.5,-14.5],"rms_db":[-20.6,-20.6],"clipped_samples":0,"status":"Connected(1)"},
+{"t":260.2,"tc":"6 1 3129","peak_db":[-65.2,-65.2],"rms_db":[-84.5,-84.5],"clipped_samples":0,"status":"Connected(1)"},
+{"t":260.3,"tc":"6 1 4145","peak_db":[-200.0,-200.0],"rms_db":[-200.0,-200.0],"clipped_samples":0,"status":"Connected(1)"},
+{"t":260.4,"tc":"6 2 1 33","peak_db":[-10.5,-10.5],"rms_db":[-27.7,-27.7],"clipped_samples":0,"status":"Connected(1)"},
+{"t":260.5,"tc":"6 2 1226","peak_db":[-10.4,-10.4],"rms_db":[-17.7,-17.7],"clipped_samples":0,"status":"Connected(1)"},
+{"t":260.6,"tc":"6 2 2178","peak_db":[-14.4,-14.4],"rms_db":[-20.6,-20.6],"clipped_samples":0,"status":"Connected(1)"},
+{"t":260.7,"tc":"6 2 3129","peak_db":[-56.7,-56.7],"rms_db":[-74.6,-74.6],"clipped_samples":0,"status":"Connected(1)"},
+{"t":260.8,"tc":"6 2 4 82","peak_db":[-200.0,-200.0],"rms_db":[-200.0,-200.0],"clipped_samples":0,"status":"Connected(1)"},
+{"t":260.9,"tc":"6 3 1 34","peak_db":[-10.2,-10.2],"rms_db":[-24.2,-24.2],"clipped_samples":0,"status":"Connected(1)"},
+{"t":261.0,"tc":"6 3 1215","peak_db":[-11.2,-11.2],"rms_db":[-18.3,-18.3],"clipped_samples":0,"status":"Connected(1)"},
+{"t":261.1,"tc":"6 3 3  1","peak_db":[-14.3,-14.3],"rms_db":[-20.4,-20.4],"clipped_samples":0,"status":"Connected(1)"},
+{"t":261.2,"tc":"6 3 3129","peak_db":[-52.6,-52.6],"rms_db":[-76.9,-76.9],"clipped_samples":0,"status":"Connected(1)"},
+{"t":261.3,"tc":"6 3 4 82","peak_db":[-200.0,-200.0],"rms_db":[-200.0,-200.0],"clipped_samples":0,"status":"Connected(1)"},
+{"t":261.4,"tc":"6 4 1 33","peak_db":[-10.1,-10.1],"rms_db":[-24.1,-24.1],"clipped_samples":0,"status":"Connected(1)"},
+{"t":261.5,"tc":"6 4 1225","peak_db":[-11.1,-11.1],"rms_db":[-18.1,-18.1],"clipped_samples":0,"status":"Connected(1)"},
+{"t":261.6,"tc":"6 4 2177","peak_db":[-14.2,-14.2],"rms_db":[-20.6,-20.6],"clipped_samples":0,"status":"Connected(1)"},
+{"t":261.7,"tc":"6 4 3129","peak_db":[-69.5,-69.5],"rms_db":[-93.6,-93.6],"clipped_samples":0,"status":"Connected(1)"},
+{"t":261.8,"tc":"6 4 4 82","peak_db":[-200.0,-200.0],"rms_db":[-200.0,-200.0],"clipped_samples":0,"status":"Connected(1)"}
+]}
+ 263.952 CAPTURE done tc=  6 4 4144
+TAP status Connected(1)  pulls ok=24641 err=0 lastErr=0 frames=12616192 (262.8 s)  tc=  6 4 4194
+POS 6.4.4.194  raw=[  6 4 4194] assign=P2
+TAP status Connected(1)  pulls ok=31012 err=0 lastErr=0 frames=15878144 (330.8 s)  tc=  6 4 4194
