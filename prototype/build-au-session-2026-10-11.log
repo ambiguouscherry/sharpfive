@@ -1,0 +1,108 @@
+# BUILD spike session log, 2026-10-11 (ticket #15)
+# Question: brief -> JUCE 8 AU that Logic loads, with no human in the compile loop?
+# Brief used: "tape saturation with a tilt EQ". Plugin: TapeTilt, manufacturer Sharpfive (Shfv/Tptl, aufx).
+# Machine: macOS 26.7.1, Intel i7/16 GB, Command Line Tools only (no Xcode), cmake 4.4.2, ninja, JUCE 8.0.9 at ~/JUCE,
+#          pluginval at /Applications/pluginval.app, auval, Logic Pro 11.2.
+# Source: prototype/build-au/ on branch prototype/build-au (scaffold from juce-init, agent-doc layer removed).
+
+## TIMELINE (wall clock, seconds from 19:47:40 = t0)
+  +19   juce-init scaffold.sh Sharpfive TapeTilt                                   1 s
+  +20..+144  agent authors DSP + APVTS from the brief (5 params, oversampled tanh,
+             tilt = low/high shelf pair, dry/wet, no editor; editor files deleted)   ~2 min
+  +157  cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release                         38 s (juceaide build included)
+  +195  cmake --build --target TapeTilt_AU TapeTilt_VST3 --parallel               141 s, 49 steps, zero errors
+  +336  pluginval --strictness-level 5 on the VST3 from the build dir             *** FAILED: Timeout after 30 secs
+        -> Gatekeeper alert on Margot's screen: "TapeTilt.vst3 is damaged and can't be opened"
+        -> cause: /Applications/pluginval.app carries com.apple.quarantine; loading an ad-hoc-signed bundle
+           through a quarantined app stamps the bundle's _CodeSignature with quarantine (0281) and macOS refuses it.
+        -> HUMAN STEP #1: Margot clicked Cancel on the alert.
+        -> fix: xattr -dr com.apple.quarantine /Applications/pluginval.app; xattr -cr on both bundles.
+  +340  codesign -dv on the built AU: "code object is not signed at all" (JUCE 8.0.9 post-build only ad-hoc signs
+        the VST3). Fix: codesign --force --sign - (no --deep) on both bundles; --verify --deep --strict ok.
+  +404  AU installed to ~/Library/Audio/Plug-Ins/Components/TapeTilt.component (folder was empty before)
+  +407  pluginval --strictness-level 5 VST3 -> SUCCESS                             3 s
+  +491  auval -v aufx Tptl Shfv -> AU VALIDATION SUCCEEDED (5 parameters PASS, latency PASS)   1 s
+        (auval found the component immediately: the registrar already knew it)
+
+## RESCAN EXPERIMENT — does Logic see the new AU without a restart?
+  Method: MCU surface (audio-tap spike `scrollto`): SELECT strip -> PLUG-IN -> PLUG-IN gives the selection view;
+  v-pot ticks walk Logic's plug-in list, each name lands on the LCD. The Audio Units section after Logic's own
+  effects reads: ... I/O, Tape Fiasco, AUDynamicsProcessor ... AUSoundIsolation, RC-20 Retro Color, EffectRack,
+  Serum 2 FX (end). The list is by plugin name; TapeTilt would sit between AUSoundIsolation and RC-20.
+  +455..+609  no intervention (2.5 min after install): not in list (400 ticks fwd, 30 back)         NO
+  +491  after auval registered it, same open view: not in list                                     NO
+  +520  PLUG-IN twice to rebuild the view (overview -> selection), 260 ticks: not in list           NO
+  +538  killall -9 AudioComponentRegistrar (user instance, pid 631), reopen view, 260 ticks        NO
+  +608  AX: Logic Pro > Settings > Plug-in Manager… opened from code (AXPress by title, no focus).
+        Window dump: 1341 AX lines, every row = Name/Type/Manufacturer/Version/Compatibility/Use text fields.
+        No TapeTilt row, no Sharpfive manufacturer. "Reset & Rescan Selection" with nothing selected ->
+        an empty "Audio Unit Validation Result" window, still no row                               NO
+  +676  "Full Audio Unit Reset" -> alert "Do you want to reset all Audio Unit scan results? After the reset,
+        you must restart Logic Pro and rescan all Audio Units. This may take a while." [Yes/No]
+        The alert was confirmed before my "No" press reached it; ~/Library/Caches/AudioUnitCache was deleted.
+        -> HUMAN STEP #2: Margot saved the project and quit Logic (20:07:20), relaunched (20:10:41).
+  20:10:45  AudioUnitCache recreated; TapeTilt present in com.apple.audiounits.cache within 16 s of launch.
+  20:10..   Logic revalidates every installed AU at launch (~1 AU / 12 s, cache +~480 B each); project not yet open.
+
+## VERDICT ON RESCAN
+  No in-session path made Logic 11.2 index a newly installed AU: not time, not auval, not restarting the
+  registrar, not the Plug-in Manager's selection rescan. Logic builds its AU list at launch. A "Full Audio Unit
+  Reset" is worse than a plain restart: it throws away every validation result and revalidates all AUs.
+  Rule for the BUILD limb: install, then restart Logic (plain quit/relaunch, project saved) — do NOT use
+  Full Audio Unit Reset.
+
+## AFTER RESTART
+(appended below)
+  20:10:41  Logic relaunched by Margot. Full-reset rescan validated every AU, ~1 per 12 s (cache +~480 B each),
+            about 25 min for this machine's ~215 components. Startup alert "Incompatible Audio Units found" (1):
+            opened the Plug-in Manager from code (AXPress "Start Plug-In Manager") and read the table:
+              TapeTilt | effect | Sharpfive | 1.0.0 | successfully validated | Use=1      <- Logic validated it
+              EffectRack | Soundtoys 5.4.3 | couldn't be opened | Use=0                   <- the failure, not ours
+            Pressed Done; dismissed "last selected audio interface is not available" (OK); File > Open Recent >
+            sharpfive-prototype from code; surface reconnected (pinned IDs) straight into the plug-in view.
+  20:37     MCU selection view, strip 1 ("hello :P", mono list) 300 ticks: Logic's own effects, I/O, Tape Fiasco,
+            AUBandpass ... AUPitch, RC-20 Retro Color, Serum 2 FX (end). NO TapeTilt.
+            Strip 2 ("Inst 2") 400 ticks: same set with (m/s) variants, NO TapeTilt.
+            (Mistake on the way: a press landed while the list cursor sat on Serum 2 FX -> inserted it; removed again
+             from the surface: PLUG-IN to the per-strip slot view, 300 CCW ticks to "--", press. Slot reads "--".)
+            Every other validated third-party effect (Tape Fiasco = also JUCE + ad-hoc signed, RC-20, Serum 2 FX)
+            IS in the surface list. Differences left: ours sits in ~/Library (the only user-folder AU on this
+            machine), has no editor (hasEditor=false), and has never been loaded in Logic.
+            auval reports explicit channel capabilities [1,1] [2,2], so a mono-strip filter is not the cause.
+            No unified-log lines mention TapeTilt/Shfv; Logic prefs mention none of the third-party AUs.
+  20:45     Screen locked (AX returns nothing); GUI-menu check (Audio Units > Sharpfive > TapeTilt?) pending Margot.
+  20:51     Screen unlocked. Inspector strip "hello :P" via AX: Compressor group + two 'audio plug-in' buttons (empty
+            slots; actions AXPress + "Open plug-in menu with legacy plug-ins"). AXPress on an empty slot opened
+            Logic 11's plug-in popup: not an AXMenu, not a window; its search field becomes the app's
+            AXFocusedUIElement (the popup is otherwise invisible to AX). While it was open, TapeTilt landed in
+            Stereo Out slot 1 (Inspector: AXGroup d='TapeTilt' with bypass/open/list; 'library indicator, TapeTilt')
+            -> it IS in Logic's GUI plug-in menu. Margot confirmed she picked Audio Units > Sharpfive > TapeTilt
+            from the popup herself (HUMAN STEP #3). The AX 'open' press on the TapeTilt group returned 0 but Margot
+            saw no plug-in window; Logic hides plug-in windows from AX, so the generic view is evidenced by the
+            MCU edit view (5 names + values) and auval's parameter pass, not by a screenshot.
+  20:56     MCU, Stereo Out overview: "Ins1Pl TapTil | Ins2Pl ANeSed" (TapeTilt before AUNetSend = tap order).
+            v-pot 1 press -> edit view:   Mix 100 | Tilt 0.0 | TiltF 800 | Drive 6.0 | Output 0.0
+            = the five APVTS parameters with their defaults, 6-char names (parameters visible, no custom UI).
+            tap connect -> Connected(1); PLAY; capture 3 s: quarter-note onsets at -6.7..-8.1 dB peak through
+            TapeTilt (dry source was -10.0 dBFS in #7's capture: +6 dB drive, tanh, -3 dB makeup), zeros between,
+            0 clipped samples, 705 pulls, 0 errors. The BUILD loop can hear its own plugin (#16 input).
+  20:57     Surface selection list, strip 2, 400 ticks: "TapeTilt (m/m)" FOUND after 167 ticks (after I/O, before
+            Tape Fiasco / the AU* block) — present now that Logic has instantiated it once via the GUI popup.
+            Before that (same Logic process, same project) 400-tick scans never showed it. Scrolled back to "--".
+  Build-variant hedge (not installed, not needed): TapeTilt with juce::GenericAudioProcessorEditor built in 76 s
+            incremental at $CLAUDE_JOB_DIR/tmp/variant-ui; discarded because the headless build loads fine.
+
+## TOTALS
+  brief -> installed, pluginval- and auval-clean AU: ~7 min wall (scaffold 1 s, authoring ~2 min, configure 38 s,
+  build 141 s, pluginval 3 s, auval 1 s, signing/install seconds). Human steps: (1) Gatekeeper alert from the
+  quarantined pluginval.app — one-time, fixed by xattr; (2) Logic restart (save + quit + relaunch; the relaunch
+  did ~25 min of full revalidation only because Full Audio Unit Reset was confirmed — a plain restart would not);
+  (3) one GUI insertion of the new plugin, after which the MCU surface lists it (needs re-test: maybe opening the
+  popup alone is the trigger). Everything else — scaffold, DSP/APVTS, build, sign, install, validate, Plug-in
+  Manager reading, alert dismissal, project reopen, parameter readback, audio capture — ran from code.
+  21:00     Second AX 'open' press on the Inspector's TapeTilt group opened the plug-in window (title = strip name,
+            "Stereo Out"; the first press was swallowed while the surface still had focus). AX dump of the window:
+              AXMenuButton 'Controls' (view) | preset popup 'Manual' | AXStaticText 'TapeTilt'
+              Mix: 10000 | Tilt: 5000 | Tilt Freq: 5774 | Drive: 2500 | Output: 6667   (AXSlider, 0..10000 normalised)
+            = Logic's generic Controls view with the five parameters at their defaults (100 %, 0 dB, 800 Hz on the
+            skewed 200–2000 range, 6/24 dB, 24/36 dB). "Parameters visible in the generic view": proven by AX read.
