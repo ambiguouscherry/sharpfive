@@ -49,6 +49,7 @@ private:
     juce::dsp::Gain<float> driveGain;                 // pre-saturation, runs at 2x
     juce::dsp::WaveShaper<float> shaper;              // tanh tape curve
     StereoIIR lowShelf, highShelf;                    // tilt = opposing shelves
+    StereoIIR dcBlock;                                // 5 Hz first-order HPF (1.1.0, #16)
     juce::dsp::Gain<float> outputGain;
     juce::dsp::DryWetMixer<float> dryWet;
 

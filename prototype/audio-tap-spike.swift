@@ -8,6 +8,7 @@
 // Run: swiftc -O -o /tmp/tap prototype/audio-tap-spike.swift && /tmp/tap < cmd-fifo
 // Not production code. No error handling beyond what keeps it runnable.
 
+import Accelerate
 import AudioToolbox
 import CoreMIDI
 import Foundation
@@ -450,6 +451,7 @@ final class Tap {
                 if err != noErr { pullsErr += 1; lastErr = err; continue }
                 pullsOK += 1
                 analyze(storage)
+                lock.lock(); if recording { recordFrames(storage) }; lock.unlock()
             }
             free(bufs.unsafeMutablePointer)
         }
@@ -498,6 +500,78 @@ final class Tap {
         }
         lastWindowPeakDb = peakDb
         if watch && peakDb > onsetThresholdDb { log("TAP \(json)") }
+    }
+
+    // ── #16: spectral judgement ──────────────────────────────────────────────
+    // `spectrum <seconds> [rawfile]` records mono (L+R)/2 for N s, then reports a Welch-averaged
+    // octave-band spectrum (4096-pt Hann, 50 % hop, segments gated at -60 dBFS RMS so gaps between
+    // notes do not dilute), DC offset, peak/RMS, and a least-squares spectral tilt in dB/octave over
+    // 125 Hz..8 kHz. Band levels are relative (arbitrary FFT scaling); compare two runs, not one.
+    var recording = false
+    var recBuf: [Float] = []
+    func recordFrames(_ chans: [[Float]]) {
+        let n = Int(framesPerPull)
+        if channels >= 2 {
+            var mono = [Float](repeating: 0, count: n)
+            vDSP_vadd(chans[0], 1, chans[1], 1, &mono, 1, vDSP_Length(n))
+            var half: Float = 0.5; vDSP_vsmul(mono, 1, &half, &mono, 1, vDSP_Length(n))
+            recBuf.append(contentsOf: mono)
+        } else { recBuf.append(contentsOf: chans[0].prefix(n)) }
+    }
+    func spectrum(seconds: Double, rawPath: String?) -> String {
+        lock.lock(); recBuf = []; recBuf.reserveCapacity(Int(sampleRate * seconds) + 8192); recording = true; lock.unlock()
+        Thread.sleep(forTimeInterval: seconds)
+        lock.lock(); recording = false; let x = recBuf; lock.unlock()
+        if let rawPath { x.withUnsafeBufferPointer { p in FileManager.default.createFile(atPath: rawPath, contents: Data(buffer: p)) } }
+        let n = 4096, half = n / 2, log2n = vDSP_Length(12)
+        guard x.count >= n, let setup = vDSP_create_fftsetup(log2n, FFTRadix(kFFTRadix2)) else { return "{\"error\":\"too few frames \(x.count)\"}" }
+        defer { vDSP_destroy_fftsetup(setup) }
+        var window = [Float](repeating: 0, count: n); vDSP_hann_window(&window, vDSP_Length(n), Int32(vDSP_HANN_NORM))
+        var acc = [Float](repeating: 0, count: half), real = [Float](repeating: 0, count: half), imag = [Float](repeating: 0, count: half)
+        var seg = [Float](repeating: 0, count: n), mags = [Float](repeating: 0, count: half)
+        var used = 0, total = 0, i = 0
+        var peak: Float = 0, sumSq: Double = 0, sum: Double = 0
+        vDSP_maxmgv(x, 1, &peak, vDSP_Length(x.count))
+        var msAll: Float = 0; vDSP_measqv(x, 1, &msAll, vDSP_Length(x.count)); sumSq = Double(msAll)
+        var meanAll: Float = 0; vDSP_meanv(x, 1, &meanAll, vDSP_Length(x.count)); sum = Double(meanAll)
+        while i + n <= x.count {
+            total += 1
+            var ms: Float = 0; vDSP_measqv(Array(x[i..<i + n]), 1, &ms, vDSP_Length(n))
+            if ms > 1e-6 {   // segment RMS above -60 dBFS
+                x.withUnsafeBufferPointer { xp in vDSP_vmul(xp.baseAddress! + i, 1, window, 1, &seg, 1, vDSP_Length(n)) }
+                real.withUnsafeMutableBufferPointer { rp in imag.withUnsafeMutableBufferPointer { ip in
+                    var split = DSPSplitComplex(realp: rp.baseAddress!, imagp: ip.baseAddress!)
+                    seg.withUnsafeBufferPointer { sp in sp.baseAddress!.withMemoryRebound(to: DSPComplex.self, capacity: half) { cp in
+                        vDSP_ctoz(cp, 2, &split, 1, vDSP_Length(half)) } }
+                    vDSP_fft_zrip(setup, &split, 1, log2n, FFTDirection(FFT_FORWARD))
+                    let dc = rp[0]; ip[0] = 0   // bin 0 packs DC (real) and Nyquist (imag); keep DC only
+                    vDSP_zvmags(&split, 1, &mags, 1, vDSP_Length(half)); mags[0] = dc * dc
+                } }
+                vDSP_vadd(acc, 1, mags, 1, &acc, 1, vDSP_Length(half))
+                used += 1
+            }
+            i += half
+        }
+        guard used > 0 else { return "{\"error\":\"no segment above -60 dBFS\",\"segments\":\(total)}" }
+        let binHz = sampleRate / Double(n)
+        let centres: [Double] = [31.5, 63, 125, 250, 500, 1000, 2000, 4000, 8000, 16000]
+        var bands: [(Double, Double)] = []
+        for f in centres {
+            let lo = Int((f / 1.41421356 / binHz).rounded(.up)), hi = min(half - 1, Int((f * 1.41421356 / binHz).rounded(.down)))
+            guard lo >= 1, hi >= lo else { continue }
+            var s: Double = 0; for b in lo...hi { s += Double(acc[b]) }
+            bands.append((f, 10 * log10(max(s / Double(used), 1e-20))))
+        }
+        // least-squares slope of band level vs log2(f), 125..8000 Hz
+        let fit = bands.filter { $0.0 >= 125 && $0.0 <= 8000 }
+        let mx = fit.map { log2($0.0) }.reduce(0, +) / Double(fit.count), my = fit.map { $0.1 }.reduce(0, +) / Double(fit.count)
+        var num = 0.0, den = 0.0
+        for (f, l) in fit { let dx = log2(f) - mx; num += dx * (l - my); den += dx * dx }
+        let slope = den > 0 ? num / den : 0
+        func d(_ v: Double) -> String { String(format: "%.2f", v) }
+        let bandJson = bands.map { "\"\(Int($0.0))\":\(d($0.1))" }.joined(separator: ",")
+        let dcDb = abs(sum) <= 1e-10 ? "-200" : d(20 * log10(abs(sum)))
+        return "{\"seconds\":\(seconds),\"sample_rate\":\(Int(sampleRate)),\"frames\":\(x.count),\"segments_total\":\(total),\"segments_used\":\(used),\"peak_db\":\(d(20 * log10(max(Double(peak), 1e-10)))),\"rms_db\":\(d(10 * log10(max(sumSq, 1e-20)))),\"dc_db\":\(dcDb),\"dc_sign\":\(sum >= 0 ? 1 : -1),\"bands_db\":{\(bandJson)},\"tilt_db_per_oct_125_8k\":\(d(slope)),\"status\":\"\(statusString())\"}"
     }
 
     func capture(seconds: Double) -> String {
@@ -599,6 +673,11 @@ while let line = readLine() {
         log("CAPTURE \(secs) s start tc=\(spike.tcString()) status=\(tap.statusString())")
         print(tap.capture(seconds: secs))
         log("CAPTURE done tc=\(spike.tcString())")
+    case "spectrum":   // #16: spectrum <seconds> [rawfile]
+        let secs = parts.count > 1 ? (Double(parts[1]) ?? 4) : 4
+        log("SPECTRUM \(secs) s start tc=\(spike.tcString()) status=\(tap.statusString())")
+        print("SPECTRUM " + tap.spectrum(seconds: secs, rawPath: parts.count > 2 ? parts[2] : nil))
+        log("SPECTRUM done tc=\(spike.tcString())")
     case "scrollto":
         guard parts.count >= 2 else { print("usage: scrollto <text> [maxticks] [strip] [gap_ms] [dir]"); continue }
         spike.scrollTo(parts[1], strip: intArg(3, 1), maxTicks: intArg(2, 200), gapMs: intArg(4, 40), dir: intArg(5, 1))

@@ -82,6 +82,9 @@ void TapeTiltAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlo
     highShelf.prepare (spec);    highShelf.reset();
     lastTilt = lastCentre = 1.0e9f;   // force coefficient refresh at the new rate
 
+    dcBlock.prepare (spec);      dcBlock.reset();
+    *dcBlock.state = *Coeffs::makeFirstOrderHighPass (sampleRate, 5.0f);
+
     outputGain.prepare (spec);   outputGain.reset();
     outputGain.setRampDurationSeconds (0.02);
 
@@ -113,19 +116,21 @@ void TapeTiltAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
     dryWet.setWetMixProportion (mix);
     dryWet.pushDrySamples (block);
 
-    // Saturate at 2x: drive in, tanh, then pull back half the drive so level stays sane.
+    // Saturate at 2x: drive in, tanh, then pull the full drive back out so the stage sits near unity
+    // at its default. (1.0.0 pulled back only half: the tap measured wet +2.7 dB over bypass, #16.)
     auto osBlock = oversampling.processSamplesUp (block);
     driveGain.setGainDecibels (drive);
     juce::dsp::ProcessContextReplacing<float> osCtx (osBlock);
     driveGain.process (osCtx);
     shaper.process (osCtx);
-    osBlock.multiplyBy (juce::Decibels::decibelsToGain (-drive * 0.5f));
+    osBlock.multiplyBy (juce::Decibels::decibelsToGain (-drive));
     oversampling.processSamplesDown (block);
 
     updateTilt (tilt, centre);
     juce::dsp::ProcessContextReplacing<float> ctx (block);
     lowShelf.process (ctx);
     highShelf.process (ctx);
+    dcBlock.process (ctx);   // the asymmetric curve rectifies a little; measured +6 dB of DC over dry (#16)
 
     outputGain.setGainDecibels (outDb);
     outputGain.process (ctx);

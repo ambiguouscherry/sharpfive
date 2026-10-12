@@ -1,0 +1,129 @@
+# BUILD-loop spike session log, 2026-10-11 (ticket #16)
+# Question: can the agent close the loop on its own plugin — play material through TapeTilt, hear it via the
+# audio tap, judge against the brief, change the DSP, rebuild, and prove the revised build is what Logic runs?
+# Starting state (handoff after #15): Logic Pro 11.2 pid 89818, project sharpfive-prototype, Stereo Out slot 1
+# TapeTilt 1.0.0 (defaults: Mix 100, Tilt 0, TiltF 800, Drive 6, Output 0), slot 2 AUNetSend (the tap).
+# Material: the #8 MIDI-write region on "Inst 1" (8 quarter notes, note 48, bars 5-6, ~-10 dBFS dry peak).
+# Tooling: prototype/audio-tap-spike.swift + new `spectrum <s> [rawfile]` verb (Welch octave bands, DC,
+#          spectral tilt dB/oct 125 Hz-8 kHz, segments gated at -60 dBFS). No numpy on this machine; Accelerate.
+# Judgement method planned: A/B through the same tap and the same 2 bars — dry (Mix 0 %) vs wet, then Tilt at
+#          +6 dB vs 0 dB — band-by-band differences, not absolute levels.
+
+## TIMELINE
+21:08:30  session log opened
+21:09     tap3 (audio-tap spike + spectrum verb) started on the fifo; surface reconnected on pinned IDs straight into
+          the slot view: "hell:P | Inst 2 | St Out | Master" / "Comprs | -- | TapTil". tap connect -> Connected(1),
+          0 pull errors. Playhead 9.1.4.141.
+21:10     SURFACE FINDING: in the slot view, v-pot 3 press (St Out / TapTil) opens the COMPRESSOR edit page
+          (hell:P slot 1), twice, with SELECT LED 3 on. PLUG-IN -> overview also shows hell:P's inserts
+          ("Ins1Pl Comprs | Ins2Pl -- ..."). Logic's MCU plug-in edit page follows the track selected in the
+          Arrange window, and the SELECT button does not move that selection onto Stereo Out (not a track).
+          Yesterday's Stereo Out overview worked only because the GUI selection was on Stereo Out at the time.
+          => for #16 parameters are set through the plug-in window's AX sliders ($T/axparam, 0..10000 normalised,
+          display string read back from the AXGroup). The v-pot path is left for the EDIT limb to fix (#28/#6).
+21:12     MEASUREMENT A — wet, defaults (Mix 100, Tilt 0, TiltF 800, Drive 6, Output 0). goto 5 (from 9.1), PLAY,
+          spectrum 3.6 s, STOP at 6.4.4.15. 8 quarter-note onsets at -7.9..-8.2 dB peak (dry source was -10.0 in #7).
+          {"frames":173568,"segments_total":83,"segments_used":48,"peak_db":-7.90,"rms_db":-19.98,"dc_db":-68.18,
+           "dc_sign":1,"bands_db":{"31":34.11,"63":53.85,"125":52.01,"250":50.76,"500":45.11,"1000":44.21,
+           "2000":40.62,"4000":32.53,"8000":11.92,"16000":-6.22},"tilt_db_per_oct_125_8k":-5.76}
+          raw mono float32 at $CLAUDE_JOB_DIR/tmp/A-wet-default.raw
+21:16     $T/axparam (AX, plug-in window "Stereo Out"): kAXWindows is EMPTY for Logic; the plug-in window is only
+          reachable as kAXFocusedWindow after the Inspector 'open' press. Rows read fine (Mix 100/9999 norm, Tilt 0.0/5000,
+          Tilt Freq 800/5774, Drive 6.0/2500, Output 0.0/6667). AXValue set on the inner AXSlider returned err=0 but
+          the value stayed (10000 -> 9999, display still '100').
+21:17     MEASUREMENT B (intended Mix 0, actually still Mix 100 = a repeat of A). Same 2 bars:
+          bands 63..8k within 0.1 dB of A (53.75/51.94/50.66/45.05/44.12/40.55/32.51/12.01), tilt -5.74 vs -5.76,
+          rms -19.97 vs -19.98, dc -68.15 vs -68.18. 16 kHz band differs by 2.8 dB (noise floor, ignore).
+          => the tap + spectrum method is repeatable to ~0.1 dB per band; any A/B difference above ~0.5 dB is real.
+21:19     AX PROBE on the Mix row: cell = AXStaticText 'Mix:' | AXGroup (value text '100', contains an AXSlider that
+          only nudges ~1 per AXValue set) | AXSlider 0..10000 (direct child, AXIncrement/AXDecrement, AXValue
+          settable) | AXValueIndicator. Integer AXValue set on the DIRECT-CHILD slider works: 9988 -> 0, display '0'.
+          Double sets and the inner slider do not. => axparam uses the direct-child slider; set + 300 ms readback.
+21:21     MEASUREMENT B (real) — DRY: Mix 0 % via AX (readback '0'), same 2 bars. Onsets -10.0..-10.6 dB (= #7's dry).
+          {"segments_used":48,"peak_db":-9.98,"rms_db":-22.68,"dc_db":-73.97,"dc_sign":1,"bands_db":{"31":30.86,
+           "63":51.10,"125":49.32,"250":48.09,"500":42.36,"1000":41.52,"2000":38.10,"4000":30.18,"8000":7.06,
+           "16000":-16.34},"tilt_db_per_oct_125_8k":-5.96}
+          WET(A) minus DRY(B), dB per band: 63 +2.75 | 125 +2.69 | 250 +2.67 | 500 +2.75 | 1k +2.69 | 2k +2.52 |
+          4k +2.35 | 8k +4.86 | 16k +10.1 ; rms +2.70, peak +2.08, dc -68.2 vs -74.0 (asymmetry term adds ~6 dB of DC
+          on top of the source's own).
+          READING: at default Drive 6 dB the "makeup" of -drive/2 leaves the wet path ~2.7 dB louder than bypass
+          across the band; the saturation itself only shows above 4 kHz (harmonics of the C3 synth note). A level
+          bump that large makes every A/B of the saturation "sound better" for the wrong reason.
+21:23     MEASUREMENT C — WET, Tilt +6.0 dB (AX readback '6.0'), Mix 100, rest default. Onsets -4.5..-5.4 dB.
+          {"segments_used":47,"peak_db":-4.86,"rms_db":-22.38,"dc_db":-71.15,"bands_db":{"31":30.47,"63":50.93,
+           "125":49.10,"250":47.88,"500":43.14,"1000":45.35,"2000":43.48,"4000":35.59,"8000":14.93,"16000":-11.68},
+           "tilt_db_per_oct_125_8k":-4.53}
+          C minus A (tilt +6 vs tilt 0), dB per band: 63 -2.92 | 125 -2.91 | 250 -2.88 | 500 -1.97 | 1k +1.14 |
+          2k +2.86 | 4k +3.06 | 8k +3.01 ; slope +1.23 dB/oct; peak +3.0 dB (shelf boost sits after the saturator).
+          READING: the tilt does what the brief asked — a 6 dB see-saw pivoting at the 800 Hz centre, ±3 dB reached by
+          the second octave either side. No change needed to the tilt.
+
+## JUDGEMENT (from the tapped output, against the brief "tape saturation with a tilt EQ")
+  1. Level: wet is +2.7 dB over bypass at the default Drive (A-B). Cause in the source: makeup is -drive/2 after a
+     +drive push into tanh. A saturation stage should sit near unity at its default so the Mix/bypass comparison is
+     honest. CHANGE: makeup = -drive (full compensation). Prediction: wet-dry broadband -> about -0.3 dB (tanh
+     eats a little of the peaks), 8k/16k harmonics stay above dry.
+  2. DC: the asymmetric curve tanh(x + 0.05x^2) rectifies a little; wet DC -68 dB vs dry -74 dB (6 dB added).
+     Harmless for listening, but it is a measurable defect of the curve and it will pump a downstream compressor's
+     detector. CHANGE: first-order high-pass at 5 Hz after the shelves. Prediction: wet DC returns to the dry floor.
+  3. Tilt: as designed, no change.
+  Version 1.0.0 -> 1.1.0 (behaviour change at defaults).
+          (clock note: the 21:12-21:23 stamps above were estimated; wall clock at the 1.1.0 install below was 21:18:14,
+           so measurements A-C ran 21:10-21:16. Order and content are exact; the stamps are ~5 min early... late.)
+21:16     EDIT: PluginProcessor.cpp makeup -drive*0.5 -> -drive; new StereoIIR dcBlock (first-order HPF 5 Hz) after
+          the shelves; header member; CHANGELOG 1.1.0; CMake VERSION 1.1.0. 1.0.0 component backed up to
+          $T/backup-TapeTilt-1.0.0.component.
+21:18:14  BUILD 1.1.0: cmake --build (AU+VST3) 131 s, 49 ninja steps (the version bump recompiles everything;
+          a DSP-only edit was 76 s yesterday). Sign both (ad-hoc), pluginval strictness 5 on the VST3: 3 s, pass.
+          Installed OVER the live component (rm -rf + cp -R while Logic pid 89818 had 1.0.0 loaded): Logic kept
+          running, audio kept flowing (next measurement). Info.plist 1.1.0 / 65792. auval 1 s: VALIDATION SUCCEEDED.
+          Loop so far: judge -> edit -> validated install = 136 s of machine time.
+21:18:45  MEASUREMENT D — wet defaults, SAME Logic process, 30 s after 1.1.0 was installed over the live bundle.
+          {"peak_db":-7.90,"rms_db":-19.97,"dc_db":-68.15,"bands_db":{"63":53.86,"125":52.01,"250":50.77,"500":45.11,
+           "1000":44.20,"2000":40.62,"4000":32.56,"8000":11.88},"tilt_db_per_oct_125_8k":-5.76}
+          = A to 0.05 dB in every band. The running instance is still 1.0.0: dyld keeps the loaded image, the new
+          bundle on disk is not what Logic is executing. Replacing the bundle under a live session is SAFE (no crash,
+          no glitch, audio uninterrupted) but SILENT — nothing in the session changes until Logic reloads the
+          component. Next: restart from code and re-measure.
+21:19:41  RESTART FROM CODE (#36's question, run as part of this loop). $T/restart16.sh:
+          File > Save via AX menu press: menu item was DISABLED (enabled=false) because the plug-in window
+          "Stereo Out" had focus, so nothing saved. Logic Pro > Quit: Logic showed the standard save sheet
+          ("Do you want to save the changes made to the document "sharpfive-prototype"?" Save / Don't Save / Cancel)
+          — readable via AX on the focused window; pressed 'Save' from code -> Logic quit 4 s later.
+          Old pid 89818 gone at 21:19:56 (15 s after the Save press). `open -a "Logic Pro"` -> pid 34826 in <1 s.
+          Splash (AX-readable: 'Version 11.2', 'Updating information about Audio Unit plug-ins') for ~3 s — a plain
+          relaunch revalidates only what changed, NOT the 25-min full pass. One alert: "The last selected audio
+          interface is not available ... USB AUDIO CODEC will be used" -> pressed OK. No "Incompatible Audio Units"
+          alert this time. 'Choose a Project' window at 21:20:03. Quit 15 s + launch-to-chooser 8 s = 23 s.
+21:20:29  File > Open Recent > sharpfive-prototype from code: Tracks window AND the "Stereo Out" plug-in window back
+          in 3 s (Logic restores open plug-in windows with the project; kAXWindows now lists both windows — it was
+          empty in the pre-restart process). Surface reconnected on the pinned IDs straight into the slot view
+          (hell:P | Inst 2 | St Out | Master / Comprs | -- | TapTil), playhead restored at 6.4.4.32, tap
+          disconnect + connect -> Connected(1). Full cycle Save-press -> Tracks window: 51 s.
+          lsof: pid 34826 has ~/Library/Audio/Plug-Ins/Components/TapeTilt.component/Contents/MacOS/TapeTilt mapped
+          (the 1.1.0 bundle; Info.plist 1.1.0).
+21:21:03  MEASUREMENT E — wet defaults, TapeTilt 1.1.0 (Mix 100 / Tilt 0.0 readback), same 2 bars. Onsets -9.2..-11.2.
+          {"segments_used":50,"peak_db":-10.53,"rms_db":-22.98,"dc_db":-98.54,"dc_sign":-1,"bands_db":{"31":30.17,
+           "63":50.63,"125":48.82,"250":47.56,"500":41.95,"1000":41.02,"2000":37.45,"4000":29.41,"8000":8.75,
+           "16000":-17.73},"tilt_db_per_oct_125_8k":-5.75}
+          E minus DRY(B), dB per band: 63 -0.47 | 125 -0.50 | 250 -0.53 | 500 -0.41 | 1k -0.50 | 2k -0.65 | 4k -0.77 |
+          8k +1.69 ; rms -0.30, peak -0.55, DC -98.5 vs -74.0 (gone).
+          E minus A (1.1.0 vs 1.0.0 at identical settings): -3.2 dB broadband, 8k -3.2, DC -30 dB.
+          PREDICTIONS HELD: (1) wet now ~unity with bypass (slightly under, tanh eats 0.5 dB of the peaks; the
+          8 kHz harmonic lift is the saturation, still present); (2) DC floor gone. The agent's reading of the
+          tapped output changed the DSP, and the tapped output of the rebuilt plugin confirms the change.
+
+## VERDICT (#16)
+  The loop closes from code: play -> tap -> spectrum -> judgement -> edit -> build (131 s) -> sign/validate/install
+  (5 s) -> restart Logic (Save sheet answered, relaunch, alert, Open Recent: 51 s) -> re-measure (10 s).
+  One iteration ~3.5 min of machine time, zero human steps (the 1.0.0 session's three human steps are all gone:
+  pluginval de-quarantined, restart from code, plug-in window reopened by the project).
+  How the agent judged the audio: Welch octave-band spectrum + DC + slope, A/B on the same 2 bars through the same
+  tap; repeatability ~0.1 dB per band (A vs its accidental repeat), so differences > 0.5 dB are real. Not used:
+  vision on a spectrogram, loudness models.
+  Replacing an inserted plugin in a live session: SAFE (no crash, audio uninterrupted) but SILENT (D == A): Logic
+  keeps executing the loaded image; the new code runs only after a Logic restart. A fresh insert in the same
+  process was not tested (expected: same image, same old code — dyld does not reload a loaded bundle).
+  Parameters for the A/B were set through the plug-in window's AX sliders (direct-child AXSlider, Int 0..10000)
+  because the MCU plug-in edit page follows the Arrange-selected track and Stereo Out is not a track.
+  Machine cost of a BUILD iteration on this laptop: version-bump rebuild 131 s (DSP-only edit ~76 s), restart 51 s.

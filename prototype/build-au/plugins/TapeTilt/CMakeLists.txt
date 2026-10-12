@@ -1,4 +1,4 @@
-project(TapeTilt VERSION 1.0.0)
+project(TapeTilt VERSION 1.1.0)
 
 set(PRODUCT_NAME "TapeTilt")
 
