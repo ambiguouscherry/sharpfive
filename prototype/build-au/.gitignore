@@ -1,0 +1,7 @@
+build/
+*/build/
+logs/
+.DS_Store
+*.user
+.cache/
+compile_commands.json
