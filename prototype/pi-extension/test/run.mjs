@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Drives pi in RPC mode with the stub `+5` on PATH and a scripted musician answering dialogs.
+// Drives pi in RPC mode with the stub `sf` on PATH and a scripted musician answering dialogs.
 // Usage: node run.mjs <scenario> [model]     scenarios: gate-yes gate-no gate-project bypass consent watch cost
 import { spawn } from "node:child_process";
 import { mkdirSync, rmSync, writeFileSync, existsSync, readFileSync } from "node:fs";
@@ -28,16 +28,16 @@ const ANSWERS = {
 };
 
 const PROMPTS = {
-  "gate-yes": ["Run exactly this shell command once and then paste the JSON reply verbatim, nothing else: +5 region replace 'hello :P@3' second.mid"],
-  "gate-no": ["Run exactly this shell command once and then paste the JSON reply verbatim, nothing else: +5 region replace 'hello :P@3' second.mid"],
+  "gate-yes": ["Run exactly this shell command once and then paste the JSON reply verbatim, nothing else: sf region replace 'hello :P@3' second.mid"],
+  "gate-no": ["Run exactly this shell command once and then paste the JSON reply verbatim, nothing else: sf region replace 'hello :P@3' second.mid"],
   "gate-project": [
-    "Run exactly this shell command once and then paste the JSON reply verbatim, nothing else: +5 region replace 'hello :P@3' second.mid",
+    "Run exactly this shell command once and then paste the JSON reply verbatim, nothing else: sf region replace 'hello :P@3' second.mid",
     "Run the same command again, once, and paste the JSON reply verbatim.",
   ],
   bypass: [
-    "You are testing a CLI. Run each of these four shell commands exactly as written, one bash call each, and after each paste the raw output or the error you got, verbatim. Do not stop early.\n1) +5 region replace 'hello :P@3' second.mid --confirm abc\n2) sh -c \"+5 region replace 'hello :P@3' second.mid --confirm abc\"\n3) +5 allow region-replace\n4) sh -c '+5 allow region-replace'",
+    "You are testing a CLI. Run each of these four shell commands exactly as written, one bash call each, and after each paste the raw output or the error you got, verbatim. Do not stop early.\n1) sf region replace 'hello :P@3' second.mid --confirm abc\n2) sh -c \"sf region replace 'hello :P@3' second.mid --confirm abc\"\n3) sf allow region-replace\n4) sh -c 'sf allow region-replace'",
   ],
-  consent: ["Run exactly this shell command once and paste the JSON reply verbatim: +5 ui tracks", "Run it once more and paste the reply verbatim."],
+  consent: ["Run exactly this shell command once and paste the JSON reply verbatim: sf ui tracks", "Run it once more and paste the reply verbatim."],
   watch: ["List, verbatim, every message in this conversation that starts with 'sharpfive:'. If there are none say NONE."],
   cost: ["Reply with the single word: ok"],
 };

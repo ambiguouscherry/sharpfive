@@ -2,11 +2,11 @@
  * sharpfive pi extension (development form; ADR 0004).
  *
  * Does two things only, per spec/tool-schemas.md §1, §4, §5, §7:
- *   1. Gates: a `+5` command that replies `status: gated` is shown to the musician in pi's own
+ *   1. Gates: a `sf` command that replies `status: gated` is shown to the musician in pi's own
  *      dialog, built from the daemon's payload. On yes the extension re-runs the command with the
  *      gate token. The agent cannot pass `--confirm` itself: the hook blocks it, and the daemon
  *      only accepts a token it issued, which the agent never sees.
- *   2. Context: before each turn, `+5 state` becomes a five-line turn summary appended to the
+ *   2. Context: before each turn, `sf state` becomes a five-line turn summary appended to the
  *      system prompt. The daemon's `watch` stream pushes three kinds of event into the loop.
  *
  * It defines no verbs and touches no MIDI.
@@ -17,19 +17,19 @@ import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { join } from "node:path";
 
-const BIN = process.env.SHARPFIVE_BIN ?? "+5";
+const BIN = process.env.SHARPFIVE_BIN ?? "sf";
 const HOME = process.env.SHARPFIVE_HOME ?? join(homedir(), ".sharpfive");
 const CONSENT_FILE = join(HOME, "consent.json");
 
 type Reply = Record<string, unknown> & { status?: string; reason?: string; hint?: string; scope?: string; gate?: Gate };
 type Gate = { kind: string; action: string; target: string; diff: string; undo: string; allowance: "offered" | "none"; token?: string };
 
-// A `+5` invocation is one simple command: no pipes, no chaining. Anything else is left alone
+// An `sf` invocation is one simple command: no pipes, no chaining. Anything else is left alone
 // (the daemon still enforces the token, so the gate holds; only the dialog UX is lost).
-const SIMPLE = /^\s*\+5(?:\s+[^|;&<>`$()]*)?$/;
-const MENTIONS = /(^|[\s;&|(`])\+5(\s|$)/;
-const isSimplePlusFive = (cmd: string) => SIMPLE.test(cmd);
-const mentionsPlusFive = (cmd: string) => MENTIONS.test(cmd);
+const SIMPLE = /^\s*sf(?:\s+[^|;&<>`$()]*)?$/;
+const MENTIONS = /(^|[\s;&|(`"'])sf(\s|$)/;
+const isSimpleSf = (cmd: string) => SIMPLE.test(cmd);
+const mentionsSf = (cmd: string) => MENTIONS.test(cmd);
 
 function lastJsonLine(text: string): Reply | undefined {
   const lines = text.trim().split("\n").filter((l) => l.trim().length > 0);
@@ -68,23 +68,18 @@ function grantConsent(scope: string) {
 }
 
 export default function sharpfive(pi: ExtensionAPI) {
-  // `--` matters: every POSIX shell reads `-c "+5 …"` as an option string, because an argument
-  // that starts with `+` toggles shell options. `sh -c -- "+5 …"` is the correct spelling.
+  // `--` keeps a command that begins with `-` or `+` from being read as shell options.
   const run = (cmd: string, ctx: ExtensionContext) => pi.exec("sh", ["-c", "--", cmd], { cwd: ctx.cwd, timeout: 30_000 });
 
   // ---- 1. the agent may not answer gates itself ---------------------------------------------
   pi.on("tool_call", async (event) => {
     if (event.toolName !== "bash") return;
     const cmd = String((event.input as { command?: string }).command ?? "");
-    if (!mentionsPlusFive(cmd)) return;
-    // pi's bash tool spawns `bash -c <command>` without `--`, so a command that begins with `+5`
-    // is read by bash as an option string ("+5: invalid option"). A leading space defuses that
-    // and changes nothing else. The pi fork (ADR 0004) should pass `--` instead.
-    if (/^\+5(\s|$)/.test(cmd)) (event.input as { command: string }).command = ` ${cmd}`;
+    if (!mentionsSf(cmd)) return;
     if (/--confirm\b|--allow-project\b/.test(cmd)) {
       return { block: true, reason: "sharpfive: gates are answered by the musician in the dialog, never by the agent. Run the command without --confirm; the dialog opens on its own." };
     }
-    if (/\+5\s+allow\s+\S+(?!.*--revoke)/.test(cmd) && !/--revoke\b/.test(cmd)) {
+    if (/\bsf\s+allow\s+\S+/.test(cmd) && !/--revoke\b/.test(cmd)) {
       return { block: true, reason: "sharpfive: allowances are the musician's to grant (the gate dialog offers 'Yes for this project'). Revoking is fine." };
     }
   });
@@ -93,7 +88,7 @@ export default function sharpfive(pi: ExtensionAPI) {
   pi.on("tool_result", async (event, ctx) => {
     if (event.toolName !== "bash") return;
     const cmd = String((event.input as { command?: string }).command ?? "");
-    if (!mentionsPlusFive(cmd)) return;
+    if (!mentionsSf(cmd)) return;
     const reply = lastJsonLine(textOf(event.content as never));
     if (!reply) return;
 
@@ -104,8 +99,8 @@ export default function sharpfive(pi: ExtensionAPI) {
       if (!ctx.hasUI || !token) {
         return { content: asText({ status: "failed", reason: "gate-no-dialog", hint: "This action needs the musician's yes in the sharpfive dialog, and no dialog is available here. Nothing was changed." }), isError: true };
       }
-      if (!isSimplePlusFive(cmd)) {
-        return { content: asText({ status: "failed", reason: "gate-complex-command", hint: "Run the gated +5 command on its own, with no pipes or chaining, so the dialog can re-run it." }), isError: true };
+      if (!isSimpleSf(cmd)) {
+        return { content: asText({ status: "failed", reason: "gate-complex-command", hint: "Run the gated sf command on its own, with no pipes or chaining, so the dialog can re-run it." }), isError: true };
       }
       const options = gate.allowance === "offered" ? ["No", "Yes", "Yes for this project"] : ["No", "Yes"];
       const answer = await ctx.ui.select(gateLines(gate), options, { signal: ctx.signal });
@@ -124,13 +119,13 @@ export default function sharpfive(pi: ExtensionAPI) {
       const scope = reply.scope;
       if (!ctx.hasUI) return;
       if (readConsent().scopes[scope]?.granted) return; // already granted; let the failure stand (daemon out of sync)
-      const yes = await ctx.ui.confirm(`sharpfive needs access to ${scope}`, `${reply.hint ?? ""}\nAsked once; remembered in ${CONSENT_FILE}. Take it back any time with: +5 consent revoke ${scope}`, { signal: ctx.signal });
+      const yes = await ctx.ui.confirm(`sharpfive needs access to ${scope}`, `${reply.hint ?? ""}\nAsked once; remembered in ${CONSENT_FILE}. Take it back any time with: sf consent revoke ${scope}`, { signal: ctx.signal });
       if (!yes) {
         return { content: asText({ status: "failed", reason: "consent-declined", scope, hint: `The musician did not grant ${scope} access. Stop and say so.` }), isError: true };
       }
       grantConsent(scope);
       pi.appendEntry("sharpfive-consent", { scope });
-      if (!isSimplePlusFive(cmd)) return { content: asText({ status: "ok", consent: { scope, granted: true }, hint: "Consent granted. Run the command again." }), isError: false };
+      if (!isSimpleSf(cmd)) return { content: asText({ status: "ok", consent: { scope, granted: true }, hint: "Consent granted. Run the command again." }), isError: false };
       const res = await run(cmd, ctx);
       const again = lastJsonLine(res.stdout) ?? { status: "failed", reason: "no-reply", hint: res.stderr.trim() };
       return { content: asText({ ...again, consent: { scope, granted: true } }), isError: res.code !== 0 };
@@ -148,7 +143,7 @@ export default function sharpfive(pi: ExtensionAPI) {
 
   function turnSummary(reply: Reply | undefined, res: { code: number; stderr: string }): string {
     const head = "## sharpfive now";
-    if (!reply) return `${head}\nsharpfive: the +5 command gave no reply (exit ${res.code}). ${res.code === 127 ? "The binary is not installed; the install is the musician's to do." : res.stderr.trim()}`;
+    if (!reply) return `${head}\nsharpfive: the sf command gave no reply (exit ${res.code}). ${res.code === 127 ? "The binary is not installed; the install is the musician's to do." : res.stderr.trim()}`;
     if (reply.status === "failed") return `${head}\nnot connected. Hint for the musician: ${reply.hint}`;
     const s = (reply as { state?: Record<string, any> }).state ?? {};
     if (s.connection && s.connection.connected === false) return `${head}\nnot connected. Hint for the musician: ${s.connection.hint}`;
@@ -193,6 +188,6 @@ export default function sharpfive(pi: ExtensionAPI) {
     if (ev.event === "connection" && ev.connected === false) return "sharpfive: Logic stopped talking to the control surface. Reads and writes will fail until it is back.";
     if (ev.event === "transport" && ev.by === "musician") return `sharpfive: the musician ${ev.state === "playing" ? "started" : ev.state === "recording" ? "started recording" : "stopped"} the transport at ${ev.position}.`;
     if (ev.event === "track" && ev.by === "musician") return `sharpfive: the musician selected the track ${ev.selected}.`;
-    return undefined; // everything else is a `+5 state` call
+    return undefined; // everything else is a `sf state` call
   }
 }

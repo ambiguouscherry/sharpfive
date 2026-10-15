@@ -8,9 +8,9 @@ Named, not yet specced: the models are proven in research, the verbs are not. Ru
 ```
 
 ```
-+5 hear record 8bars take.wav     # microphone to a file, with a count-in click; needs microphone consent
-+5 hear transcribe take.wav       # hum or playing to notes, with feel kept as unquantised offsets
-+5 hear stems ref.wav             # a reference track into stems
+sf hear record 8bars take.wav     # microphone to a file, with a count-in click; needs microphone consent
+sf hear transcribe take.wav       # hum or playing to notes, with feel kept as unquantised offsets
+sf hear stems ref.wav             # a reference track into stems
 ```
 
 A Seedling's provenance travels with everything you write from it. Confidence below 0.5: show the musician the result before you build on it.

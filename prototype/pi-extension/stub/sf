@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Stub `+5` for ticket #40. Replays canned replies in the shape spec/tool-schemas.md fixes.
+// Stub `sf` for ticket #40. Replays canned replies in the shape spec/tool-schemas.md fixes.
 // It is not the daemon. It exists so the pi extension can be built and measured before the binary.
 //
 // State lives in $SHARPFIVE_HOME (default ~/.sharpfive):
@@ -46,7 +46,7 @@ const HINTS = {
   "no-consent": (scope) => `sharpfive needs access to ${scope}. Say yes here and I will remember it.`,
   "confirm-token-invalid": "The gate was not answered in the dialog, so nothing was changed. Run the command again without --confirm and let the musician answer.",
   "tty-required": "Allowances are granted by the musician in a terminal, not by the agent. Answer 'Yes for this project' in the gate dialog instead.",
-  "unknown-verb": "I do not know that verb. Run `+5 help`.",
+  "unknown-verb": "I do not know that verb. Run `sf help`.",
 };
 
 const consent = readJson(CONSENT, { scopes: {} });
@@ -78,7 +78,7 @@ function gate(kind, payload, onConfirmed) {
 
 // ---- verbs -------------------------------------------------------------
 if (verb === "help" || verb.startsWith("help ")) {
-  out({ status: "ok", help: { command: "+5", verbs: ["state", "watch", "mute <track>", "region replace <track@bar> <file>", "plugin remove <track> <slot>", "ui tracks", "consent list|revoke <scope>", "allow <kind> [--revoke]"], stub: true } });
+  out({ status: "ok", help: { command: "sf", verbs: ["state", "watch", "mute <track>", "region replace <track@bar> <file>", "plugin remove <track> <slot>", "ui tracks", "consent list|revoke <scope>", "allow <kind> [--revoke]"], stub: true } });
 }
 
 if (verb === "state") {
@@ -94,7 +94,7 @@ if (verb === "state") {
 }
 
 if (verb === "stub set") {
-  // test hook: `+5 stub set connected=false transport=playing`
+  // test hook: `sf stub set connected=false transport=playing`
   for (const kv of raw.slice(2)) { const [k, v] = kv.split("="); if (k in state) state[k] = v === "true" ? true : v === "false" ? false : v; }
   save(); out({ status: "ok", stub: state });
 }
