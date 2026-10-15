@@ -18,11 +18,55 @@ Non-textual musical input from the musician — singing, humming, beatboxing, mo
 
 ### Gated action
 
-An action the agent must not take without the musician's explicit confirmation: a FETCH download, a BUILD install into the plugin folder, a destructive EDIT (deleting regions, replacing plugins in a live session).
+An action the agent must not take without the musician's explicit confirmation: a FETCH download, a BUILD install into the plugin folder, a destructive EDIT (deleting regions, replacing plugins in a live session). Contrast with **consent**, which is about reaching a resource, not about one action.
+
+### Gate
+
+The stop before one gated action. The agent's call comes back as gated with what would change; the action runs only when the call is repeated with confirmation. The musician sees the gate as a dialog with five lines: the action, the target, the change, whether undo exists, and whether an allowance is offered.
+
+### Gate kind
+
+A class of gated action: region replace, record over, plug-in replace, plug-in remove, delete track, plug-in install, file download. Allowances are granted per kind. Kinds with a snapshot or an undo behind them can be lifted for a project; kinds whose yes loses something code cannot rebuild always ask.
+
+### Allowance
+
+A "yes" that covers every later gate of one kind until it expires: "yes for this project". It ends when the project changes. The agent still reports what it did after each action.
+
+### Consent
+
+Permission to reach a resource: the screen, the microphone, a directory, the ML box. Asked once, remembered on the machine, never asked again for that scope. Says nothing about what the agent may do once inside; gates do that. The musician can list and revoke consents.
 
 ### Limb
 
 One bridge between the agent brain and Logic, exposed to pi as a CLI tool + skill. Each limb covers part of a verb; no limb covers everything.
+
+### Tool
+
+One thing the agent can call. In sharpfive every limb is reached through one command, `+5`, run by the agent's shell tool; its families (surface, ui, audio, hear) are the tools the agent thinks in.
+
+### Skill
+
+A document the agent reads to learn how to use tools. The agent sees only the skill's name and one-line description until it needs it, then reads the whole document. This is progressive disclosure.
+
+### Reply
+
+The one line every `+5` command prints. It always carries a status. Writes add what was requested and what was observed. Failures add a reason and a hint.
+
+### Hint
+
+One sentence in a failed reply, written for the musician, that says what to do next. The agent repeats it as it is and never invents setup steps.
+
+### Turn summary
+
+The few lines about Logic's state the agent is given at the start of every turn: connected or not, the selected track, the transport, the assignment mode, active allowances.
+
+### Position
+
+A place in the song, written as bar, beat and division: `17`, `17.3`, `17.3.2`. Bars count from 1 as Logic shows them.
+
+### Hear
+
+The verb family for LISTEN deep: turn an audio file into a Seedling (transcription, stems, a microphone take). LISTEN is the umbrella over hear, the audio tap and screen reads.
 
 ### Procedural producer work
 
