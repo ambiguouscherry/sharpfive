@@ -42,7 +42,7 @@ From the README / `yt-dlp --help` (verified locally):
 
 - `-f bestaudio` selects the best audio-only stream. yt-dlp's default codec preference for audio is `flac/alac > wav/aiff > opus > vorbis > aac > mp4a > mp3 …` ([Sorting Formats](https://github.com/yt-dlp/yt-dlp#sorting-formats)). YouTube serves Opus (webm) and AAC (m4a); Opus at ~128–160 kbps is usually the top pick.
 - `-x, --extract-audio` "Convert video files to audio-only files (requires ffmpeg and ffprobe)". `--audio-format` accepts `best (default), aac, alac, flac, m4a, mp3, opus, vorbis, wav`. `--audio-quality` 0 (best) – 10 for VBR.
-- **Recommendation for Seedlings:** `-f bestaudio -x --audio-format wav` only when Logic needs a drop-in file; otherwise keep `--audio-format best` (no re-encode, container-strip only) and convert to WAV/AIFF at import time. Decoding Opus→WAV is lossless with respect to the stream; nothing is gained by asking YouTube for "lossless". Record the source codec/bitrate (`acodec`, `abr`, `asr`) in provenance so nobody mistakes a 128 kbps Opus for a studio stem.
+- **Recommendation for motifs:** `-f bestaudio -x --audio-format wav` only when Logic needs a drop-in file; otherwise keep `--audio-format best` (no re-encode, container-strip only) and convert to WAV/AIFF at import time. Decoding Opus→WAV is lossless with respect to the stream; nothing is gained by asking YouTube for "lossless". Record the source codec/bitrate (`acodec`, `abr`, `asr`) in provenance so nobody mistakes a 128 kbps Opus for a studio stem.
 - `--download-sections "*1:23-1:41"` cuts a time range (needs ffmpeg); useful when the producer points at a moment in a long video.
 - `--no-overwrites`, `--download-archive FILE` ("Download only videos not listed in the archive file. Record the IDs of all downloaded videos in it") give idempotent re-runs.
 
@@ -56,7 +56,7 @@ From the README / `yt-dlp --help` (verified locally):
 
 Fields documented in the README's OUTPUT TEMPLATE section and verified present in the local `-j` output: `id`, `title`, `webpage_url` ("A URL to the video webpage which, if given to yt-dlp, should yield the same result again"), `original_url`, `extractor`/`extractor_key`, `uploader`, `uploader_id`, `uploader_url`, `channel`, `channel_id`, `channel_url`, `upload_date` (YYYYMMDD UTC), `timestamp`, `release_date`, `duration`, `license` ("License name the video is licensed under" — `null` on the test video; YouTube only populates it for Creative Commons uploads), `categories`, `tags`, `description`, `track`/`artist`/`album` (YouTube Music), `availability`, `epoch` (when extraction ran), `_version` (yt-dlp version/commit) plus the chosen format's `format_id`, `ext`, `acodec`, `abr`, `asr`, `audio_channels`, `filesize`.
 
-`--write-info-json` dumps all of this beside the file (the README warns it "may contain personal information" — i.e. cookies-derived data; `--clean-info-json` is the default). Easiest provenance path: always write the info.json and copy the subset above into the Seedling record.
+`--write-info-json` dumps all of this beside the file (the README warns it "may contain personal information" — i.e. cookies-derived data; `--clean-info-json` is the default). Easiest provenance path: always write the info.json and copy the subset above into the motif record.
 
 ### Credentials
 
@@ -105,7 +105,7 @@ Per post: `id`, `permalink`, `subreddit`, `author`, `title`, `url` (link target)
   - Note for the map: current pi docs describe first-class MCP support (`pi mcp add docs --url https://example.com/mcp`, user config `~/.pi/agent/mcp.json`, project `.pi/mcp.json`) ([pi docs/mcp.md](https://github.com/badlogic/pi-mono/blob/main/packages/coding-agent/docs/mcp.md)). The map's "pi is MCP-less by design" is out of date; the Splice server could be attached directly rather than wrapped in a CLI. Whether to is a map decision, not this ticket's.
 - **Local folder convention (official):** downloaded samples go to `Macintosh HD/Users/[your username]/Splice`, "organized by pack"; if moved, the new location must be set in app Preferences; MIDI goes to `~/Downloads`; presets go to plugin-specific folders (`~/Library/Application Support/Splice/<Astra|Beatmaker>/Presets/From Splice`, Serum/Sylenth/Massive paths) ([where is my Splice folder](https://support.splice.com/en/articles/8652662-where-is-my-splice-folder), [where do downloads go](https://support.splice.com/en/articles/8652631-where-do-my-downloaded-samples-presets-midi-files-go)). The Splice Sounds plugin writes to `~/Library/Splice/Plug-in/samples` and that path is not configurable (support search result; not re-verified).
 - **Observed on this machine:** `~/Splice/` contains `sounds/`, `presets/` (both empty — nothing has been downloaded) and a `.splice` marker file holding the numeric Splice user id. The desktop app keeps its state under `~/Library/Application Support/com.splice.Splice/`: `appState.json` (app version 5.4.4, user profile), `port.conf` (`127.0.0.1:<port>` — the local helper the DAW plugin talks to), `logs/`, and **`users/default/<username>/sounds.db`**, a SQLite catalogue of downloaded sounds. Its schema was not inspected here (user-profile directory; also holds `settings.json` which may contain tokens). The community tool [ebai101/splorganizer](https://github.com/ebai101/splorganizer) reads this same `sounds.db` (obtained via the app's "Download logs" export) to reorganise samples by type, which confirms it carries per-sample tags/metadata.
-- **Recommended path:** FETCH's Splice limb is a **local indexer**: walk `~/Splice/sounds/<pack>/…` (or the path from app Preferences) and, read-only, join against `sounds.db` for tags/bpm/key. Provenance for a Splice Seedling: `source: splice`, `path`, `pack`, `filename`, plus whatever `sounds.db` row fields exist (sample id, pack id/name, tags, bpm, key). Licence: Splice's own terms govern (the API exposes no per-sample licence field); record `license: "splice-terms"` and the user id from `.splice`. Remote search is the MCP server or nothing.
+- **Recommended path:** FETCH's Splice limb is a **local indexer**: walk `~/Splice/sounds/<pack>/…` (or the path from app Preferences) and, read-only, join against `sounds.db` for tags/bpm/key. Provenance for a Splice motif: `source: splice`, `path`, `pack`, `filename`, plus whatever `sounds.db` row fields exist (sample id, pack id/name, tags, bpm, key). Licence: Splice's own terms govern (the API exposes no per-sample licence field); record `license: "splice-terms"` and the user id from `.splice`. Remote search is the MCP server or nothing.
 
 ## 5. Looperman
 
@@ -131,9 +131,9 @@ Terms of use: "We strictly prohibit unauthorised access or downloading of data u
 
 Where: pi keeps user configuration in the agent directory (`~/.pi/agent`, overridable with `PI_CODING_AGENT_DIR`), with `auth.json` for "Saved API keys and OAuth credentials", `extensions/`, `skills/`, and user-level `mcp.json`; project config is `.pi/` under the repo and loads only after project trust. Pi resolves provider credentials as `--api-key` → `auth.json` → `models.json` → environment variables, and the docs say to "Keep `auth.json` and any credential commands private" ([configuration.md](https://github.com/badlogic/pi-mono/blob/main/packages/coding-agent/docs/configuration.md), [models.md](https://github.com/badlogic/pi-mono/blob/main/packages/coding-agent/docs/models.md), [environment-variables.md](https://github.com/badlogic/pi-mono/blob/main/packages/coding-agent/docs/environment-variables.md)). Mirror that: the fetch tool reads `~/.pi/agent/sharpfive/fetch-credentials.json` (0600, `.gitignore`d by location), env vars override, nothing credential-shaped in `.pi/` or the repo. Pi's `mcp.json` supports `${ENV_VAR}` substitution in headers, so the Splice server can be declared without inlining a token.
 
-## 8. Provenance every fetched Seedling must carry
+## 8. Provenance every fetched Motif must carry
 
-Common envelope (write it as `<file>.seedling.json` beside the audio, and keep the raw source response — e.g. yt-dlp's `.info.json` — alongside):
+Common envelope (write it as `<file>.motif.json` beside the audio, and keep the raw source response — e.g. yt-dlp's `.info.json` — alongside):
 
 ```
 source            youtube | soundcloud | reddit | freesound | splice | archive | looperman | local | url
@@ -155,7 +155,7 @@ transforms        [] of post-fetch steps (section cut, transcode opus→wav, nor
 local_path        where it landed in the project
 ```
 
-Source-specific extras ride in a `source_meta` object (yt-dlp `tags`/`categories`/`availability`; Freesound `tags`/`pack`/`samplerate`/`bitdepth`; Reddit `subreddit`/`score`/`flair`; archive `collection`/`subject`/`mediatype`; Splice `pack`/`bpm`/`key`/`tags`). The WRITE verb's traceability rule (every WRITE traces to a Seedling) hangs off `source_url` + `sha256`; everything else is there so the producer can answer "where did this come from and under what terms" without re-opening the source.
+Source-specific extras ride in a `source_meta` object (yt-dlp `tags`/`categories`/`availability`; Freesound `tags`/`pack`/`samplerate`/`bitdepth`; Reddit `subreddit`/`score`/`flair`; archive `collection`/`subject`/`mediatype`; Splice `pack`/`bpm`/`key`/`tags`). The WRITE verb's traceability rule (every WRITE traces to a motif) hangs off `source_url` + `sha256`; everything else is there so the producer can answer "where did this come from and under what terms" without re-opening the source.
 
 ## 9. Open items for the FETCH prototype
 

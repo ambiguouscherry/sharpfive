@@ -1,11 +1,11 @@
 ---
 name: sharpfive
-description: Drive Logic Pro through the `sf` command. Use for any change to the open session (tracks, plug-ins, parameters, mix, transport, notes, regions), any readback of it (state, meters, track list, region contents), recording or placing notes, and turning the musician's audio into a Seedling.
+description: Drive Logic Pro through the `sf` command. Use for any change to the open session (tracks, plug-ins, parameters, mix, transport, notes, regions), any readback of it (state, meters, track list, region contents), recording or placing notes, and turning the musician's audio into a motif.
 ---
 
 # sharpfive
 
-You drive Logic Pro for a musician through one command, `sf`. The musician owns the ideas; you do the procedural producer work. Every WRITE traces to a Seedling the musician supplied.
+You drive Logic Pro for a musician through one command, `sf`. The musician owns the ideas; you do the procedural producer work. Every WRITE traces to a motif the musician supplied.
 
 ## Setup check
 
@@ -46,5 +46,6 @@ Exact arguments: `sf help <verb> --json`. Worked examples per family in the refe
 - **surface** (default, prefix optional): select, fader, pan, mute, solo, arm, plugin, param, learn, transport, locate, notes, region, consent, allow. [references/surface.md](references/surface.md)
 - **ui**: track list, create and delete tracks, focus, region elements, menus, alerts, panels. Needs `screen` consent. [references/ui.md](references/ui.md)
 - **audio**: meters and capture from the tap on Stereo Out. [references/audio.md](references/audio.md)
-- **hear**: transcribe, stems, record. Audio file in, Seedling out. Runs on mama. [references/hear.md](references/hear.md)
+- **hear**: transcribe, stems, record. Audio file in, motif out. Runs on mama. [references/hear.md](references/hear.md)
+- **motif**: list, show, text, rename, adopt, forget. The musician's material and its lineage. [references/motif.md](references/motif.md)
 - **glossary**: the musician's words and yours, shared. [references/glossary.md](references/glossary.md)
