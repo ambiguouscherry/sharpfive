@@ -8,7 +8,7 @@ Resolves [Grilling: spec pi tool schemas and skill docs for the surviving limbs]
 - **pi reaches every limb through its shell tool.** No custom pi tool per verb. The skill is the schema: it tells pi the families, the reply contract and the rules; `sf help <verb> --json` is the source of truth for each verb's arguments, generated from the binary so the docs cannot drift.
 - **One thin pi extension** does two things only: shows gates in pi's own confirm dialog (a `tool_call` hook on shell commands that start with `sf`), and writes the turn summary into the system prompt before each turn (`before_agent_start`), with mid-turn pushes from the daemon's `watch` stream (`pi.sendMessage`). It defines no verbs and touches no MIDI.
 - **Product form.** The extension is the development form. For market the product is a modified copy of pi's source with the same code built in, not an extension installed into stock pi.
-- **Four verb families, one mechanism each:** `surface` (the control-surface daemon verbs, the default family so the prefix is optional), `ui` (accessibility reads and menu presses), `audio` (the tap), `hear` (LISTEN deep: audio file in, Seedling out; named, not yet specced).
+- **Five verb families, one mechanism each:** `surface` (the control-surface daemon verbs, the default family so the prefix is optional), `ui` (accessibility reads and menu presses), `audio` (the tap), `hear` (LISTEN deep: audio file in, motif out; named, not yet specced), `motif` (the musician's material and its lineage: [spec/motif-lifecycle.md](motif-lifecycle.md), added 2026-10-15 by #19).
 - **Typed pi tools and an MCP wrapper** stay possible later as layers over the same CLI (map Notes).
 
 ## 2. Reply
@@ -87,11 +87,11 @@ Stereo Out and Master are strips in the selection view; `<track>` accepts them.
 
 | Verb | Returns |
 |---|---|
-| `hear transcribe <audio>` | a Seedling: MIDI path, provenance (source file, model, time), confidence 0–1 |
-| `hear stems <audio>` | a Seedling: stem paths, provenance, confidence |
+| `hear transcribe <audio>` | a motif: MIDI path, provenance (source file, model, time), confidence 0–1 |
+| `hear stems <audio>` | four motifs (drums, bass, vocals, other), one parent each; the reply carries `motifs`, a list |
 | `hear record [<length>] <file>` | microphone capture to a file (needs `microphone` consent) |
 
-Schemas land after the prototype tickets prove the models ([#38](https://github.com/ambiguouscherry/sharpfive/issues/38), [#39](https://github.com/ambiguouscherry/sharpfive/issues/39)). The extension is built in [#40](https://github.com/ambiguouscherry/sharpfive/issues/40). Reply shape fixed now: `status: done | failed`, `seedling: {path, kind, provenance, confidence}`.
+Schemas land after the prototype tickets prove the models ([#38](https://github.com/ambiguouscherry/sharpfive/issues/38), [#39](https://github.com/ambiguouscherry/sharpfive/issues/39)). The extension is built in [#40](https://github.com/ambiguouscherry/sharpfive/issues/40). Reply shape fixed now: `status: done | failed`, `motif: {id, name, path, kind, parents, provenance, confidence}` (`motifs`, a list, for stems). The sidecar beside the file carries the same facts: [spec/motif-lifecycle.md](motif-lifecycle.md).
 
 ## 4. Gates
 
@@ -120,8 +120,9 @@ Payload fields: `kind`, `action`, `target`, `diff`, `undo`, `allowance: offered 
 | `plugin-remove` | not reversible | always ask |
 | `track-delete` | Undo, but regions go with it | always ask |
 | `build-install` | manual | always ask |
+| `motif-forget` | moves to `Motifs/.trash/`, restorable by hand | always ask |
 
-**FETCH gate** (tool not built; the gate is fixed): source URL or library path, licence as the source states it, size, destination path, the provenance line that will be attached to the Seedling. Fires before any byte lands. Search and propose are free.
+**FETCH gate** (tool not built; the gate is fixed): source URL or library path, licence as the source states it, size, destination path, the provenance line that will be attached to the motif. Fires before any byte lands. Search and propose are free.
 
 **BUILD gate** (tool not built; the gate is fixed): plug-in name and version, the brief it was built from, install path, whether it overwrites an installed version, that Logic must restart to see a new component (#36). Fires before the copy into the plug-in folder. Building in a scratch folder is free.
 
@@ -133,8 +134,8 @@ Consent is permission to reach a resource. Asked once, remembered, never asked a
 |---|---|
 | `screen` | the `ui` family (accessibility) |
 | `microphone` | `hear record` |
-| `project-dir` | reading and writing files beside the Logic project (snapshots, SMFs) |
-| `download-dir` | FETCH |
+| `project-dir` | reading and writing files beside the Logic project (snapshots, SMFs, the `Motifs/` folder) |
+| `download-dir` | FETCH; resolves to the project's `Motifs/` folder or the inbox, never a separate downloads folder |
 | `plugin-dir` | BUILD install |
 | `mama` | the ssh link for `hear` |
 

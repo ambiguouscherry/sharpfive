@@ -6,15 +6,62 @@ Glossary of terms for the sharpfive domain. Vocabulary only — no implementatio
 
 ### Verb
 
-One of the five capabilities the agent has: **LISTEN** (perceive the session and the musician — audio analysis, stem separation, transcription, state readback, vocalizations), **WRITE** (put new musical material into the session — parts, arrangement, composition — always tracing to a Seedling), **EDIT** (change what's already there — parameters, mix, regions, project setup), **BUILD** (author, build, and install new tooling for the musician, chiefly custom AU plugins), **FETCH** (find outside material and bring it in as Seedlings — internet sources and local sample libraries).
+One of the five capabilities the agent has: **LISTEN** (perceive the session and the musician — audio analysis, stem separation, transcription, state readback, vocalizations), **WRITE** (put new musical material into the session — parts, arrangement, composition — always tracing to a motif), **EDIT** (change what's already there — parameters, mix, regions, project setup), **BUILD** (author, build, and install new tooling for the musician, chiefly custom AU plugins), **FETCH** (find outside material and bring it in as motifs — internet sources and local sample libraries).
 
-### Seedling
+### Motif
 
-Musician-supplied starting material that a workflow carries toward a finished track. Takes any form: a hummed or played phrase, a vocalization, a text brief, a reference track or sample, a rough MIDI sketch, a half-done project. Every Seedling carries its provenance (where it came from). Every WRITE must trace back to a Seedling — this traceability is how the agent stays the musician's collaborator rather than the author.
+Musician-supplied starting material that a workflow carries toward a finished track, and everything the agent makes from it. Takes any form: a hummed or played phrase, a vocalization, a text brief, a reference track or sample, a stem, a rough MIDI sketch, a half-done project. One file is one motif. Every motif carries its provenance and names its parents. Every WRITE must trace back to a motif — this traceability is how the agent stays the musician's collaborator rather than the author.
+_Avoid_: seedling, seed, idea, source material
+
+### Provenance
+
+Where a motif came from: a microphone take at a time, a URL and its licence, a model run over another motif, an edit or a WRITE. Fixed when the motif is made; never edited.
+
+### Parent
+
+A motif that another motif was made from. A transcription's parent is the take; a stem's parent is the reference track; a WRITE's parents are the motifs it was asked to build on. A motif may have several parents.
+
+### Root motif
+
+A motif with no parent: a take, a fetched file, a brief, or the project's own material on the day the agent first saw it.
+
+### Lineage
+
+The chain of parents from one motif back to its roots. What "traces to a motif" means: the lineage reads all the way to something the musician supplied.
+
+### Motif name
+
+The two to four words the agent gives a motif from the conversation that made it ("chorus hum", "shell shock bass"). What the musician and the agent say. The musician can rename; the lineage does not depend on the name.
+
+### Sidecar
+
+The small file beside a motif's file that carries its provenance, parents, name, text and placed log. The motif's file holds the music; the sidecar holds the facts.
+
+### Text
+
+The musician's own words about a motif, kept in its sidecar. Free text. Not a musical note.
+_Avoid_: note, comment, description
+
+### Inbox
+
+Where motifs go when no Logic project is open. Emptied into a project by adopting.
+
+### Adopt
+
+Move the inbox's motifs into the open project's motif folder. Offered when a project opens.
+
+### Placed log
+
+The list in a sidecar of where a motif has gone into Logic: track and bar, with the time. A record of what the agent did, not a claim about what is in the project now; export is the truth for that.
+
+### Forget
+
+Put a motif out of the way without destroying it: the file and its sidecar move to the motif folder's trash. Always asks. Children keep their parent link.
+_Avoid_: delete, remove
 
 ### Vocalization
 
-Non-textual musical input from the musician — singing, humming, beatboxing, mouth-drumming. A form of Seedling the agent must interpret (melody, rhythm, feel) rather than transcribe as words.
+Non-textual musical input from the musician — singing, humming, beatboxing, mouth-drumming. A form of motif the agent must interpret (melody, rhythm, feel) rather than transcribe as words.
 
 ### Gated action
 
@@ -70,11 +117,11 @@ A place in the song, written as bar, beat and division: `17`, `17.3`, `17.3.2`. 
 
 ### Hear
 
-The verb family for LISTEN deep: turn an audio file into a Seedling (transcription, stems, a microphone take). LISTEN is the umbrella over hear, the audio tap and screen reads.
+The verb family for LISTEN deep: turn an audio file into a motif (transcription, stems, a microphone take). LISTEN is the umbrella over hear, the audio tap and screen reads.
 
 ### Procedural producer work
 
-The friction-heavy, non-creative work around making music: setting up plugin environments, creating and naming tracks, gain staging, routing, finding and preparing samples, building a missing tool. The agent's primary job. Contrast with **musicianship** — the ideas and taste that drive a track, which stay with the human. The agent may compose and arrange, but only in service of a Seedling the musician supplied; it never originates the idea.
+The friction-heavy, non-creative work around making music: setting up plugin environments, creating and naming tracks, gain staging, routing, finding and preparing samples, building a missing tool. The agent's primary job. Contrast with **musicianship** — the ideas and taste that drive a track, which stay with the human. The agent may compose and arrange, but only in service of a motif the musician supplied; it never originates the idea.
 
 ### Readback
 
