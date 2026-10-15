@@ -1,0 +1,152 @@
+#!/usr/bin/env node
+// Stub `+5` for ticket #40. Replays canned replies in the shape spec/tool-schemas.md fixes.
+// It is not the daemon. It exists so the pi extension can be built and measured before the binary.
+//
+// State lives in $SHARPFIVE_HOME (default ~/.sharpfive):
+//   consent.json      written by the extension; read here
+//   stub-state.json   pending gate tokens, allowances, connection flag
+//   stub-watch.jsonl  optional scripted `watch` events: {"afterMs":1000,"event":"transport",...}
+const fs = require("node:fs");
+const path = require("node:path");
+const os = require("node:os");
+const crypto = require("node:crypto");
+
+const HOME = process.env.SHARPFIVE_HOME || path.join(os.homedir(), ".sharpfive");
+fs.mkdirSync(HOME, { recursive: true });
+const STATE = path.join(HOME, "stub-state.json");
+const CONSENT = path.join(HOME, "consent.json");
+
+const readJson = (p, d) => { try { return JSON.parse(fs.readFileSync(p, "utf8")); } catch { return d; } };
+const writeJson = (p, v) => fs.writeFileSync(p, JSON.stringify(v, null, 2) + "\n");
+const state = readJson(STATE, { connected: true, allowances: [], gates: {}, selected: "hello :P", transport: "stopped", position: "3.1.1" });
+const save = () => writeJson(STATE, state);
+
+// ---- argv --------------------------------------------------------------
+const raw = process.argv.slice(2);
+const flags = {};
+const pos = [];
+for (let i = 0; i < raw.length; i++) {
+  const a = raw[i];
+  if (a === "--confirm") { flags.confirm = raw[i + 1] && !raw[i + 1].startsWith("--") ? raw[++i] : ""; continue; }
+  if (a === "--allow-project") { flags.allowProject = true; continue; }
+  if (a === "--revoke") { flags.revoke = true; continue; }
+  if (a === "--json") { flags.json = true; continue; }
+  if (a === "--pretty") { flags.pretty = true; continue; }
+  if (a.startsWith("--")) { flags[a.slice(2)] = true; continue; }
+  pos.push(a);
+}
+if (["surface", "ui", "audio", "hear"].includes(pos[0])) { flags.family = pos.shift(); } else { flags.family = "surface"; }
+const verb = pos.join(" ");
+
+const out = (obj) => { process.stdout.write(JSON.stringify(obj) + "\n"); process.exit(obj.status === "failed" ? 1 : 0); };
+const fail = (reason, hint, extra = {}) => out({ status: "failed", reason, hint, ...extra });
+
+const HINTS = {
+  "not-connected": "Logic is not talking to sharpfive. Logic › Control Surfaces › Setup › Install › Mackie Control, both ports = sharpfive.",
+  "no-consent": (scope) => `sharpfive needs access to ${scope}. Say yes here and I will remember it.`,
+  "confirm-token-invalid": "The gate was not answered in the dialog, so nothing was changed. Run the command again without --confirm and let the musician answer.",
+  "tty-required": "Allowances are granted by the musician in a terminal, not by the agent. Answer 'Yes for this project' in the gate dialog instead.",
+  "unknown-verb": "I do not know that verb. Run `+5 help`.",
+};
+
+const consent = readJson(CONSENT, { scopes: {} });
+const hasConsent = (scope) => Boolean(consent.scopes?.[scope]?.granted);
+const needConsent = (scope) => { if (!hasConsent(scope)) fail("no-consent", HINTS["no-consent"](scope), { scope }); };
+const needConnection = () => { if (!state.connected) fail("not-connected", HINTS["not-connected"]); };
+
+// ---- gates -------------------------------------------------------------
+// A gate token is issued with the `gated` reply and accepted once, within ten minutes.
+// The extension strips the token from what the model sees; only the dialog path has it.
+const ALWAYS_ASK = new Set(["plugin-replace", "plugin-remove", "track-delete", "build-install"]);
+function gate(kind, payload, onConfirmed) {
+  if (state.allowances.includes(kind)) return onConfirmed({ allowance: kind });
+  if (flags.confirm !== undefined) {
+    const g = state.gates[flags.confirm];
+    if (!g || g.kind !== kind || Date.now() - g.at > 10 * 60 * 1000) {
+      fail("confirm-token-invalid", HINTS["confirm-token-invalid"]);
+    }
+    delete state.gates[flags.confirm];
+    if (flags.allowProject && !ALWAYS_ASK.has(kind)) state.allowances.push(kind);
+    save();
+    return onConfirmed({});
+  }
+  const token = crypto.randomBytes(12).toString("hex");
+  state.gates[token] = { kind, at: Date.now() };
+  save();
+  out({ status: "gated", gate: { kind, ...payload, allowance: ALWAYS_ASK.has(kind) ? "none" : "offered", token } });
+}
+
+// ---- verbs -------------------------------------------------------------
+if (verb === "help" || verb.startsWith("help ")) {
+  out({ status: "ok", help: { command: "+5", verbs: ["state", "watch", "mute <track>", "region replace <track@bar> <file>", "plugin remove <track> <slot>", "ui tracks", "consent list|revoke <scope>", "allow <kind> [--revoke]"], stub: true } });
+}
+
+if (verb === "state") {
+  if (!state.connected) out({ status: "ok", state: { connection: { connected: false, hint: HINTS["not-connected"] } } });
+  out({ status: "ok", state: {
+    connection: { connected: true, surface: "Mackie Control", ports: "sharpfive" },
+    selected: { track: state.selected, strip: 2 },
+    transport: { state: state.transport, position: state.position, cycle: false, replace: false },
+    assignment: "plugin",
+    allowances: state.allowances,
+    project: { name: "sharpfive-prototype", saved: false },
+  } });
+}
+
+if (verb === "stub set") {
+  // test hook: `+5 stub set connected=false transport=playing`
+  for (const kv of raw.slice(2)) { const [k, v] = kv.split("="); if (k in state) state[k] = v === "true" ? true : v === "false" ? false : v; }
+  save(); out({ status: "ok", stub: state });
+}
+if (verb === "stub reset") { fs.rmSync(STATE, { force: true }); out({ status: "ok" }); }
+
+if (verb === "watch") {
+  needConnection();
+  const script = path.join(HOME, "stub-watch.jsonl");
+  const lines = fs.existsSync(script) ? fs.readFileSync(script, "utf8").split("\n").filter(Boolean).map((l) => JSON.parse(l)) : [];
+  let t = 0;
+  for (const l of lines) { t += l.afterMs ?? 1000; const { afterMs, ...ev } = l; setTimeout(() => process.stdout.write(JSON.stringify({ ...ev, at: new Date().toISOString() }) + "\n"), t); }
+  setInterval(() => process.stdout.write(JSON.stringify({ event: "heartbeat", position: state.position }) + "\n"), 5000);
+  // never exits on its own
+} else if (verb.startsWith("mute ")) {
+  needConnection();
+  const track = pos[1];
+  out({ status: "confirmed", requested: { track, mute: true }, observed: { track, mute: true }, resolved: { track, strip: 2 }, settledAfterMs: 42 });
+} else if (verb.startsWith("region replace ")) {
+  needConnection();
+  const [, , target, file] = pos;
+  const [track, bar] = (target || "").split("@");
+  gate("region-replace", {
+    action: `Replace the region on ${track} at bar ${bar}.`,
+    target: `${track}, bar ${bar} to ${Number(bar) + 1}.3, named "second"`,
+    diff: "2 notes moved, 1 added: C3 3.2 → 3.3, + E3 4.1. Everything else stays.",
+    undo: "Snapshot kept; Edit > Undo verified by export.",
+  }, (extra) => out({ status: "confirmed", requested: { track, bar: Number(bar), file }, observed: { track, bar: Number(bar), notes: 7, name: "second" }, resolved: { track, strip: 2 }, snapshot: `${HOME}/snapshots/${track}@${bar}.mid`, settledAfterMs: 310, ...extra }));
+} else if (verb.startsWith("plugin remove ")) {
+  needConnection();
+  const [, , track, slot] = pos;
+  gate("plugin-remove", {
+    action: `Remove the plug-in in slot ${slot} on ${track}.`,
+    target: `${track}, slot ${slot}: Compressor`,
+    diff: "The slot becomes empty. Its settings are lost.",
+    undo: "Not reversible.",
+  }, () => out({ status: "confirmed", requested: { track, slot }, observed: { track, slot, plugin: null }, resolved: { track, strip: 2, slot: Number(slot) }, settledAfterMs: 500 }));
+} else if (flags.family === "ui" && verb === "tracks") {
+  needConsent("screen");
+  out({ status: "ok", tracks: [
+    { index: 1, name: "Inst 1", focus: false, mute: false, solo: false, arm: false },
+    { index: 2, name: "hello :P", focus: true, mute: false, solo: false, arm: false },
+    { index: 3, name: "Inst 2", focus: false, mute: false, solo: false, arm: false },
+  ] });
+} else if (verb === "consent list") {
+  out({ status: "ok", consent });
+} else if (verb.startsWith("consent revoke ")) {
+  delete consent.scopes[pos[2]]; writeJson(CONSENT, consent); out({ status: "ok", consent });
+} else if (verb.startsWith("allow ")) {
+  const kind = pos[1];
+  if (!process.stdin.isTTY) fail("tty-required", HINTS["tty-required"]);
+  if (flags.revoke) state.allowances = state.allowances.filter((k) => k !== kind); else if (!state.allowances.includes(kind)) state.allowances.push(kind);
+  save(); out({ status: "ok", allowances: state.allowances });
+} else {
+  fail("unknown-verb", HINTS["unknown-verb"]);
+}

@@ -25,7 +25,7 @@ Every `+5` command prints one JSON line. Parse it; act on `status`.
 | `confirmed` | the write landed; `observed` is Logic's state after it | report `observed`, never `requested` |
 | `uncertain` | sent, no echo in time; may have landed | read back once with the matching read verb; if it matches, report confirmed by readback; else tell the musician what you tried and what you see, and ask before any retry |
 | `failed` | nothing changed; `reason` and `hint` say why | repeat `hint` word for word; on `no-match`, offer `candidates` and ask |
-| `gated` | a destructive action waits for a yes | the dialog has already asked; if the answer was yes, repeat the same command with `--confirm`; if no, stop and say so |
+| `gated` | a destructive action waited for a yes | you never see this bare: the dialog asked the musician and the command was re-run for you. A yes arrives as `confirmed` with `gate.answer`; a no as `failed`, `reason: gate-declined`: stop and say so. Never write `--confirm` yourself; it is blocked and the daemon rejects it |
 
 Never retry a write blind. A repeated toggle flips twice; a repeated record writes twice.
 
