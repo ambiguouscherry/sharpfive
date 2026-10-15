@@ -1,0 +1,16 @@
+{
+ "id": "01M50W2W8JN6EK8S9JM7NMQ5G7",
+ "name": "take2",
+ "kind": "audio",
+ "source": {
+  "by": "mic",
+  "device": "default input"
+ },
+ "parents": [],
+ "at": "2026-10-15T15:29:40-07:00",
+ "tempo": 100.0,
+ "key": null,
+ "bars": null,
+ "text": "",
+ "placed": []
+}

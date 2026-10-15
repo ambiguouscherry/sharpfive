@@ -1,18 +1,25 @@
 #!/usr/bin/env python3
 """sf hear transcribe — the mama side.
 
-A hummed take (WAV) in, a MIDI Seedling out. torchcrepe `full` at a 5 ms hop,
+A hummed take (WAV) in, a MIDI motif out (spec/motif-lifecycle.md: the take is the parent). torchcrepe `full` at a 5 ms hop,
 periodicity-thresholded, median-filtered, segmented into notes. Note starts and
 lengths are kept exactly where they were sung (no quantise); the grid is only
 used to express the feel as an offset from the nearest 16th.
 
 Reply (stdout, one JSON object) follows spec/tool-schemas.md §3:
-  {status: done|failed, seedling: {path, kind: midi, provenance: {source, model, at}, confidence}, ...}
+  {status: done|failed, motif: {id, name, path, kind: midi, parents, provenance: {source, model, at}, confidence}, ...}
+plus the sidecar <file>.motif.json beside the MIDI.
 
 Run inside ~/sharpfive-ml-research/.venv-mir on mama (torch 2.14, torchcrepe 0.0.24, pretty_midi).
 """
-import argparse, json, math, sys, time, datetime, os, platform
+import argparse, json, math, sys, time, datetime, os, platform, secrets
 import numpy as np
+
+def ulid():
+    """26-char Crockford base32: 48-bit ms timestamp + 80 random bits."""
+    alphabet = "0123456789ABCDEFGHJKMNPQRSTVWXYZ"
+    v = (int(time.time() * 1000) << 80) | secrets.randbits(80)
+    return "".join(alphabet[(v >> (5 * i)) & 31] for i in range(25, -1, -1))
 
 def log(*a):
     print(*a, file=sys.stderr, flush=True)
@@ -40,6 +47,8 @@ def main():
     ap.add_argument("--stub-ms", type=float, default=130.0, help="shorter and unsure = stutter, absorbed by a neighbour")
     ap.add_argument("--stub-confidence", type=float, default=0.25)
     ap.add_argument("--glide-ms", type=float, default=150.0, help="a shorter note leading into a longer semitone neighbour is a scoop")
+    ap.add_argument("--parent", default=None, help="the take motif's id (ULID)")
+    ap.add_argument("--name", default=None, help="motif name; default = the take's base name")
     ap.add_argument("--render", action="store_true", help="also write a sine rendering of the MIDI for an ear check")
     a = ap.parse_args()
 
@@ -227,6 +236,7 @@ def main():
                     continue
                 spans.pop(k); changed = True; break
     out_notes = [describe(s, e) for (s, e) in spans]
+    tc_ver = getattr(torchcrepe, '__version__', '0.0.24')
 
     # overall confidence: duration-weighted note confidence, scaled by how much of the voiced time became notes
     if out_notes:
@@ -279,19 +289,32 @@ def main():
         render_path = os.path.join(a.out, stem + ".render.wav")
         sf.write(render_path, y, rs, subtype="PCM_16")
 
+    model_str = f"torchcrepe-{a.model} {tc_ver} / torch {torch.__version__} / {device} on {platform.node()}"
+    now = datetime.datetime.now().astimezone().isoformat(timespec="seconds")
+    name = a.name or stem
+    last_beat = max([r["beat"] + r["length_beats"] for r in out_notes], default=1.0) if a.bpm else None
+    bars = int(math.ceil((last_beat - 1) / 4)) if last_beat else None
+    sidecar = {
+        "id": ulid(), "name": name, "kind": "midi",
+        "source": {"by": "hear", "model": f"torchcrepe-{a.model}", "version": tc_ver, "device": device, "host": platform.node()},
+        "parents": [a.parent] if a.parent else [],
+        "at": now, "tempo": a.bpm, "key": None, "bars": bars,
+        "confidence": round(confidence, 3), "text": "", "placed": [],
+    }
+    sidecar_path = midi_path + ".motif.json"
+    with open(sidecar_path, "w") as fh:
+        json.dump(sidecar, fh, indent=1)
     reply = {
         "status": "done" if out_notes else "failed",
-        "seedling": {
-            "path": midi_path, "kind": "midi",
-            "provenance": {"source": os.path.abspath(a.wav),
-                           "model": f"torchcrepe-{a.model} {torchcrepe.__version__ if hasattr(torchcrepe,'__version__') else '0.0.24'} / torch {torch.__version__} / {device} on {platform.node()}",
-                           "at": datetime.datetime.now().astimezone().isoformat(timespec="seconds")},
+        "motif": {
+            "id": sidecar["id"], "name": name, "path": midi_path, "kind": "midi", "parents": sidecar["parents"],
+            "provenance": {"source": os.path.abspath(a.wav), "model": model_str, "at": now},
             "confidence": round(confidence, 3),
         },
         "notes": out_notes,
         "raw_notes": raw_notes,
         "tuning_centre_cents": round(centre * 100),
-        "sidecars": {"f0": f0_path, "render": render_path},
+        "sidecars": {"motif": sidecar_path, "f0": f0_path, "render": render_path},
         "audio": {"seconds": round(dur, 3), "sr": sr, "voiced_seconds": round(float(v.sum() * dt), 3)},
         "timing_s": {"load": round(t_load, 3), "infer": round(t_infer, 3), "total": round(time.time() - t0, 3)},
     }

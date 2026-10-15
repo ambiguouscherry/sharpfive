@@ -1,4 +1,4 @@
-# Prototype: `sf hear transcribe` — a hummed take on mama becomes a MIDI Seedling
+# Prototype: `sf hear transcribe` — a hummed take on mama becomes a MIDI motif
 
 Resolves issue #38. Built and measured 2026-10-15 with Margot humming (HITL). Laptop: Intel MacBook Pro, built-in mic, 48 kHz. ML box: mama (M2 Pro, Python 3.14, `~/sharpfive-ml-research/.venv-mir` from #17). Model: `torchcrepe==0.0.24` `full` on MPS.
 
@@ -11,30 +11,32 @@ Resolves issue #38. Built and measured 2026-10-15 with Margot humming (HITL). La
 | File | Role |
 |---|---|
 | `record.swift` → `record` | laptop `hear record`: count-in click to the headphones, then the take from the default mic to WAV. Prints `{file, seconds, sr, bpm, countin_beats, grid_start_s}`. |
-| `hear-transcribe.sh` | laptop `hear transcribe`: scp the WAV + script to `mama:~/sharpfive-hear/`, run, scp the Seedling back, print the reply with local paths and a `round_trip_s` breakdown. |
-| `transcribe_mama.py` | the mama side: torchcrepe → periodicity gate → note segmentation → cleanup → MIDI (`pretty_midi`), raw f0 CSV sidecar, sine rendering for the ear check, one JSON reply. |
-| `takes/*.reply.json` | the replies for Margot's two takes (final tuning). The WAVs and renderings are her voice and stay untracked. |
+| `hear-transcribe.sh` | laptop `hear transcribe`: scp the WAV + script to `mama:~/sharpfive-hear/`, run, scp the motif back, print the reply with local paths and a `round_trip_s` breakdown. |
+| `transcribe_mama.py` | the mama side: torchcrepe → periodicity gate → note segmentation → cleanup → MIDI (`pretty_midi`) + its `.motif.json` sidecar (parent = the take), raw f0 CSV, sine rendering for the ear check, one JSON reply. |
+| `takes/*.reply.json`, `takes/*.wav.motif.json` | the replies and the take sidecars (root motifs, `source: mic`) for Margot's two takes, final tuning. The WAVs and renderings are her voice and stay untracked. |
 
 Run: `./record takes/take.wav --seconds 10 --bpm 100 --countin 4` (musician runs it, so the count-in starts when they're ready), then `./hear-transcribe.sh takes/take.wav --bpm 100 --grid-start 2.4`, then `afplay out/take/take.render.wav` for the ear check.
 
-## Reply shape (as specced, §3 hear)
+## Reply shape (as specced, §3 hear + motif lifecycle)
 
 ```json
 {"status": "done",
- "seedling": {"path": ".../take2.mid", "kind": "midi",
-              "provenance": {"source": ".../takes/take2.wav",
-                             "model": "torchcrepe-full 0.0.24 / torch 2.14.1 / mps on mama",
-                             "at": "2026-10-15T15:42:11+01:00"},
-              "confidence": 0.607},
- "notes": [{"pitch": 61, "name": "C#4", "cents": 14, "start_s": 2.774, "end_s": 2.904, "confidence": 0.61,
-            "beat": 1.63, "offset_ms": -70, "length_beats": 0.22}, ...],
- "raw_notes": [...], "sidecars": {"f0": ".../take2.f0.csv", "render": ".../take2.render.wav"},
+ "motif": {"id": "01M50W360TYEZBYB9XQDNJS8A2", "name": "take2", "path": ".../out/take2/take2.mid", "kind": "midi",
+           "parents": ["01M50W2W8JN6EK8S9JM7NMQ5G7"],
+           "provenance": {"source": ".../takes/take2.wav",
+                          "model": "torchcrepe-full 0.0.24 / torch 2.14.1 / mps on mama",
+                          "at": "2026-10-15T15:49:28-07:00"},
+           "confidence": 0.575},
+ "notes": [{"pitch": 63, "name": "D#4", "cents": -45, "start_s": 2.78, "end_s": 3.12, "confidence": 0.256,
+            "beat": 1.633, "offset_ms": -70, "length_beats": 0.567}, ...],
+ "raw_notes": [...], "tuning_centre_cents": 0,
+ "sidecars": {"motif": ".../take2.mid.motif.json", "f0": ".../take2.f0.csv", "render": ".../take2.render.wav"},
  "audio": {"seconds": 12.4, "sr": 48000, "voiced_seconds": 5.66},
- "timing_s": {"load": 0.74, "infer": 7.55, "total": 8.59},
- "round_trip_s": {"upload": 0.85, "mama": 9.16, "download": 0.82, "total": 10.83}}
+ "timing_s": {"load": 0.751, "infer": 7.575, "total": 8.631},
+ "round_trip_s": {"upload": 0.85, "mama": 9.2, "download": 0.55, "total": 10.61}}
 ```
 
-`notes` is what the MIDI holds; `raw_notes` is the segmentation before cleanup; `beat` / `offset_ms` express the feel against the click grid (the MIDI itself is unquantised, tempo = the click). The f0 CSV keeps the raw curve so pitch-bend can be reconstructed later.
+The take is a root motif (`record` writes `<take>.wav.motif.json`, `source: mic`; the driver makes one for an older take) and the MIDI is its child: `<file>.mid.motif.json` carries id, name, kind, source (`hear`, model, version), parents, at, tempo, bars, confidence, empty `text`, empty `placed` — the sidecar from `spec/motif-lifecycle.md` §3. ids are ULIDs. `notes` is what the MIDI holds; `raw_notes` is the segmentation before cleanup; `beat` / `offset_ms` express the feel against the click grid (the MIDI itself is unquantised, tempo = the click). The f0 CSV keeps the raw curve so pitch-bend can be reconstructed later.
 
 ## Measurements
 
@@ -75,6 +77,7 @@ Eight iterations, each judged by Margot listening to a sine rendering of the MID
 - **Tempo is given, not detected.** The take is sung to the click the recorder plays; `--bpm` and `--grid-start` come from the recorder's reply. No click → MIDI at 120 with no grid.
 - **Latency alignment** between the click playback and the mic file is not measured; onsets landed within ~30 ms on the synthetic check and nothing in the takes suggested worse.
 - One singer, two takes, one song. The thresholds are a starting point, not a calibration.
+- **Runs are not bit-identical, and boundary notes flip between them.** The same take came back as 23 notes / 0.61 on the run Margot judged and 22 / 0.58 on the regeneration for this write-up: the opening C#4–D#4 pair merged, and the A#3 at beat 3.4 (−27 cents) came back as A3. MPS inference is not deterministic, and a note on the 0.8-semitone or 130 ms edge flips with it. Another argument for #45: context, not thresholds, should decide boundary notes.
 
 ## Recorder findings (`hear record`)
 

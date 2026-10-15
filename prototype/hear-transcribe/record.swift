@@ -2,7 +2,8 @@
 //
 //   swift record.swift out.wav --seconds 8 --bpm 100 --countin 4 [--no-click]
 //
-// Prints one JSON line: {file, seconds, sr, channels, bpm, countin_beats, grid_start_s}.
+// Prints one JSON line: {file, seconds, sr, channels, bpm, countin_beats, grid_start_s, motif}.
+// Writes <out>.motif.json beside the take: the take is a root motif (spec/motif-lifecycle.md, source: mic).
 // grid_start_s is where bar 1 beat 1 falls in the file (the end of the count-in). The click keeps
 // going through the take so the musician can hold tempo; wear headphones or it bleeds into the mic.
 import AVFoundation
@@ -92,7 +93,22 @@ while written < need && Date().timeIntervalSince(t0) < total + 2 {
 input.removeTap(onBus: 0)
 engine.stop()
 file = nil   // release = close = header finalised
-let dict: [String: Any] = ["status": "ok", "file": outPath, "seconds": Double(written) / sr, "sr": sr,
+func ulid() -> String {
+    let alphabet = Array("0123456789ABCDEFGHJKMNPQRSTVWXYZ")
+    var ms = UInt64(Date().timeIntervalSince1970 * 1000)
+    var out = [Character](repeating: "0", count: 26)
+    for i in stride(from: 9, through: 0, by: -1) { out[i] = alphabet[Int(ms & 31)]; ms >>= 5 }
+    for i in 10..<26 { out[i] = alphabet[Int.random(in: 0..<32)] }
+    return String(out)
+}
+let name = (outPath as NSString).lastPathComponent.components(separatedBy: ".").dropLast().joined(separator: ".")
+let iso = ISO8601DateFormatter(); iso.formatOptions = [.withInternetDateTime]
+let sidecar: [String: Any] = ["id": ulid(), "name": name, "kind": "audio",
+                              "source": ["by": "mic", "device": "default input", "sr": sr, "countin_beats": countin, "grid_start_s": gridStart],
+                              "parents": [], "at": iso.string(from: t0), "tempo": bpm, "key": NSNull(), "bars": NSNull(),
+                              "text": "", "placed": []]
+try JSONSerialization.data(withJSONObject: sidecar, options: [.prettyPrinted]).write(to: URL(fileURLWithPath: outPath + ".motif.json"))
+let dict: [String: Any] = ["status": "ok", "file": outPath, "motif": ["id": sidecar["id"]!, "name": name, "kind": "audio", "path": outPath], "seconds": Double(written) / sr, "sr": sr,
                            "channels": inFmt.channelCount, "bpm": bpm, "countin_beats": countin, "grid_start_s": gridStart]
 let data = try JSONSerialization.data(withJSONObject: dict)
 print(String(data: data, encoding: .utf8)!)
