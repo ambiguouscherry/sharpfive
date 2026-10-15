@@ -24,6 +24,10 @@ An action the agent must not take without the musician's explicit confirmation: 
 
 The stop before one gated action. The agent's call comes back as gated with what would change; the action runs only when the call is repeated with confirmation. The musician sees the gate as a dialog with five lines: the action, the target, the change, whether undo exists, and whether an allowance is offered.
 
+### Gate token
+
+The one-time secret the daemon attaches to a gated reply. The extension keeps it out of the agent's sight and spends it on the re-run after the musician's yes. Without it, `--confirm` does nothing. It is what makes the dialog the only way through a gate.
+
 ### Gate kind
 
 A class of gated action: region replace, record over, plug-in replace, plug-in remove, delete track, plug-in install, file download. Allowances are granted per kind. Kinds with a snapshot or an undo behind them can be lifted for a project; kinds whose yes loses something code cannot rebuild always ask.

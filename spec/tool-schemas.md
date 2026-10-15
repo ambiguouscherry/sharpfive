@@ -4,7 +4,7 @@ Resolves [Grilling: spec pi tool schemas and skill docs for the surviving limbs]
 
 ## 1. Shape
 
-- **The command is `+5`.** One Swift binary (ADR 0002) with the daemon and every verb. `+` is an ordinary character in a shell command name; tested in sh, zsh and bash. Everything that is not typed in a shell is named `sharpfive`: the pi package, the skill, the socket, the config folder `~/.sharpfive/`.
+- **The command is `+5`.** One Swift binary (ADR 0002) with the daemon and every verb. `+` is an ordinary character in a shell command name when typed at a prompt (tested in sh, zsh and bash). *Correction 2026-10-15 (#40):* under `sh -c "+5 …"` every POSIX shell reads the argument as an option string (`+5: invalid option`), and pi's bash tool spawns exactly that. The extension prepends a space to `+5` commands for now; the pi fork passes `-c -- <command>`; scripts and ssh spell it `sh -c -- '+5 …'`. Whether to keep the name is Margot's call. Everything that is not typed in a shell is named `sharpfive`: the pi package, the skill, the socket, the config folder `~/.sharpfive/`.
 - **pi reaches every limb through its shell tool.** No custom pi tool per verb. The skill is the schema: it tells pi the families, the reply contract and the rules; `+5 help <verb> --json` is the source of truth for each verb's arguments, generated from the binary so the docs cannot drift.
 - **One thin pi extension** does two things only: shows gates in pi's own confirm dialog (a `tool_call` hook on shell commands that start with `+5`), and writes the turn summary into the system prompt before each turn (`before_agent_start`), with mid-turn pushes from the daemon's `watch` stream (`pi.sendMessage`). It defines no verbs and touches no MIDI.
 - **Product form.** The extension is the development form. For market the product is a modified copy of pi's source with the same code built in, not an extension installed into stock pi.
@@ -105,9 +105,11 @@ A gated verb without `--confirm` returns `status: gated` and does nothing. The e
 | undo | available and how, or not | Snapshot kept; Edit > Undo verified by export. |
 | allowance | offered or not | Yes for this project lifts region edits until the project changes. |
 
-Payload fields: `kind`, `action`, `target`, `diff`, `undo`, `allowance: offered | none`.
+Payload fields: `kind`, `action`, `target`, `diff`, `undo`, `allowance: offered | none`, `token`.
 
-**Gate kinds.** Lifted kinds accept "Yes for this project"; the allowance lives in the daemon and dies when the project changes or the daemon restarts. `allow <kind>` grants or revokes it from the command line. Always-ask kinds show two buttons.
+**Gate token** (added 2026-10-15, #40). The daemon issues a one-time `token` with every `gated` reply. The extension strips it from what the model sees and, on yes, re-runs the command with `--confirm <token>` (plus `--allow-project` for "Yes for this project"). A `--confirm` without a valid token fails `confirm-token-invalid`; tokens are single use and expire after ten minutes. The extension also blocks any agent-written `--confirm`, but the token is the guard: no shell wrapping gets past it. Without a dialog (print mode) a gated reply becomes `failed`, `reason: gate-no-dialog`.
+
+**Gate kinds.** Lifted kinds accept "Yes for this project"; the allowance lives in the daemon and dies when the project changes or the daemon restarts. `allow <kind>` grants or revokes it from the command line, and refuses to grant when stdin is not a terminal (`tty-required`), so the agent's shell cannot grant itself an allowance; revoking is always allowed. Always-ask kinds show two buttons.
 
 | Kind | Undo | Default |
 |---|---|---|
@@ -153,10 +155,13 @@ One shape for every failure: `status: failed`, `reason`, `hint`. The skill tells
 | `region-refused` | "That region is looped or a take folder, and I only edit plain regions." |
 | `mama-unreachable` | "The ML box (mama) is not answering over ssh." |
 | `timeout` | "Logic did not answer in time. Nothing was changed as far as I can see." |
+| `confirm-token-invalid` | "The gate was not answered in the dialog, so nothing was changed. Run the command again without --confirm and let the musician answer." |
+| `gate-declined` | (written by the extension) "The musician said no. Stop and say so; do not retry." |
+| `tty-required` | "Allowances are granted by the musician in a terminal, not by the agent. Answer 'Yes for this project' in the gate dialog instead." |
 
 ## 7. Turn summary and pushes
 
-Before each turn the extension runs `+5 state` and appends about five lines to pi's system prompt: connected or not (with the hint if not), the selected track, transport state and position, assignment mode, active allowances. Mid-turn the daemon's `watch` stream pushes a message into pi's loop only for: connection lost, transport started or stopped by the musician, track changed by the musician. Everything else is a `+5 state` call.
+Before each turn the extension runs `+5 state` and appends about five lines to pi's system prompt: connected or not (with the hint if not), the selected track, transport state and position, assignment mode, active allowances. Mid-turn the daemon's `watch` stream pushes a message into pi's loop only for: connection lost, transport started or stopped by the musician, track changed by the musician. Everything else is a `+5 state` call. *Measured 2026-10-15 (#40):* the summary costs 54 input tokens per turn; connection lost is delivered as a steer (it interrupts), the musician's moves as next-turn context (they never trigger a reply).
 
 ## 8. Units
 
