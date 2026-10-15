@@ -46,7 +46,7 @@ One bridge between the agent brain and Logic, exposed to pi as a CLI tool + skil
 
 ### Tool
 
-One thing the agent can call. In sharpfive every limb is reached through one command, `+5`, run by the agent's shell tool; its families (surface, ui, audio, hear) are the tools the agent thinks in.
+One thing the agent can call. In sharpfive every limb is reached through one command, `sf`, run by the agent's shell tool; its families (surface, ui, audio, hear) are the tools the agent thinks in.
 
 ### Skill
 
@@ -54,7 +54,7 @@ A document the agent reads to learn how to use tools. The agent sees only the sk
 
 ### Reply
 
-The one line every `+5` command prints. It always carries a status. Writes add what was requested and what was observed. Failures add a reason and a hint.
+The one line every `sf` command prints. It always carries a status. Writes add what was requested and what was observed. Failures add a reason and a hint.
 
 ### Hint
 

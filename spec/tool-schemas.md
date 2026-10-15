@@ -4,9 +4,9 @@ Resolves [Grilling: spec pi tool schemas and skill docs for the surviving limbs]
 
 ## 1. Shape
 
-- **The command is `+5`.** One Swift binary (ADR 0002) with the daemon and every verb. `+` is an ordinary character in a shell command name when typed at a prompt (tested in sh, zsh and bash). *Correction 2026-10-15 (#40):* under `sh -c "+5 …"` every POSIX shell reads the argument as an option string (`+5: invalid option`), and pi's bash tool spawns exactly that. The extension prepends a space to `+5` commands for now; the pi fork passes `-c -- <command>`; scripts and ssh spell it `sh -c -- '+5 …'`. Whether to keep the name is Margot's call. Everything that is not typed in a shell is named `sharpfive`: the pi package, the skill, the socket, the config folder `~/.sharpfive/`.
-- **pi reaches every limb through its shell tool.** No custom pi tool per verb. The skill is the schema: it tells pi the families, the reply contract and the rules; `+5 help <verb> --json` is the source of truth for each verb's arguments, generated from the binary so the docs cannot drift.
-- **One thin pi extension** does two things only: shows gates in pi's own confirm dialog (a `tool_call` hook on shell commands that start with `+5`), and writes the turn summary into the system prompt before each turn (`before_agent_start`), with mid-turn pushes from the daemon's `watch` stream (`pi.sendMessage`). It defines no verbs and touches no MIDI.
+- **The command is `sf`.** One Swift binary (ADR 0002) with the daemon and every verb. *Renamed 2026-10-15 from `+5` after #40:* under `sh -c "+5 …"` every POSIX shell reads a leading `+` as an option toggle (`sf: invalid option`), and pi's bash tool spawns exactly that; `sf` has no such hazard and is free on PATH. Everything that is not typed in a shell is named `sharpfive`: the pi package, the skill, the socket, the config folder `~/.sharpfive/`.
+- **pi reaches every limb through its shell tool.** No custom pi tool per verb. The skill is the schema: it tells pi the families, the reply contract and the rules; `sf help <verb> --json` is the source of truth for each verb's arguments, generated from the binary so the docs cannot drift.
+- **One thin pi extension** does two things only: shows gates in pi's own confirm dialog (a `tool_call` hook on shell commands that start with `sf`), and writes the turn summary into the system prompt before each turn (`before_agent_start`), with mid-turn pushes from the daemon's `watch` stream (`pi.sendMessage`). It defines no verbs and touches no MIDI.
 - **Product form.** The extension is the development form. For market the product is a modified copy of pi's source with the same code built in, not an extension installed into stock pi.
 - **Four verb families, one mechanism each:** `surface` (the control-surface daemon verbs, the default family so the prefix is optional), `ui` (accessibility reads and menu presses), `audio` (the tap), `hear` (LISTEN deep: audio file in, Seedling out; named, not yet specced).
 - **Typed pi tools and an MCP wrapper** stay possible later as layers over the same CLI (map Notes).
@@ -31,7 +31,7 @@ Every command prints exactly one JSON line. `--pretty` prints a readable layout 
 
 ## 3. Families and verbs
 
-Arguments in full come from `+5 help <verb> --json`. This table fixes the verbs, what each returns, and the gate kind.
+Arguments in full come from `sf help <verb> --json`. This table fixes the verbs, what each returns, and the gate kind.
 
 ### surface (daemon, control surface; prefix optional)
 
@@ -95,7 +95,7 @@ Schemas land after the prototype tickets prove the models ([#38](https://github.
 
 ## 4. Gates
 
-A gated verb without `--confirm` returns `status: gated` and does nothing. The extension's `tool_call` hook sees any `+5` command that returned `gated` and opens pi's confirm dialog from the payload, never from pi's words. The dialog has five fixed lines and three buttons: **No**, **Yes**, **Yes for this project**.
+A gated verb without `--confirm` returns `status: gated` and does nothing. The extension's `tool_call` hook sees any `sf` command that returned `gated` and opens pi's confirm dialog from the payload, never from pi's words. The dialog has five fixed lines and three buttons: **No**, **Yes**, **Yes for this project**.
 
 | Line | Content | Example |
 |---|---|---|
@@ -138,7 +138,7 @@ Consent is permission to reach a resource. Asked once, remembered, never asked a
 | `plugin-dir` | BUILD install |
 | `mama` | the ssh link for `hear` |
 
-Stored in `~/.sharpfive/consent.json` on this machine, written by the extension when the musician says yes, read by the CLI. Survives pi restarts and new sessions. `+5 consent list` shows it; `+5 consent revoke <scope>` takes one back. A verb that needs a scope without consent returns `failed`, `reason: no-consent`, with the hint naming the scope; the extension turns that into the one-time question.
+Stored in `~/.sharpfive/consent.json` on this machine, written by the extension when the musician says yes, read by the CLI. Survives pi restarts and new sessions. `sf consent list` shows it; `sf consent revoke <scope>` takes one back. A verb that needs a scope without consent returns `failed`, `reason: no-consent`, with the hint naming the scope; the extension turns that into the one-time question.
 
 ## 6. Failures
 
@@ -146,7 +146,7 @@ One shape for every failure: `status: failed`, `reason`, `hint`. The skill tells
 
 | Reason | Hint (written once, here) |
 |---|---|
-| `daemon-not-running` | only after the CLI tried to start it: "sharpfive could not start its daemon. Run `+5 daemon` in a terminal and send me the output." |
+| `daemon-not-running` | only after the CLI tried to start it: "sharpfive could not start its daemon. Run `sf daemon` in a terminal and send me the output." |
 | `not-connected` | "Logic is not talking to sharpfive. Logic › Control Surfaces › Setup › Install › Mackie Control, both ports = sharpfive." |
 | `no-consent` | "sharpfive needs access to <scope>. Say yes here and I will remember it." |
 | `ax-not-trusted` | "macOS has not granted sharpfive accessibility access. System Settings › Privacy & Security › Accessibility › sharpfive." |
@@ -161,7 +161,7 @@ One shape for every failure: `status: failed`, `reason`, `hint`. The skill tells
 
 ## 7. Turn summary and pushes
 
-Before each turn the extension runs `+5 state` and appends about five lines to pi's system prompt: connected or not (with the hint if not), the selected track, transport state and position, assignment mode, active allowances. Mid-turn the daemon's `watch` stream pushes a message into pi's loop only for: connection lost, transport started or stopped by the musician, track changed by the musician. Everything else is a `+5 state` call. *Measured 2026-10-15 (#40):* the summary costs 54 input tokens per turn; connection lost is delivered as a steer (it interrupts), the musician's moves as next-turn context (they never trigger a reply).
+Before each turn the extension runs `sf state` and appends about five lines to pi's system prompt: connected or not (with the hint if not), the selected track, transport state and position, assignment mode, active allowances. Mid-turn the daemon's `watch` stream pushes a message into pi's loop only for: connection lost, transport started or stopped by the musician, track changed by the musician. Everything else is a `sf state` call. *Measured 2026-10-15 (#40):* the summary costs 54 input tokens per turn; connection lost is delivered as a steer (it interrupts), the musician's moves as next-turn context (they never trigger a reply).
 
 ## 8. Units
 
@@ -180,7 +180,7 @@ Before each turn the extension runs `+5 state` and appends about five lines to p
 Lives in the sharpfive pi package at `skills/sharpfive/`. Model-invoked (pi reaches it from its one-line description). Draft in `spec/skill/`.
 
 - `SKILL.md`, short: when to use it, the setup check, the reply contract, the rules (uncertain, gates, consent, failures, addressing), and a one-line index of families pointing at the reference files.
-- `references/surface.md`, `references/ui.md`, `references/audio.md`, `references/hear.md`: per family, the verbs with what each returns and its gate kind, worked examples. Exact arguments: `+5 help`.
+- `references/surface.md`, `references/ui.md`, `references/audio.md`, `references/hear.md`: per family, the verbs with what each returns and its gate kind, worked examples. Exact arguments: `sf help`.
 - `references/glossary.md`: copied from `CONTEXT.md` at package build time, so the agent and the musician share words.
 
 The package also ships the extension (`extensions/sharpfive.ts`). The binary installs separately; the setup check in the skill tells pi how to detect its absence and what to tell the musician.
@@ -191,4 +191,4 @@ The AU front-end (#21). An MCP wrapper (possible later). Controller and pitch-be
 
 ## 11. Facts this spec rests on
 
-Logic Pro 11.2, macOS 26.7, prototypes of 2026-10-11 (branches `prototype/*`, unmerged by design). pi docs fetched 2026-10-11 (`research/pi-extension-idiom.md`): skills follow the Agent Skills spec with name and description loaded at startup and the body on demand; extensions hook `tool_call` (may block, may call `ctx.ui.confirm`), `before_agent_start` (may append to the system prompt) and `pi.sendMessage` (push into the loop); one package ships extensions, skills and prompts; MCP is built in since pi 0.99.0. `+5` as a command name tested 2026-10-15 in sh, zsh and bash.
+Logic Pro 11.2, macOS 26.7, prototypes of 2026-10-11 (branches `prototype/*`, unmerged by design). pi docs fetched 2026-10-11 (`research/pi-extension-idiom.md`): skills follow the Agent Skills spec with name and description loaded at startup and the body on demand; extensions hook `tool_call` (may block, may call `ctx.ui.confirm`), `before_agent_start` (may append to the system prompt) and `pi.sendMessage` (push into the loop); one package ships extensions, skills and prompts; MCP is built in since pi 0.99.0. `sf` replaced `+5` as the command name on 2026-10-15 (#40): a leading `+` is an option toggle under `sh -c`.
