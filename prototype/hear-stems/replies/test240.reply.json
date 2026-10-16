@@ -1,0 +1,135 @@
+{
+ "status": "done",
+ "motifs": [
+  {
+   "id": "01M51ATV6YR3DRT6SXPRNDA28P",
+   "name": "test240-drums",
+   "path": "<scratch>/out/test240/test240-drums.wav",
+   "kind": "audio",
+   "parents": [
+    "01M51AT8720N6ZA9MPM1YEBVZ6"
+   ],
+   "provenance": {
+    "source": "<scratch>/test240.wav",
+    "model": "demucs-htdemucs 4.1.0 / torch 2.14.1 / mps on mama",
+    "at": "2026-10-15T20:07:04-07:00"
+   },
+   "confidence": 0.862
+  },
+  {
+   "id": "01M51ATV6YFA4FVXX218NF6557",
+   "name": "test240-bass",
+   "path": "<scratch>/out/test240/test240-bass.wav",
+   "kind": "audio",
+   "parents": [
+    "01M51AT8720N6ZA9MPM1YEBVZ6"
+   ],
+   "provenance": {
+    "source": "<scratch>/test240.wav",
+    "model": "demucs-htdemucs 4.1.0 / torch 2.14.1 / mps on mama",
+    "at": "2026-10-15T20:07:04-07:00"
+   },
+   "confidence": 0.876
+  },
+  {
+   "id": "01M51ATV6ZS7STF1E2W51QSYDB",
+   "name": "test240-vocals",
+   "path": "<scratch>/out/test240/test240-vocals.wav",
+   "kind": "audio",
+   "parents": [
+    "01M51AT8720N6ZA9MPM1YEBVZ6"
+   ],
+   "provenance": {
+    "source": "<scratch>/test240.wav",
+    "model": "demucs-htdemucs 4.1.0 / torch 2.14.1 / mps on mama",
+    "at": "2026-10-15T20:07:04-07:00"
+   },
+   "confidence": 0.861
+  },
+  {
+   "id": "01M51ATV6Z9VYT47N1ZMMFX8AE",
+   "name": "test240-other",
+   "path": "<scratch>/out/test240/test240-other.wav",
+   "kind": "audio",
+   "parents": [
+    "01M51AT8720N6ZA9MPM1YEBVZ6"
+   ],
+   "provenance": {
+    "source": "<scratch>/test240.wav",
+    "model": "demucs-htdemucs 4.1.0 / torch 2.14.1 / mps on mama",
+    "at": "2026-10-15T20:07:04-07:00"
+   },
+   "confidence": 0.789
+  }
+ ],
+ "sidecars": {
+  "drums": "<scratch>/out/test240/test240-drums.wav.motif.json",
+  "bass": "<scratch>/out/test240/test240-bass.wav.motif.json",
+  "vocals": "<scratch>/out/test240/test240-vocals.wav.motif.json",
+  "other": "<scratch>/out/test240/test240-other.wav.motif.json"
+ },
+ "audio": {
+  "seconds": 240.0,
+  "sr": 44100,
+  "channels": 2,
+  "stem_bytes_each": 42336044
+ },
+ "evidence": {
+  "residual_db": -21.26,
+  "rms_share": {
+   "drums": 0.0786,
+   "bass": 0.066,
+   "vocals": 0.0026,
+   "other": 0.7311
+  },
+  "silence_frac": {
+   "drums": 0.0,
+   "bass": 0.0,
+   "vocals": 0.086,
+   "other": 0.0
+  },
+  "bleed_corr": {
+   "drums": {
+    "bass": 0.0118,
+    "vocals": 0.0058,
+    "other": 0.0797
+   },
+   "bass": {
+    "drums": 0.0118,
+    "vocals": 0.0012,
+    "other": 0.0586
+   },
+   "vocals": {
+    "drums": 0.0058,
+    "bass": 0.0012,
+    "other": 0.0222
+   },
+   "other": {
+    "drums": 0.0797,
+    "bass": 0.0586,
+    "vocals": 0.0222
+   }
+  },
+  "published_sdr_db": {
+   "drums": 7.94,
+   "bass": 8.48,
+   "other": 5.72,
+   "vocals": 7.93
+  },
+  "truth_sdr_db": null
+ },
+ "timing_s": {
+  "model_load": 1.563,
+  "separate": 14.551,
+  "write": 0.267,
+  "evidence": 0.123,
+  "total": 16.505
+ },
+ "round_trip_s": {
+  "upload": 2.42,
+  "mama": 17.09,
+  "download": 13.84,
+  "total": 33.35,
+  "transfer": "scp"
+ }
+}

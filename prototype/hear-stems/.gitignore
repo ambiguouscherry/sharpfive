@@ -1,0 +1,5 @@
+out/
+*.wav
+*.flac
+*.mp3
+*.stderr

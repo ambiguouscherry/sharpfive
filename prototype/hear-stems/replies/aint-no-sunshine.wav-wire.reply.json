@@ -1,0 +1,135 @@
+{
+ "status": "done",
+ "motifs": [
+  {
+   "id": "01M51AWSB5A1P96NWMCDT0PPBZ",
+   "name": "aint-no-sunshine-drums",
+   "path": "<scratch>/out/aint-no-sunshine/aint-no-sunshine-drums.wav",
+   "kind": "audio",
+   "parents": [
+    "01M51AW7VXAHY6414ZHBHCKTWB"
+   ],
+   "provenance": {
+    "source": "<scratch>/aint-no-sunshine.mp3",
+    "model": "demucs-htdemucs 4.1.0 / torch 2.14.1 / mps on mama",
+    "at": "2026-10-15T20:08:07-07:00"
+   },
+   "confidence": 0.862
+  },
+  {
+   "id": "01M51AWSB69REPWZF6F5TGKBG8",
+   "name": "aint-no-sunshine-bass",
+   "path": "<scratch>/out/aint-no-sunshine/aint-no-sunshine-bass.wav",
+   "kind": "audio",
+   "parents": [
+    "01M51AW7VXAHY6414ZHBHCKTWB"
+   ],
+   "provenance": {
+    "source": "<scratch>/aint-no-sunshine.mp3",
+    "model": "demucs-htdemucs 4.1.0 / torch 2.14.1 / mps on mama",
+    "at": "2026-10-15T20:08:07-07:00"
+   },
+   "confidence": 0.876
+  },
+  {
+   "id": "01M51AWSB69S8BCXQZJSH5S9R9",
+   "name": "aint-no-sunshine-vocals",
+   "path": "<scratch>/out/aint-no-sunshine/aint-no-sunshine-vocals.wav",
+   "kind": "audio",
+   "parents": [
+    "01M51AW7VXAHY6414ZHBHCKTWB"
+   ],
+   "provenance": {
+    "source": "<scratch>/aint-no-sunshine.mp3",
+    "model": "demucs-htdemucs 4.1.0 / torch 2.14.1 / mps on mama",
+    "at": "2026-10-15T20:08:07-07:00"
+   },
+   "confidence": 0.861
+  },
+  {
+   "id": "01M51AWSB6XHBGZ3AKNCN0HMNJ",
+   "name": "aint-no-sunshine-other",
+   "path": "<scratch>/out/aint-no-sunshine/aint-no-sunshine-other.wav",
+   "kind": "audio",
+   "parents": [
+    "01M51AW7VXAHY6414ZHBHCKTWB"
+   ],
+   "provenance": {
+    "source": "<scratch>/aint-no-sunshine.mp3",
+    "model": "demucs-htdemucs 4.1.0 / torch 2.14.1 / mps on mama",
+    "at": "2026-10-15T20:08:07-07:00"
+   },
+   "confidence": 0.789
+  }
+ ],
+ "sidecars": {
+  "drums": "<scratch>/out/aint-no-sunshine/aint-no-sunshine-drums.wav.motif.json",
+  "bass": "<scratch>/out/aint-no-sunshine/aint-no-sunshine-bass.wav.motif.json",
+  "vocals": "<scratch>/out/aint-no-sunshine/aint-no-sunshine-vocals.wav.motif.json",
+  "other": "<scratch>/out/aint-no-sunshine/aint-no-sunshine-other.wav.motif.json"
+ },
+ "audio": {
+  "seconds": 251.69,
+  "sr": 44100,
+  "channels": 2,
+  "stem_bytes_each": 44398124
+ },
+ "evidence": {
+  "residual_db": -29.85,
+  "rms_share": {
+   "drums": 0.1677,
+   "bass": 0.2975,
+   "vocals": 0.2579,
+   "other": 0.1563
+  },
+  "silence_frac": {
+   "drums": 0.015,
+   "bass": 0.043,
+   "vocals": 0.032,
+   "other": 0.008
+  },
+  "bleed_corr": {
+   "drums": {
+    "bass": 0.0092,
+    "vocals": 0.0247,
+    "other": 0.0782
+   },
+   "bass": {
+    "drums": 0.0092,
+    "vocals": 0.0011,
+    "other": 0.0591
+   },
+   "vocals": {
+    "drums": 0.0247,
+    "bass": 0.0011,
+    "other": 0.1133
+   },
+   "other": {
+    "drums": 0.0782,
+    "bass": 0.0591,
+    "vocals": 0.1133
+   }
+  },
+  "published_sdr_db": {
+   "drums": 7.94,
+   "bass": 8.48,
+   "other": 5.72,
+   "vocals": 7.93
+  },
+  "truth_sdr_db": null
+ },
+ "timing_s": {
+  "model_load": 1.196,
+  "separate": 14.826,
+  "write": 0.271,
+  "evidence": 0.135,
+  "total": 16.428
+ },
+ "round_trip_s": {
+  "upload": 1.02,
+  "mama": 16.9,
+  "download": 14.21,
+  "total": 32.13,
+  "transfer": "scp"
+ }
+}
