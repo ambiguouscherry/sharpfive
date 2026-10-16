@@ -1,0 +1,23 @@
+{
+ "id": "01M51BDC5JBGYAEC472E17QHD4",
+ "name": "aint-no-sunshine-bass",
+ "kind": "audio",
+ "source": {
+  "by": "hear",
+  "model": "demucs-htdemucs",
+  "version": "4.1.0",
+  "device": "mps",
+  "host": "mama",
+  "stem": "bass"
+ },
+ "parents": [
+  "01M51AW7VXAHY6414ZHBHCKTWB"
+ ],
+ "at": "2026-10-15T20:17:11-07:00",
+ "tempo": null,
+ "key": null,
+ "bars": null,
+ "confidence": 0.905,
+ "text": "",
+ "placed": []
+}

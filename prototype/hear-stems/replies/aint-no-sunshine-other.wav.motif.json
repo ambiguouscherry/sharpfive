@@ -1,0 +1,23 @@
+{
+ "id": "01M51BDC5J1E6VJTFGBSR7DHNZ",
+ "name": "aint-no-sunshine-other",
+ "kind": "audio",
+ "source": {
+  "by": "hear",
+  "model": "demucs-htdemucs",
+  "version": "4.1.0",
+  "device": "mps",
+  "host": "mama",
+  "stem": "other"
+ },
+ "parents": [
+  "01M51AW7VXAHY6414ZHBHCKTWB"
+ ],
+ "at": "2026-10-15T20:17:11-07:00",
+ "tempo": null,
+ "key": null,
+ "bars": null,
+ "confidence": 0.814,
+ "text": "",
+ "placed": []
+}
