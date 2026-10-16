@@ -79,10 +79,37 @@ def snap_by_context(notes, a):
     partner = {}
     for i, j in rep["pairs"]:
         partner[i] = j; partner[j] = i
+    # adjacent notes sung within a quarter tone of each other are one pitch, decided together on their
+    # duration-weighted mean: plain rounding sent 47.54 up to C3 and 47.39 down to B2 and made a semitone
+    # accent the singer never sang ("Sir Duke", #45)
+    pfs = [r["pitch"] + r["cents"] / 100.0 for r in notes]
+    group = list(range(len(notes)))
+    for i in range(1, len(notes)):
+        if abs(pfs[i] - pfs[group[i - 1]]) < 0.25 and a.snap != "none":
+            group[i] = group[i - 1]
+    dec_pf = list(pfs)
+    for g in set(group):
+        members = [i for i in range(len(notes)) if group[i] == g]
+        if len(members) > 1:
+            w = [notes[i]["end_s"] - notes[i]["start_s"] for i in members]
+            m = sum(pfs[i] * wi for i, wi in zip(members, w)) / sum(w)
+            for i in members:
+                dec_pf[i] = m
+                if abs(m - round(m)) < a.boundary_cents / 100.0 and round(m) != notes[i]["pitch"]:
+                    notes[i]["raw_pitch"] = notes[i]["pitch"]; notes[i]["raw_name"] = notes[i]["name"]
+                    notes[i]["pitch"] = int(round(m)); notes[i]["name"] = NAMES[notes[i]["pitch"] % 12] + str(notes[i]["pitch"] // 12 - 1)
+                    notes[i]["cents"] = round((pfs[i] - notes[i]["pitch"]) * 100); notes[i]["snapped_by"] = f"unison:{g}"
     for i, r in enumerate(notes):
-        if abs(r["cents"]) < a.boundary_cents or a.snap == "none":
+        pf = dec_pf[i]
+        if group[i] != i and notes[group[i]].get("snapped_by", "").startswith(("key", "repeat", "unison")):
+            lead = notes[group[i]]
+            if lead["pitch"] != r["pitch"]:
+                r["raw_pitch"] = r["pitch"]; r["raw_name"] = r["name"]
+                r["pitch"] = lead["pitch"]; r["name"] = lead["name"]; r["cents"] = round((pfs[i] - r["pitch"]) * 100)
+                r["snapped_by"] = f"unison:{group[i]}"
             continue
-        pf = r["pitch"] + r["cents"] / 100.0
+        if abs(pf - round(pf)) < a.boundary_cents / 100.0 or a.snap == "none":
+            continue
         lo, hi = int(math.floor(pf)), int(math.ceil(pf))
         chosen, by = None, "undecided"
         if a.snap in ("repeat", "both") and i in partner:
@@ -115,7 +142,7 @@ def snap_by_context(notes, a):
         r["raw_pitch"] = r["pitch"]; r["raw_name"] = r["name"]; r["snapped_by"] = by
         if chosen is not None and chosen != r["pitch"]:
             r["pitch"] = chosen; r["name"] = NAMES[chosen % 12] + str(chosen // 12 - 1)
-            r["cents"] = round((pf - chosen) * 100)
+            r["cents"] = round((pfs[i] - chosen) * 100)
     key.pop("_scales")
     return key, rep
 
@@ -142,7 +169,7 @@ def main():
     ap.add_argument("--snap", default="both", choices=["none", "key", "repeat", "both"], help="#45: decide semitone-boundary notes by context — the take's key, the repeated phrase, or repeat first then key")
     ap.add_argument("--boundary-cents", type=int, default=25, help="a note this far from a semitone is a boundary note and open to snapping (35 left an approved peak at +33 one run and +36 the next, #45)")
     ap.add_argument("--snap-min-conf", type=float, default=0.5, help="a note must be this sure to vote for the key or to inform its repeat partner")
-    ap.add_argument("--stub-ms", type=float, default=130.0, help="shorter and unsure = stutter, absorbed by a neighbour")
+    ap.add_argument("--stub-ms", type=float, default=130.0, help="shorter and unsure = stutter, absorbed by a neighbour; with a click tempo the line is a 16th note if that is longer (#45: a 132 ms stub at 100 BPM survived a 130 ms line)")
     ap.add_argument("--stub-confidence", type=float, default=0.25)
     ap.add_argument("--glide-ms", type=float, default=150.0, help="a shorter note leading into a longer semitone neighbour is a scoop")
     ap.add_argument("--parent", default=None, help="the take motif's id (ULID)")
@@ -294,10 +321,13 @@ def main():
                 oset.add(k)
     except Exception as e:
         log("rms re-articulation unavailable:", e); oset |= onsets
+    stub_s = a.stub_ms / 1000.0
+    if a.bpm:
+        stub_s = max(stub_s, 60.0 / a.bpm / 4)    # a 16th at the click tempo
     split = []
     guard = max(1, int(round(0.08 / dt)))         # an onset within 80 ms of a note edge is that edge
     for (s_, e_) in notes:
-        stub_fr = max(min_frames, int(round(a.stub_ms / 1000.0 / dt)))
+        stub_fr = max(min_frames, int(round(stub_s / dt)))
         cuts = sorted(o for o in oset if s_ + guard <= o <= e_ - guard)
         last = s_
         for c in cuts:
@@ -344,7 +374,7 @@ def main():
 
     # cleanup: a stub (short and unsure) is a stutter, not a note. It joins the neighbour it touches
     # (the previous span if contiguous, else the next); pitch and confidence are recomputed over the union.
-    stub_fr = int(round(a.stub_ms / 1000.0 / dt)); touch = int(round(0.03 / dt))
+    stub_fr = int(round(stub_s / dt)); touch = int(round(0.03 / dt))
     changed = True
     while changed and len(spans) > 1:
         changed = False
@@ -357,6 +387,15 @@ def main():
                 else:
                     continue
                 spans.pop(k); changed = True; break
+    # an isolated stub (shorter than stub_ms, touching nothing) is a flicker the lower silence gate let
+    # through, not a note: two 67 ms F#3s in silence after the end of "Sir Duke" (#45)
+    kept = []
+    for k, (s, e) in enumerate(spans):
+        alone = (k == 0 or s - spans[k - 1][1] > touch) and (k + 1 >= len(spans) or spans[k + 1][0] - e > touch)
+        if e - s < stub_fr and alone:
+            continue
+        kept.append((s, e))
+    spans = kept
     dbg("stubs", spans)
     out_notes = [describe(s, e) for (s, e) in spans]
     key_est, repeat_est = snap_by_context(out_notes, a)

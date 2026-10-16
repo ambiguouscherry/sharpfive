@@ -100,6 +100,7 @@ Built and judged 2026-10-16 with Margot (HITL), four takes: the two "Rain" takes
 4. **A far snap needs a sure key.** Moving a note more than 60 cents is allowed only when a single key is live at r ≥ 0.7. "Rain" take 1 (G♯ minor, r 0.79, alone) may lift its +33-cent peak to D♯4; "Sir Duke" (G minor 0.72 over D♯ major 0.58, within the 0.15 tie band) may not pull a chromatic B3 (−32) down to A♯3.
 5. **No snap may turn a sung step into a unison.** The last two notes of the "Sir Duke" riff are a half step apart; the key rule made them the same note because B is not in E♭. A general "keep the interval within 0.75" veto also blocked two approved snaps (the neighbour's own rounding error counts against it), so the veto is only against unisons.
 6. **The boundary zone is ±25 cents, not ±35.** The approved take-1 peak came back at +36 on one run and +33 on the next; at 35 the second run never reached the key rule.
+7. **Adjacent notes sung within a quarter tone of each other are one pitch, decided together** on their duration-weighted mean. Plain rounding sent 47.54 up to C3 and 47.39 down to B2 and made a semitone accent in "Sir Duke" that was never sung.
 
 The raw pitch stays in the note (`raw_pitch`, `raw_name`) with `snapped_by`: `repeat:<index>`, `key`, `key-disagree`, `key-too-far`, `key-vetoed-unison` or `undecided`. The reply carries `key` (estimate, live keys, top three with r) and `repeat` (lag, pairs); the sidecar's `key` is filled when the estimate is sure. This is what the panel shows when the system is unsure about a note.
 
@@ -108,26 +109,40 @@ The raw pitch stays in the note (`raw_pitch`, `raw_name`) with `snapped_by`: `re
 - **Both phrase endings of take 2 had a repeat Margot never sang.** Two causes. (a) librosa onsets at 5.50 s and 5.93 s with strength 2.4–2.6 (the take's real attacks are 3.4–12) and no energy change under them: an onset now cuts a note only if the level rises ≥ `--rearticulate-db` after it. (b) The 3 dB dip-and-rise rule fired on a 3.6 dB wobble in a decaying held note: the bar is now 6 dB. The "da da da da" test still splits cleanly at 6 dB (the quarter notes have silence between them, so no rule was needed).
 - **A vibrato dip was read as a scoop and split a held D♯4 in two.** The scoop fold produced two adjacent pieces of the same pitch, but the same-pitch merge had already run. It now runs again after the fold.
 - **The −80 dB silence gate dropped a legato "oo" at the same level as the "da" beside it** (an "oo" has few upper harmonics, and the gate is A-weighted). Default is now −100; −120 gave the identical result.
+- **Two phantom notes after the end of "Sir Duke"**: 67 ms flickers in silence that the lower gate let through, with confidence 0.4, so the stub rule (short *and* unsure, and only into a neighbour it touches) ignored them. An isolated note shorter than the stub line is now dropped whatever its confidence. The same rule removed the four count-in flickers and two tail flickers from take 1.
+- **A G♯3 on take 1 cut in two by an onset**, the first half a 132 ms stub at confidence 0.14 that survived the 130 ms line by 2 ms. The stub line is now a 16th note at the click tempo when that is longer than 130 ms (150 ms at 100 BPM, 167 at 90). See the tempo bullet below.
 - **A legato same-pitch repeat is one note, confirmed on purpose.** The two "oo" quarter notes came back as one half note; the level under them never dips more than 2 dB. Still the known limit: hum "da-da" for a repeat.
 - **Relative keys are a coin flip.** "Sir Duke" in E♭ major came back as G minor (same scale); "Rain" as G♯ minor on one run and G♯ major or D♯ major on others. The scale is what the snapping uses, so it is right; the tonic in the sidecar is not to be trusted on a hum.
-- **Tempo-scaled thresholds: no, not on this evidence.** Measured against the beat: the real F3 passing note in take 2 is 0.17 beat (100 ms at 100 BPM); the artefact stubs (scoop onsets, releases) are 0.09–0.15 beat at 90 BPM and 0.10 at 100. Length does not separate them at either tempo, and neither does confidence (0.29 vs 0.28–0.46). Scaling 130 ms by tempo would move the line without separating anything. The stub decision needs a different signal (onset strength, grid position); left as is.
+- **Tempo-scaled thresholds: the stub line, yes; the rest, no.** Measured against the beat: the real F3 passing note in take 2 is 0.17 beat (100 ms at 100 BPM) and is kept by its confidence (0.29); the stubs that mattered were 0.22 beat at 100 BPM (132 ms, confidence 0.14) and 0.10 at 90 (67 ms, confidence 0.4–0.46). A stub line of one 16th at the click tempo, with the confidence gate for touching stubs and no gate for isolated ones, catches all of those and keeps the passing note. The hysteresis hold (100 ms) and the re-articulation bar (6 dB) were not touched: nothing in four takes argued for scaling them, and a 16th-note passing tone at 100 BPM is 150 ms, which the hold already allows.
 
 ### Measurements
 
 | Take | Notes | Boundary notes (±25) | Snapped | Vetoed / undecided | Key (truth) | Repeat |
 |---|---|---|---|---|---|---|
-| Rain 1 (100 BPM) | 30 | 16 | 5 | 2 undecided | G♯ minor r 0.79, alone | lag 4, 11 pairs |
+| Rain 1 (100 BPM) | 22 | 12 | 3 | 1 undecided | G♯ minor r 0.79, alone | lag 8, 9 pairs |
 | Rain 2 | 19 | 10 | 2 | 3 key-disagree | D♯ major 0.73 / G♯ major 0.72 / G♯ minor 0.66 | lag 8, 7 pairs |
-| Sir Duke (90) | 20 | 11 | 2 | 4 too-far, 3 undecided | G minor 0.72 / D♯ major 0.58 (truth: E♭ major) | lag 4, 12 pairs |
+| Sir Duke (90) | 18 | 9 | 3 | 1 too-far, 3 undecided | G minor 0.72 / D♯ major 0.58 (sung in E♭ major) | lag 4, 10 pairs |
 | da-da (90) | 8 | 2 | 0 | | D♯ major 0.68 = D♯ minor 0.68 (one pitch, D♯) | |
 
-Margot's verdicts: "Rain" takes 1 and 2 "both sound right"; "Sir Duke" snapped "is better intonation-wise, but both got it pretty close if not perfect". Earlier in the session, on the first prototype: "the pitches are fine; the only thing is that the last note at the end of both phrases has an unnecessary repeat that I did not sing", which is what the re-articulation findings above fixed.
+Margot's verdicts, in order: on the first prototype, "the pitches are fine; the only thing is that the last note at the end of both phrases has an unnecessary repeat that I did not sing" (the re-articulation findings above); then "Rain" takes 1 and 2 "both sound right"; "Sir Duke" snapped "is better intonation-wise, but both got it pretty close if not perfect"; then, on the run with the lower gate, "the first semitone accent got mangled" on "Sir Duke" and "it oversplits some of these notes" at the end of "Rain" take 1 (rule 7, the isolated-stub rule and the 16th-note stub line).
 
-`--from-f0 <csv>` replays segmentation and snapping from a frozen f0 CSV in ~2 s on mama, deterministically; `--debug` logs the spans after every stage. Both were essential: MPS inference is not deterministic, and every live rerun reshuffled one or two boundary notes, so a rule was only judged on replays of the same curve. The committed `takes/*.reply.json` are replays of each take's last live f0 with the final script.
+### Against the record
+
+Margot asked whether the canonical melodies could be pulled and compared. "Rain" (SWV) is not to be had: no MIDI on bitmidi, freemidi, midiworld or GitHub, no melody transcription, only chord charts and paid choral arrangements. "Sir Duke" is: four MIDI files (bitmidi 94185, 97096, 111007; freemidi 6658), all with the same intro riff on a sax or brass track, in the record's key of B major at 104 BPM. Margot sang the riff in E♭, a major third up, so the comparison is on pitch class after transposing her take down four semitones, aligned by edit distance (her 18 notes against the record's first 22):
+
+| | |
+|---|---|
+| Matched | 13 of the record's 22 notes, in order, including the opening B D♯ F♯ B, the B A♯ B accent and the G F♯ ending |
+| Missed | 4 short record notes (a third of a beat each) with no note in her take: either not sung or merged by the segmenter |
+| Wrong pitch | 3: the first G♯ sung as A (sung 130 cents sharp, no rule in reach); the two Gs at bar 3 as G♯ (her C3 C3; sung at 47.5, between B2 and C3, and the key rule picked the in-scale C — **the record's G naturals are blue notes outside B major**); a D sung as A♯ (3.5 semitones off, a tracking error, not a snapping one) |
+
+So on the one take with a ground truth: the ear passed the C3 C3 pair, the record failed it, and no rule in this set gets it right, because it is a chromatic note sung on the boundary with no repeat to lean on. That is the case #50 is for. The record also says 104 BPM where she sang at 90, and B major where she sang E♭; both are her choices, not errors.
+
+Round trip is unchanged at ~10 s; the context rules add nothing measurable. `--from-f0 <csv>` replays segmentation and snapping from a frozen f0 CSV in ~2 s on mama, deterministically; `--debug` logs the spans after every stage. Both were essential: MPS inference is not deterministic, and every live rerun reshuffled one or two boundary notes, so a rule was only judged on replays of the same curve. The committed `takes/*.reply.json` are replays of each take's last live f0 with the final script.
 
 ### Honest list, updated
 
 - Four takes, one singer, two tempos. The r thresholds (0.6 sure, 0.15 live, 0.7 for a far snap) and the 60-cent line are fitted to these four takes.
 - Non-determinism is still the enemy: a note at ±25 cents on one run is at ±28 on the next. The snapping makes most of those flips land the same way; it does not make the model deterministic.
-- Chromatic melodies get less help by design (rule 4 and 5): "Sir Duke" kept its riff, but a chromatic passing note sung 40 cents off on a weak key will stay a coin flip.
+- Chromatic melodies get less help by design (rules 4, 5 and 7): "Sir Duke" kept most of its riff, but its blue-note Gs sung 46 cents sharp went to the scale, and the ear did not catch it; the record did.
 - The next-note prior from the ticket (a melody language model scoring candidates) is still the right end of this road; the key profile is its zeroth-order version and was enough for these takes.
