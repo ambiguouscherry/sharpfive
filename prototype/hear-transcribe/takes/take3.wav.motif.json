@@ -1,0 +1,23 @@
+{
+  "parents" : [
+
+  ],
+  "id" : "01M52KRY0XC6QJYRCJF1EQPCDT",
+  "name" : "take3",
+  "at" : "2026-10-16T15:02:20Z",
+  "key" : null,
+  "kind" : "audio",
+  "source" : {
+    "sr" : 48000,
+    "grid_start_s" : 2.6666666666666665,
+    "by" : "mic",
+    "device" : "default input",
+    "countin_beats" : 4
+  },
+  "bars" : null,
+  "text" : "",
+  "tempo" : 90,
+  "placed" : [
+
+  ]
+}

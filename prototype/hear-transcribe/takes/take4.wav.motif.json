@@ -1,0 +1,23 @@
+{
+  "name" : "take4",
+  "source" : {
+    "device" : "default input",
+    "grid_start_s" : 2.6666666666666665,
+    "sr" : 48000,
+    "by" : "mic",
+    "countin_beats" : 4
+  },
+  "placed" : [
+
+  ],
+  "tempo" : 90,
+  "kind" : "audio",
+  "bars" : null,
+  "id" : "01M52MGSP9531MYMPR5K81MMDZ",
+  "key" : null,
+  "at" : "2026-10-16T15:15:22Z",
+  "parents" : [
+
+  ],
+  "text" : ""
+}
