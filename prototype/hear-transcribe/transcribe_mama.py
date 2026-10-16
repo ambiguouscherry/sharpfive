@@ -24,6 +24,128 @@ def ulid():
 def log(*a):
     print(*a, file=sys.stderr, flush=True)
 
+NAMES = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"]
+KK_MAJOR = [6.35, 2.23, 3.48, 2.33, 4.38, 4.09, 2.52, 5.19, 2.39, 3.66, 2.29, 2.88]   # Krumhansl–Kessler
+KK_MINOR = [6.33, 2.68, 3.52, 5.38, 2.60, 3.53, 2.54, 4.75, 3.98, 2.69, 3.34, 3.17]
+SCALES = {"major": [0, 2, 4, 5, 7, 9, 11], "minor": [0, 2, 3, 5, 7, 8, 10]}
+
+def estimate_key(notes, boundary, min_conf):
+    """Duration × confidence pitch-class histogram of the sure, in-tune notes, correlated with the 24 key profiles."""
+    hist = np.zeros(12); voters = 0
+    for r in notes:
+        if abs(r["cents"]) < boundary and r["confidence"] >= min_conf:
+            hist[r["pitch"] % 12] += (r["end_s"] - r["start_s"]) * r["confidence"]; voters += 1
+    ranked = []
+    for tonic in range(12):
+        for mode, prof in (("major", KK_MAJOR), ("minor", KK_MINOR)):
+            corr = float(np.corrcoef(hist, np.roll(prof, tonic))[0, 1]) if hist.std() > 0 else 0.0
+            ranked.append({"key": f"{NAMES[tonic]} {mode}", "r": round(corr, 3),
+                           "scale": sorted((tonic + d) % 12 for d in SCALES[mode])})
+    ranked.sort(key=lambda k: -k["r"])
+    sure = voters >= 4 and ranked[0]["r"] >= 0.6
+    # keys within `close` of the best are all live (G# major vs G# minor tied on one take, and the winner
+    # flipped a B to a C): a note snaps only if every live key agrees on it
+    close = 0.15
+    live = [k for k in ranked if k["r"] >= ranked[0]["r"] - close] if sure else []
+    return {"estimate": ranked[0]["key"] if sure else None, "live": [k["key"] for k in live],
+            "sure": sure and len(live) == 1 and ranked[0]["r"] >= 0.7,
+            "voters": voters, "candidates": [{"key": k["key"], "r": k["r"]} for k in ranked[:3]],
+            "_scales": [set(k["scale"]) for k in live]}
+
+def find_repeat(notes, lags=(4, 8, 16), tol=0.3):
+    """Self-alignment of the note list at a lag in beats, one-to-one, closest first. Most pairs wins; ties to the longer lag."""
+    best = {"lag_beats": None, "pairs": []}
+    beats = [r.get("beat") for r in notes]
+    if not beats or any(b is None for b in beats):
+        return best
+    for lag in lags:
+        cands = sorted((abs(bj - (bi + lag)), i, j) for i, bi in enumerate(beats) for j, bj in enumerate(beats)
+                       if j != i and abs(bj - (bi + lag)) <= tol)
+        ui, uj, pairs = set(), set(), []
+        for _, i, j in cands:
+            if i in ui or j in uj: continue
+            ui.add(i); uj.add(j); pairs.append([i, j])
+        pairs.sort()
+        if len(pairs) > len(best["pairs"]) or (len(pairs) == len(best["pairs"]) and best["lag_beats"] is not None and lag > best["lag_beats"]):
+            best = {"lag_beats": lag, "pairs": pairs}
+    return best
+
+def snap_by_context(notes, a):
+    """#45: a boundary note (|cents| >= boundary) has two candidate semitones. The repeated phrase decides first
+    (a sure partner at the same place in the other pass), the key decides the rest (the candidate in the scale).
+    The raw pitch stays in the note so the panel can show the doubt. Mutates `notes`; returns (key, repeat)."""
+    key = estimate_key(notes, a.boundary_cents, a.snap_min_conf)
+    rep = find_repeat(notes)
+    partner = {}
+    for i, j in rep["pairs"]:
+        partner[i] = j; partner[j] = i
+    # adjacent notes sung within a quarter tone of each other are one pitch, decided together on their
+    # duration-weighted mean: plain rounding sent 47.54 up to C3 and 47.39 down to B2 and made a semitone
+    # accent the singer never sang ("Sir Duke", #45)
+    pfs = [r["pitch"] + r["cents"] / 100.0 for r in notes]
+    group = list(range(len(notes)))
+    for i in range(1, len(notes)):
+        if abs(pfs[i] - pfs[group[i - 1]]) < 0.25 and a.snap != "none":
+            group[i] = group[i - 1]
+    dec_pf = list(pfs)
+    for g in set(group):
+        members = [i for i in range(len(notes)) if group[i] == g]
+        if len(members) > 1:
+            w = [notes[i]["end_s"] - notes[i]["start_s"] for i in members]
+            m = sum(pfs[i] * wi for i, wi in zip(members, w)) / sum(w)
+            for i in members:
+                dec_pf[i] = m
+                if abs(m - round(m)) < a.boundary_cents / 100.0 and round(m) != notes[i]["pitch"]:
+                    notes[i]["raw_pitch"] = notes[i]["pitch"]; notes[i]["raw_name"] = notes[i]["name"]
+                    notes[i]["pitch"] = int(round(m)); notes[i]["name"] = NAMES[notes[i]["pitch"] % 12] + str(notes[i]["pitch"] // 12 - 1)
+                    notes[i]["cents"] = round((pfs[i] - notes[i]["pitch"]) * 100); notes[i]["snapped_by"] = f"unison:{g}"
+    for i, r in enumerate(notes):
+        pf = dec_pf[i]
+        if group[i] != i and notes[group[i]].get("snapped_by", "").startswith(("key", "repeat", "unison")):
+            lead = notes[group[i]]
+            if lead["pitch"] != r["pitch"]:
+                r["raw_pitch"] = r["pitch"]; r["raw_name"] = r["name"]
+                r["pitch"] = lead["pitch"]; r["name"] = lead["name"]; r["cents"] = round((pfs[i] - r["pitch"]) * 100)
+                r["snapped_by"] = f"unison:{group[i]}"
+            continue
+        if abs(pf - round(pf)) < a.boundary_cents / 100.0 or a.snap == "none":
+            continue
+        lo, hi = int(math.floor(pf)), int(math.ceil(pf))
+        chosen, by = None, "undecided"
+        if a.snap in ("repeat", "both") and i in partner:
+            p = notes[partner[i]]
+            if abs(p["cents"]) < a.boundary_cents and p["confidence"] >= a.snap_min_conf and p["pitch"] in (lo, hi):
+                chosen, by = p["pitch"], f"repeat:{partner[i]}"
+        if chosen is None and a.snap in ("key", "both") and key["_scales"]:
+            votes = set()          # a live key with both candidates in its scale has no opinion and does not block
+            for sc in key["_scales"]:
+                lo_in, hi_in = lo % 12 in sc, hi % 12 in sc
+                if lo_in != hi_in:
+                    votes.add(lo if lo_in else hi)
+            if len(votes) == 1:
+                chosen, by = votes.pop(), "key"
+                # a far snap (> 60 cents) only on a sure key: a lone G# minor at r .77 may lift a +33 peak to
+                # D#4; a weak G minor / D# major tie ("Sir Duke") may not pull a chromatic B3 -32 down to A#3
+                if abs(chosen - pf) > 0.6 and not key["sure"]:
+                    chosen, by = None, "key-too-far"
+            elif len(votes) > 1:
+                by = "key-disagree"
+        # a snap may not turn a sung step into a unison with a neighbour: the key rule collapsed a chromatic
+        # half step ("Sir Duke") into a repeated note, #45. A general "interval within 0.75" veto also
+        # blocked approved snaps, since the neighbour's own rounding error counts against the snap.
+        if chosen is not None and chosen != r["pitch"]:
+            for nb in (notes[i - 1] if i > 0 else None, notes[i + 1] if i + 1 < len(notes) else None):
+                if nb is None: continue
+                sung = abs(pf - (nb["pitch"] + nb["cents"] / 100.0))
+                if sung >= 0.75 and chosen == nb["pitch"]:
+                    chosen, by = None, by + "-vetoed-unison"; break
+        r["raw_pitch"] = r["pitch"]; r["raw_name"] = r["name"]; r["snapped_by"] = by
+        if chosen is not None and chosen != r["pitch"]:
+            r["pitch"] = chosen; r["name"] = NAMES[chosen % 12] + str(chosen // 12 - 1)
+            r["cents"] = round((pfs[i] - chosen) * 100)
+    key.pop("_scales")
+    return key, rep
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("wav")
@@ -36,20 +158,25 @@ def main():
     ap.add_argument("--fmin", type=float, default=50.0)
     ap.add_argument("--fmax", type=float, default=1000.0)
     ap.add_argument("--periodicity", type=float, default=0.21, help="voicing threshold (torchcrepe default .21)")
-    ap.add_argument("--silence-db", type=float, default=-80.0, help="torchcrepe default -60 zeroed most of a quiet laptop-mic hum")
+    ap.add_argument("--silence-db", type=float, default=-100.0, help="torchcrepe default -60 zeroed most of a quiet laptop-mic hum; -80 still dropped a legato 'oo' (few upper harmonics, A-weighting) at the same level as the 'da' notes beside it (#45)")
     ap.add_argument("--min-note-ms", type=float, default=60.0)
     ap.add_argument("--split-semitones", type=float, default=0.8, help="pitch move that starts a new note")
     ap.add_argument("--hold-ms", type=float, default=100.0, help="the move must hold this long")
     ap.add_argument("--merge-gap-ms", type=float, default=50.0)
     ap.add_argument("--pitch-window", type=float, nargs=2, default=(0.4, 0.9), help="fraction of the note the pitch is read from; late, because scoops come in from below")
     ap.add_argument("--tuning-centre", dest="tuning_centre", action="store_true", help="shift by the take's mean cents offset before rounding; off by default (fixed one peak, broke one passing note on take 2)")
-    ap.add_argument("--rearticulate-db", type=float, default=3.0, help="energy dip-and-rise inside a note that counts as a new note")
-    ap.add_argument("--stub-ms", type=float, default=130.0, help="shorter and unsure = stutter, absorbed by a neighbour")
+    ap.add_argument("--rearticulate-db", type=float, default=6.0, help="energy dip-and-rise inside a note that counts as a new note (3 dB split a decaying held note, #45)")
+    ap.add_argument("--snap", default="both", choices=["none", "key", "repeat", "both"], help="#45: decide semitone-boundary notes by context — the take's key, the repeated phrase, or repeat first then key")
+    ap.add_argument("--boundary-cents", type=int, default=25, help="a note this far from a semitone is a boundary note and open to snapping (35 left an approved peak at +33 one run and +36 the next, #45)")
+    ap.add_argument("--snap-min-conf", type=float, default=0.5, help="a note must be this sure to vote for the key or to inform its repeat partner")
+    ap.add_argument("--stub-ms", type=float, default=130.0, help="shorter and unsure = stutter, absorbed by a neighbour; with a click tempo the line is a 16th note if that is longer (#45: a 132 ms stub at 100 BPM survived a 130 ms line)")
     ap.add_argument("--stub-confidence", type=float, default=0.25)
     ap.add_argument("--glide-ms", type=float, default=150.0, help="a shorter note leading into a longer semitone neighbour is a scoop")
     ap.add_argument("--parent", default=None, help="the take motif's id (ULID)")
     ap.add_argument("--name", default=None, help="motif name; default = the take's base name")
     ap.add_argument("--render", action="store_true", help="also write a sine rendering of the MIDI for an ear check")
+    ap.add_argument("--from-f0", default=None, help="skip the model: read a frozen f0 CSV from an earlier run (deterministic re-segmentation; MPS inference is not)")
+    ap.add_argument("--debug", action="store_true", help="log the note spans after every stage to stderr")
     a = ap.parse_args()
 
     t0 = time.time()
@@ -71,10 +198,16 @@ def main():
     hop = int(round(sr * a.hop_ms / 1000.0))
     x = torch.tensor(audio)[None]
     t1 = time.time()
-    try:
+    if a.from_f0:
+        rows = [l.rstrip("\n").split(",") for l in open(a.from_f0).readlines()[1:]]
+        f0raw = np.array([float(r[1]) for r in rows]); pern = np.array([float(r[3]) for r in rows])
+        f0n = np.array([float(r[2]) if r[2] else np.nan for r in rows])
+        t_infer = 0.0
+    else:
+      try:
         f0, per = torchcrepe.predict(x, sr, hop_length=hop, fmin=a.fmin, fmax=a.fmax, model=a.model,
                                      device=device, batch_size=512, return_periodicity=True)
-    except Exception as e:
+      except Exception as e:
         if device != "cpu":
             log("mps failed, falling back to cpu:", e)
             device = "cpu"
@@ -82,16 +215,19 @@ def main():
                                          device=device, batch_size=512, return_periodicity=True)
         else:
             raise
-    t_infer = time.time() - t1
+      t_infer = time.time() - t1
 
-    # clean: silence → unvoiced, median filter periodicity + f0, threshold
-    win = 3
-    per = torchcrepe.filter.median(per, win)
-    per = torchcrepe.threshold.Silence(a.silence_db)(per, x, sr, hop)
-    f0c = torchcrepe.threshold.At(a.periodicity)(f0, per)
-    f0c = torchcrepe.filter.mean(f0c, win)
-    f0n = f0c[0].cpu().numpy(); pern = per[0].cpu().numpy(); f0raw = f0[0].cpu().numpy()
+      # clean: silence → unvoiced, median filter periodicity + f0, threshold
+      win = 3
+      per = torchcrepe.filter.median(per, win)
+      per = torchcrepe.threshold.Silence(a.silence_db)(per, x, sr, hop)
+      f0c = torchcrepe.threshold.At(a.periodicity)(f0, per)
+      f0c = torchcrepe.filter.mean(f0c, win)
+      f0n = f0c[0].cpu().numpy(); pern = per[0].cpu().numpy(); f0raw = f0[0].cpu().numpy()
     n = len(f0n); dt = hop / sr
+    def dbg(stage, spans):
+        if a.debug:
+            log(f"[{stage}] " + " ".join(f"{times[s]:.2f}-{times[e-1]+dt:.2f}:{round(float(np.nanmedian(midi[s:e])))}" for s, e in spans))
     times = np.arange(n) * dt
     midi = np.full(n, np.nan)
     v = ~np.isnan(f0n) & (f0n > 0)
@@ -129,16 +265,20 @@ def main():
             k += 1
         notes.append((start, j))
         i = j
+    dbg("segment", notes)
     # merge same-pitch neighbours separated by a tiny gap (breath flicker)
-    merged = []
-    for (s_, e_) in notes:
-        if merged:
-            ps, pe = merged[-1]
-            gap = s_ - pe
-            if gap * dt <= a.merge_gap_ms / 1000.0 and round(float(np.nanmedian(midi[ps:pe]))) == round(float(np.nanmedian(midi[s_:e_]))):
-                merged[-1] = (ps, e_); continue
-        merged.append((s_, e_))
-    notes = merged
+    def merge_same_pitch(spans):
+        merged = []
+        for (s_, e_) in spans:
+            if merged:
+                ps, pe = merged[-1]
+                gap = s_ - pe
+                if gap * dt <= a.merge_gap_ms / 1000.0 and round(float(np.nanmedian(midi[ps:pe]))) == round(float(np.nanmedian(midi[s_:e_]))):
+                    merged[-1] = (ps, e_); continue
+            merged.append((s_, e_))
+        return merged
+    notes = merge_same_pitch(notes)
+    dbg("merge", notes)
     # fold scoops: a short note (< glide_ms) that runs straight into a longer neighbour one
     # semitone away is the onset glide of that neighbour, not a note of its own
     glide = max(1, int(round(a.glide_ms / 1000.0 / dt)))
@@ -152,15 +292,19 @@ def main():
                 notes[k + 1] = (s_, ne)   # neighbour inherits the glide's start; its pitch comes from its stable middle
                 k += 1; continue
         folded.append((s_, e_)); k += 1
-    notes = folded
+    # folding can leave two pieces of one pitch side by side (a vibrato dip read as a scoop into the
+    # second half split one held D#4 in two, #45), so merge again
+    notes = merge_same_pitch(folded)
+    dbg("fold", notes)
     # re-articulations: repeated notes on one pitch show as energy onsets inside a run, not pitch changes
     try:
         import librosa
         oenv = librosa.onset.onset_strength(y=audio, sr=sr, hop_length=hop)
         oframes = librosa.onset.onset_detect(onset_envelope=oenv, sr=sr, hop_length=hop, units="frames", backtrack=True)
-        oset = set(int(o) for o in oframes)
+        onsets = set(int(o) for o in oframes)
     except Exception as e:
-        log("onset detection unavailable:", e); oset = set()
+        log("onset detection unavailable:", e); onsets = set()
+    oset = set()
     # softer re-articulations (legato "da-da"): an energy dip then a rise of >= rearticulate_db inside a note
     try:
         import librosa as _l
@@ -171,12 +315,19 @@ def main():
             dip = rms_db[k]; before = rms_db[k - look:k].max(); after = rms_db[k + 1:k + look + 1].max()
             if before - dip >= a.rearticulate_db and after - dip >= a.rearticulate_db:
                 oset.add(k)
+            # a detected onset counts only if something attacks after it: a weak onset on a flat, decaying
+            # held note split one D#4 into three (#45)
+            elif k in onsets and after - dip >= a.rearticulate_db:
+                oset.add(k)
     except Exception as e:
-        log("rms re-articulation unavailable:", e)
+        log("rms re-articulation unavailable:", e); oset |= onsets
+    stub_s = a.stub_ms / 1000.0
+    if a.bpm:
+        stub_s = max(stub_s, 60.0 / a.bpm / 4)    # a 16th at the click tempo
     split = []
     guard = max(1, int(round(0.08 / dt)))         # an onset within 80 ms of a note edge is that edge
     for (s_, e_) in notes:
-        stub_fr = max(min_frames, int(round(a.stub_ms / 1000.0 / dt)))
+        stub_fr = max(min_frames, int(round(stub_s / dt)))
         cuts = sorted(o for o in oset if s_ + guard <= o <= e_ - guard)
         last = s_
         for c in cuts:
@@ -184,6 +335,7 @@ def main():
                 split.append((last, c)); last = c
         split.append((last, e_))
     notes = split
+    dbg("rearticulate", notes)
 
     # tuning centre of the take: singers sit a little flat or sharp of A440 as a whole; measure it on the
     # late window of every note and remove it before rounding, so boundary cases round the way the singer meant
@@ -222,7 +374,7 @@ def main():
 
     # cleanup: a stub (short and unsure) is a stutter, not a note. It joins the neighbour it touches
     # (the previous span if contiguous, else the next); pitch and confidence are recomputed over the union.
-    stub_fr = int(round(a.stub_ms / 1000.0 / dt)); touch = int(round(0.03 / dt))
+    stub_fr = int(round(stub_s / dt)); touch = int(round(0.03 / dt))
     changed = True
     while changed and len(spans) > 1:
         changed = False
@@ -235,7 +387,18 @@ def main():
                 else:
                     continue
                 spans.pop(k); changed = True; break
+    # an isolated stub (shorter than stub_ms, touching nothing) is a flicker the lower silence gate let
+    # through, not a note: two 67 ms F#3s in silence after the end of "Sir Duke" (#45)
+    kept = []
+    for k, (s, e) in enumerate(spans):
+        alone = (k == 0 or s - spans[k - 1][1] > touch) and (k + 1 >= len(spans) or spans[k + 1][0] - e > touch)
+        if e - s < stub_fr and alone:
+            continue
+        kept.append((s, e))
+    spans = kept
+    dbg("stubs", spans)
     out_notes = [describe(s, e) for (s, e) in spans]
+    key_est, repeat_est = snap_by_context(out_notes, a)
     tc_ver = getattr(torchcrepe, '__version__', '0.0.24')
 
     # overall confidence: duration-weighted note confidence, scaled by how much of the voiced time became notes
@@ -298,7 +461,7 @@ def main():
         "id": ulid(), "name": name, "kind": "midi",
         "source": {"by": "hear", "model": f"torchcrepe-{a.model}", "version": tc_ver, "device": device, "host": platform.node()},
         "parents": [a.parent] if a.parent else [],
-        "at": now, "tempo": a.bpm, "key": None, "bars": bars,
+        "at": now, "tempo": a.bpm, "key": key_est["estimate"], "bars": bars,
         "confidence": round(confidence, 3), "text": "", "placed": [],
     }
     sidecar_path = midi_path + ".motif.json"
@@ -313,6 +476,7 @@ def main():
         },
         "notes": out_notes,
         "raw_notes": raw_notes,
+        "key": key_est, "repeat": repeat_est, "snap": a.snap,
         "tuning_centre_cents": round(centre * 100),
         "sidecars": {"motif": sidecar_path, "f0": f0_path, "render": render_path},
         "audio": {"seconds": round(dur, 3), "sr": sr, "voiced_seconds": round(float(v.sum() * dt), 3)},
