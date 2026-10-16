@@ -1,6 +1,6 @@
 # Prototype: `sf hear stems` — a reference track on mama becomes four stem motifs
 
-Resolves issue #39. Built and measured 2026-10-15, AFK (no ear check; timing and shape are the evidence). Laptop: Intel MacBook Pro. ML box: mama (M2 Pro, 16 GB, Python 3.14, `~/sharpfive-ml-research/.venv-demucs` from #17: demucs 4.1.0, torch 2.14.1). Model: `htdemucs` on MPS through `demucs.api.Separator`. Follows the motif lifecycle (#19, `spec/motif-lifecycle.md`).
+Resolves issue #39. Built and measured 2026-10-15, AFK (timing and shape are the evidence); ear check by Margot 2026-10-16. Laptop: Intel MacBook Pro. ML box: mama (M2 Pro, 16 GB, Python 3.14, `~/sharpfive-ml-research/.venv-demucs` from #17: demucs 4.1.0, torch 2.14.1). Model: `htdemucs` on MPS through `demucs.api.Separator`. Follows the motif lifecycle (#19, `spec/motif-lifecycle.md`).
 
 ## Answer
 
@@ -94,7 +94,7 @@ So: `confidence` in the reply = `1 / (1 + 10^(−SDR/10))` of the published MUSD
 
 ## Known limits (the honest list)
 
-- **No ear check.** AFK ticket; nobody listened to the stems. The numbers say the pipeline is coherent; whether Demucs's vocal on this track is usable as a motif is a listening question, and `other` (6.4 dB published) is the weak stem on every benchmark.
+- **Ear check: one track, one listener.** Margot listened on 2026-10-16 to 20 s of each stem (30–50 s into "Ain't No Sunshine"), then the original against the summed stems and the difference: *"sounded pretty damn clean to me."* That is the verdict for a sparse 1971 soul mix with one lead vocal; `other` (6.4 dB published) is still the weak stem on every benchmark, and a dense modern mix is untested.
 - **The stem labels are the model's taxonomy, not the musician's.** Synth leads go to `other`; a sampled vocal chop may go to `vocals`; anything the training set calls "other" is a grab bag of guitars, keys, pads and effects. Six-stem `htdemucs_6s` (+guitar, piano) exists, 22 s per 4 min in #17, piano "not working great" per upstream — a spec question, not a prototype one.
 - **Confidence is a prior.** Two different tracks get identical numbers from the same model. If the musician asks "how good is this split", the honest answer is the published benchmark plus the evidence block, not the number.
 - **The link is 12 MB/s and the stems are 4× the input.** FLAC halves it; a 10-minute track still costs ~15 s coming home. If mama ever moves off the LAN, stems should stay on mama until a motif is placed — a stage-4 question.
